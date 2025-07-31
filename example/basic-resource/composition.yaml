@@ -1,0 +1,39 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: s3bucket.example.com
+spec:
+  compositeTypeRef:
+    apiVersion: example.com/v1
+    kind: XS3Bucket
+  environment:
+  mode: Pipeline
+  pipeline:
+    - functionRef:
+        name: fn-hcl
+      step: run hcl composition
+      input:
+        apiVersion: function-hcl/v1
+        kind: HclInput
+        source: Inline
+        hcl: |
+          -- src/main.hcl --
+
+          // the resource block defines a single resource to be created, the name is the crossplane name
+          resource my-bucket {
+            // body defines the output you want and can use expressions anywhere
+            // req.composite is the composite resource
+            // similarly req.resources.my-bucket will give you the observed bucket resource
+            body = {
+              apiVersion : "s3.aws.upbound.io/v1beta1"
+              kind : "Bucket"
+              metadata : {
+                name : "${req.composite.metadata.name}-bucket" // use the composite name in a template expression
+              }
+              spec : {
+                forProvider : {
+                  region : req.composite.spec.parameters.region
+                }
+              }
+            }
+          }

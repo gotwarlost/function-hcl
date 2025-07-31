@@ -1,0 +1,31 @@
+resource my-s3-bucket {
+  // self.name will be set to "my-s3-bucket"
+
+  // locals are private to this resource
+  locals {
+    resourceName = "${req.composite.metadata.name}-bucket"
+    params       = req.composite.spec.parameters
+    tagValues = {
+      foo : "bar"
+    }
+  }
+
+  // body contains the resource definition as a schemaless object.
+  // it is a single object so you can either use `:` or `=` to assign values as allowed by HCL.
+  // The example below deliberately mixes things up to show both are possible.
+  // However `body` itself can only be assigned with a `=` sign since it is a block attribute.
+  body = {
+    apiVersion = "s3.aws.upbound.io/v1beta1"
+    kind       = "Bucket"
+    metadata : {
+      name : resourceName
+    }
+    spec : {
+      forProvider : {
+        forceDestroy : true
+        region = params.region
+        tags   = tagValues
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: s3bucket.example.com
+spec:
+  compositeTypeRef:
+    apiVersion: example.com/v1
+    kind: XS3Bucket
+  environment:
+  mode: Pipeline
+  pipeline:
+    - functionRef:
+        name: fn-hcl
+      step: run hcl composition
+      input:
+        apiVersion: function-hcl/v1
+        kind: HclInput
+        source: Inline
+        hcl: |
+          -- src/main.hcl --
+
+          resource my-bucket {
+            body = {
+              apiVersion : "s3.aws.upbound.io/v1beta1"
+              kind : "Bucket"
+              metadata : {
+                name : "${req.composite.metadata.name}-bucket" // use the composite name in a template expression
+              }
+              spec : {
+                forProvider : {
+                  region : req.composite.spec.parameters.region
+                }
+              }
+            }
+
+            // self.resource gives you the observed version of the resource in this block.
+            // use it to set composite status
+            composite status {
+              body = {
+                bucketARN = self.resource.status.atProvider.arn
+              }
+            }
+
+          }

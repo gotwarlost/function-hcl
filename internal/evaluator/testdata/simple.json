@@ -1,0 +1,51 @@
+{
+  "context": {
+    "example.com/testing": true
+  },
+  "desired": {},
+  "observed": {
+    "composite": {
+      "resource": {
+        "metadata": {
+          "name": "comp-a7df3"
+        },
+        "spec": {
+          "parameters": {
+            "azs": [
+              "us-east-1a",
+              "us-east-1b",
+              "us-east-1c"
+            ],
+            "region": "us-east-1"
+          }
+        },
+        "status": {
+          "foo": "bar"
+        }
+      }
+    },
+    "resources": {
+      "primary-bucket": {
+        "resource": {
+          "apiVersion": "aws.com/v1",
+          "kind": "S3Bucket",
+          "metadata": {
+            "name": "comp-a7df3-primary-bucket"
+          },
+          "spec": {
+            "forProvider": {
+              "region": "us-east-1"
+            },
+            "providerConfig": {
+              "name": "aws-default"
+            }
+          },
+          "status": {
+            "ready": "not yet",
+            "bucket_size": "1 litre"
+          }
+        }
+      }
+    }
+  }
+}

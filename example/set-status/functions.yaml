@@ -1,0 +1,6 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+  name: fn-hcl
+spec:
+  package: gotwarlost/function-hcl:latest

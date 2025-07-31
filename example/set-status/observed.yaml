@@ -1,0 +1,23 @@
+---
+apiVersion: s3.aws.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: my-bucket
+  generateName: bucket-36f7e-
+  labels:
+    crossplane.io/composite: bucket-36f7e
+  name: bucket-36f7e-bucket
+  ownerReferences:
+    - apiVersion: example.com/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: XS3Bucket
+      name: bucket-36f7e
+      uid: ""
+spec:
+  forProvider:
+    region: eu-west-1
+status:
+  atProvider:
+    arn: "arn:aws:something"

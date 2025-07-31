@@ -1,0 +1,34 @@
+{
+  "context": {
+    "example.com/testing": "true"
+  },
+  "desired": {},
+  "observed": {
+    "composite": {
+      "resource": {
+        "metadata": {
+          "name": "comp-a7df3",
+          "labels": {
+            "testing": "true"
+          }
+        },
+        "spec": {
+          "parameters": {
+            "namespaces": [
+              "foo",
+              "bar",
+              "baz"
+            ],
+            "data": {
+              "life": 42
+            }
+          }
+        },
+        "status": {
+          "foo": "bar"
+        }
+      }
+    },
+    "resources": {}
+  }
+}
