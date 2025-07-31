@@ -32,8 +32,4 @@ EXPOSE 9443
 USER nonroot:nonroot
 ENTRYPOINT ["/function"]
 
-FROM image AS final
-COPY --from=base /crossplane.yaml /package.yaml
-
-
 
