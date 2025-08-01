@@ -3,4 +3,15 @@ apiVersion: meta.pkg.crossplane.io/v1beta1
 kind: Function
 metadata:
   name: function-hcl
+  annotations:
+    meta.crossplane.io/source: github.com/crossplane-contrib/function-hcl
+    meta.crossplane.io/license: Apache-2.0
+    meta.crossplane.io/description: A composition function that uses HCL (Hashicorp Configuration Language) to compose resources.
+    meta.crossplane.io/readme: |
+      A crossplane function that uses an opinionated DSL built on [HCL](https://github.com/hashicorp/hcl) to model desired resources.
+      It has more than a passing familiarity with Terraform syntax. It supports single resources, lists of resources,
+      conditional resource creation, other operations, and provides all Terraform functions for use.
+      It automatically removes incomplete resources from its output and provides easy mechanisms to update
+      composite status and connection details in the context of resource blocks.
+      Read the [spec](https://github.com/elastic/function-hcl/blob/main/spec.md) for a full description.
 spec: {}

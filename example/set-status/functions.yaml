@@ -3,4 +3,4 @@ kind: Function
 metadata:
   name: fn-hcl
 spec:
-  package: gotwarlost/function-hcl:latest
+  package: xpkg.crossplane.io/crossplane-contrib/function-hcl:v0.0.2
