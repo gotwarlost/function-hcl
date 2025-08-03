@@ -30,7 +30,7 @@ func (e *Evaluator) doEval(in *fnv1.RunFunctionRequest, files ...File) (*fnv1.Ru
 	// make vars in cty format and set up the initial eval context
 	ctx, err := e.makeVars(in)
 	if err != nil {
-		return nil, sortDiagsBySeverity(diags.Append(err2diag(err)))
+		return nil, sortDiagsBySeverity(diags.Append(err2Diag(err)))
 	}
 
 	// process top-level blocks as a group
@@ -100,7 +100,7 @@ func (e *Evaluator) evaluateCondition(ctx *hcl.EvalContext, content *hcl.BodyCon
 			return false, diags
 		}
 		if val.Type() != cty.Bool {
-			return false, diags.Append(err2diag(fmt.Errorf("got type %s, expected %s", val.Type(), cty.Bool)))
+			return false, diags.Append(err2Diag(fmt.Errorf("got type %s, expected %s", val.Type(), cty.Bool)))
 		}
 		e.discard(DiscardItem{
 			Type:        et,

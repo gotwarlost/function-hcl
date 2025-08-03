@@ -17,8 +17,10 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
+// reIdent is a regular expression that can test for HCL identifiers that are allowed to contain dashes.
 var reIdent = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_-]*$`)
 
+// isIdentifier returns true if the supplied string can be interpreted as an HCL identifier.
 func isIdentifier(s string) bool {
 	return reIdent.MatchString(s)
 }
@@ -51,8 +53,7 @@ loop:
 	return ret
 }
 
-// hasVariable returns true if the supplied name is defined in the current
-// or any ancestor context.
+// hasVariable returns true if the supplied name is defined in the current or any ancestor context.
 func hasVariable(ctx *hcl.EvalContext, name string) bool {
 	c := ctx
 	for c != nil {
@@ -113,6 +114,7 @@ func valueToInterface(val cty.Value) (any, error) {
 	return result, nil
 }
 
+// valueToStruct returns the supplied value as a protobuf struct.
 func valueToStruct(val cty.Value) (*structpb.Struct, error) {
 	jsonBytes, err := ctyjson.Marshal(val, val.Type())
 	if err != nil {
@@ -125,6 +127,8 @@ func valueToStruct(val cty.Value) (*structpb.Struct, error) {
 	return &result, nil
 }
 
+// valueToStructWithAnnotations returns the supplied dynamic value as a protobuf struct after
+// injecting the supplied annotations into it.
 func valueToStructWithAnnotations(val cty.Value, a map[string]string) (*structpb.Struct, error) {
 	if len(a) == 0 {
 		return valueToStruct(val)
@@ -170,11 +174,14 @@ func valueToStructWithAnnotations(val cty.Value, a map[string]string) (*structpb
 	return ret, nil
 }
 
+// iteration stores the key and value for a specific for_each iteration.
 type iteration struct {
 	key   cty.Value
 	value cty.Value
 }
 
+// extractIterations returns a list of iterations for the supplied value which must be a collection of some sort.
+// For sets, both key and value are set to the set element.
 func extractIterations(forEachValue cty.Value) ([]iteration, error) {
 	if forEachValue.IsNull() || !forEachValue.IsWhollyKnown() {
 		return nil, fmt.Errorf("for_each value is null or unknown")
@@ -206,6 +213,8 @@ func extractIterations(forEachValue cty.Value) ([]iteration, error) {
 	return ret, nil
 }
 
+// unify unifies the supplied objects by merging values ensuring that leaf-level values are identical in the event
+// that multiple objects contain the same leaf key.
 func unify(inputs ...Object) (Object, error) {
 	var unifyObjects func(path string, objects ...Object) (Object, error)
 	unifyObjects = func(path string, objects ...Object) (Object, error) {
@@ -248,6 +257,7 @@ func unify(inputs ...Object) (Object, error) {
 	return unifyObjects("", inputs...)
 }
 
+// unifyBytes unifies the supplied maps with the same semantics as unify.
 func unifyBytes(inputs ...map[string][]byte) (map[string][]byte, error) {
 	ret := map[string][]byte{}
 	for _, input := range inputs {
@@ -270,7 +280,7 @@ func findUnknownPaths(val cty.Value) ([]string, error) {
 	var unknownPaths []string
 	if err := cty.Walk(val, func(path cty.Path, v cty.Value) (bool, error) {
 		if !v.IsKnown() {
-			unknownPaths = append(unknownPaths, path2string(path))
+			unknownPaths = append(unknownPaths, path2String(path))
 			return true, nil
 		}
 		return true, nil
@@ -284,8 +294,8 @@ func findUnknownPaths(val cty.Value) ([]string, error) {
 // unknownSegmentMarker is used to represent segments we don't support decoding.
 const unknownSegmentMarker = "<?>"
 
-// path2string converts a cty.Path to a human-readable string.
-func path2string(path cty.Path) string {
+// path2String converts a cty.Path to a human-readable string.
+func path2String(path cty.Path) string {
 	segments := make([]string, 0, len(path))
 
 	for _, p := range path {
@@ -308,8 +318,8 @@ func path2string(path cty.Path) string {
 	return strings.Join(segments, "")
 }
 
-// err2diag converts an error to a hcl.Diagnostic.
-func err2diag(err error) *hcl.Diagnostic {
+// err2Diag converts an error to a hcl.Diagnostic.
+func err2Diag(err error) *hcl.Diagnostic {
 	return &hcl.Diagnostic{
 		Severity: hcl.DiagError,
 		Summary:  err.Error(),
@@ -317,7 +327,6 @@ func err2diag(err error) *hcl.Diagnostic {
 }
 
 // mapDiagnosticSeverity maps the severity of the diagnostics from src to dst.
-//
 // This is a destructive operation, clone the diags before calling this function if you need the original.
 // nolint:unparam
 func mapDiagnosticSeverity(diags hcl.Diagnostics, src, dst hcl.DiagnosticSeverity) hcl.Diagnostics {

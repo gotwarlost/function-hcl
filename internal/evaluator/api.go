@@ -1,3 +1,4 @@
+// Package evaluator implements the HCL processing need to create resource definitions.
 package evaluator
 
 import (
@@ -19,16 +20,16 @@ type (
 	DynamicObject = map[string]cty.Value
 )
 
-// keys under vars, gotten from the run function request.
+// keys under req, gotten from the run function request.
 const (
-	varContext             = "context"
-	varComposite           = "composite"
-	varCompositeConnection = "composite_connection"
-	varObservedResource    = "resource"
-	varObservedConnection  = "connection"
-	varObservedResources   = "resources"
-	varObservedConnections = "connections"
-	varExtraResources      = "extra_resources"
+	reqContext             = "context"
+	reqComposite           = "composite"
+	reqCompositeConnection = "composite_connection"
+	reqObservedResource    = "resource"
+	reqObservedConnection  = "connection"
+	reqObservedResources   = "resources"
+	reqObservedConnections = "connections"
+	reqExtraResources      = "extra_resources"
 )
 
 // supported blocks and attributes.

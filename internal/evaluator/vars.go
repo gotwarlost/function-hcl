@@ -88,12 +88,12 @@ func (e *Evaluator) makeVars(in *fnv1.RunFunctionRequest) (*hcl.EvalContext, err
 	}
 
 	out := Object{
-		varContext:             in.GetContext().AsMap(),
-		varComposite:           toObject(in.GetObserved().GetComposite()),
-		varCompositeConnection: in.GetObserved().GetComposite().GetConnectionDetails(),
-		varObservedResource:    observedResourceMap,
-		varObservedConnection:  observedConnectionMap,
-		varExtraResources:      extra,
+		reqContext:             in.GetContext().AsMap(),
+		reqComposite:           toObject(in.GetObserved().GetComposite()),
+		reqCompositeConnection: in.GetObserved().GetComposite().GetConnectionDetails(),
+		reqObservedResource:    observedResourceMap,
+		reqObservedConnection:  observedConnectionMap,
+		reqExtraResources:      extra,
 	}
 	jsonBytes, err := json.Marshal(out)
 	if err != nil {
@@ -111,8 +111,8 @@ func (e *Evaluator) makeVars(in *fnv1.RunFunctionRequest) (*hcl.EvalContext, err
 	}
 
 	topMap := varsValue.AsValueMap()
-	e.existingResourceMap = topMap[varObservedResource].AsValueMap()
-	e.existingConnectionMap = topMap[varObservedConnection].AsValueMap()
+	e.existingResourceMap = topMap[reqObservedResource].AsValueMap()
+	e.existingConnectionMap = topMap[reqObservedConnection].AsValueMap()
 
 	collectionResources := DynamicObject{}
 	collectionConnections := DynamicObject{}
@@ -121,12 +121,18 @@ func (e *Evaluator) makeVars(in *fnv1.RunFunctionRequest) (*hcl.EvalContext, err
 		for _, resName := range resourceNames {
 			ctyResources = append(ctyResources, e.existingResourceMap[resName])
 			ctyConnections = append(ctyConnections, e.existingConnectionMap[resName])
+			// make collection resources only accessible from the collection so that
+			// we can perform better static analysis of resource name references.
+			// If this decision turns out to be a mistake it can be added back
+			// but going the other way and removing it later will be impossible.
+			delete(e.existingResourceMap, resName)
+			delete(e.existingConnectionMap, resName)
 		}
 		collectionResources[baseName] = cty.TupleVal(ctyResources)
 		collectionConnections[baseName] = cty.TupleVal(ctyConnections)
 	}
-	topMap[varObservedResources] = cty.ObjectVal(collectionResources)
-	topMap[varObservedConnections] = cty.ObjectVal(collectionConnections)
+	topMap[reqObservedResources] = cty.ObjectVal(collectionResources)
+	topMap[reqObservedConnections] = cty.ObjectVal(collectionConnections)
 
 	// create a basic context with vars
 	ctx := &hcl.EvalContext{

@@ -14,14 +14,15 @@ func (e *Evaluator) processLocals(ctx *hcl.EvalContext, content *hcl.BodyContent
 	return lp.process(ctx, content)
 }
 
+// sourceFinder returns the source code for a given range.
 type sourceFinder interface {
 	sourceCode(hcl.Range) string
 }
 
 // localsProcessor processes local declarations in a block. This is the workhorse of the evaluator.
 // It computes dependencies across local variables and evaluates them in dependency order checking for circularity.
-// Given an eval context, it checks whether there is any expression that relies on an unknown local or on unknown first level properties
-// of the `req` and `self` namespaces and produces an error if that is the case.
+// Given an eval context, it checks whether there is any expression that relies on an unknown local or on
+// other unknown values in the eval context and produces an error if that is the case.
 // At the end of processing, it returns a child context with the locals having computed values.
 // Note that "computed" does not mean "complete" - locals may have incomplete values if they refer to resource
 // properties that are not yet known.
@@ -36,6 +37,7 @@ func newLocalsProcessor(finder sourceFinder) *localsProcessor {
 	}
 }
 
+// localInfo tracks the dependencies in an HCL expression.
 type localInfo struct {
 	expr hcl.Expression
 	deps []string

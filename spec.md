@@ -158,6 +158,7 @@ Example:
 // format: resources <base-crossplane-name> 
 resources additional_buckets  {
     locals {
+      params   = req.composite.spec.parameters
       suffixes = req.composite.spec.parameters.suffixes
     }
     // list, map, or set to iterate on
@@ -174,6 +175,9 @@ resources additional_buckets  {
     // the template block allows you to render each child resource. It has exactly the same semantics
     // as a resource block and anything you can do in a resource block is allowed here. 
     template {
+      locals {
+        resourceName = "${req.composite.metadata.name}-${self.name}"
+      }
       // Note that it is your responsibility to
       // set metadata.name to a unique, stable name. The `self.name` special variable contains the
       // output of the name expression and may be used for this purpose.
@@ -181,13 +185,12 @@ resources additional_buckets  {
         apiVersion = "s3.aws.upbound.io/v1beta1"
         kind       = "Bucket"
         metadata = {
-          name = "${req.composite.metadata.name}-${self.name}"
+          name = resourceName
         }
         spec = {
           forProvider = {
             forceDestroy = true
-            region       = local.params.region
-            tags         = local.tagValues
+            region       = params.region
           }
         }
       }
@@ -503,7 +506,7 @@ The following are treated as errors:
 
 * Basic parsing errors in the HCL
 * Basic schema violations
-* References to a local variable name that does not exist (TODO: partially, half-heartedly implemented for now)
+* References to a local variable name that does not exist
 * Circular references in locals expressions (e.g. `locals{ a = b, b = a}`)
 * Two resources are produced with the same crossplane name
 * A condition value is incomplete
