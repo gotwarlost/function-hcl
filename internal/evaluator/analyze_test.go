@@ -80,7 +80,7 @@ locals {
 	foo = bar
 }
 `,
-			errMsg: `test.hcl:3,8-11: reference to non-existent local; bar`,
+			errMsg: `test.hcl:3,8-11: reference to non-existent variable; bar`,
 		},
 		{
 			name: "resource name clash",

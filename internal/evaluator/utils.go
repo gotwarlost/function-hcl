@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"regexp"
 	"sort"
 	"strings"
 
@@ -16,42 +15,6 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 )
-
-// reIdent is a regular expression that can test for HCL identifiers that are allowed to contain dashes.
-var reIdent = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_-]*$`)
-
-// isIdentifier returns true if the supplied string can be interpreted as an HCL identifier.
-func isIdentifier(s string) bool {
-	return reIdent.MatchString(s)
-}
-
-// normalizeTraversal normalizes an index traversal to an attribute traversal for known cases.
-// (i.e. x["foo"] is effectively turned to x.foo).
-func normalizeTraversal(t hcl.Traversal) hcl.Traversal {
-	var ret hcl.Traversal
-loop:
-	for _, item := range t {
-		switch item := item.(type) {
-		case hcl.TraverseRoot:
-			ret = append(ret, item)
-		case hcl.TraverseAttr:
-			ret = append(ret, item)
-		case hcl.TraverseIndex:
-			k := item.Key
-			if k.Type() == cty.String && isIdentifier(k.AsString()) {
-				ret = append(ret, hcl.TraverseAttr{
-					Name:     k.AsString(),
-					SrcRange: item.SrcRange,
-				})
-				continue loop
-			}
-			ret = append(ret, item)
-		default:
-			panic(fmt.Errorf("unexpected traversal type: %T", item))
-		}
-	}
-	return ret
-}
 
 // hasVariable returns true if the supplied name is defined in the current or any ancestor context.
 func hasVariable(ctx *hcl.EvalContext, name string) bool {
@@ -316,26 +279,6 @@ func path2String(path cty.Path) string {
 		}
 	}
 	return strings.Join(segments, "")
-}
-
-// err2Diag converts an error to a hcl.Diagnostic.
-func err2Diag(err error) *hcl.Diagnostic {
-	return &hcl.Diagnostic{
-		Severity: hcl.DiagError,
-		Summary:  err.Error(),
-	}
-}
-
-// mapDiagnosticSeverity maps the severity of the diagnostics from src to dst.
-// This is a destructive operation, clone the diags before calling this function if you need the original.
-// nolint:unparam
-func mapDiagnosticSeverity(diags hcl.Diagnostics, src, dst hcl.DiagnosticSeverity) hcl.Diagnostics {
-	for i := range diags {
-		if diags[i].Severity == src {
-			diags[i].Severity = dst
-		}
-	}
-	return diags
 }
 
 // ptr returns a pointer to the supplied value.

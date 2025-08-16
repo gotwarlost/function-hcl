@@ -3,6 +3,7 @@ package evaluator
 import (
 	"fmt"
 
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/hclutils"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -56,7 +57,7 @@ func (e *Evaluator) processContext(ctx *hcl.EvalContext, block *hcl.Block) hcl.D
 			Context:     e.messagesFromDiags(diags),
 		})
 		// map unknown context value errors to warnings as we'll handle them later
-		return diags.Extend(mapDiagnosticSeverity(ds, hcl.DiagError, hcl.DiagWarning))
+		return diags.Extend(hclutils.DowngradeDiags(ds))
 	}
 	diags = diags.Extend(ds)
 

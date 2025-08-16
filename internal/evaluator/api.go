@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/locals"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	fn "github.com/crossplane/function-sdk-go"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
@@ -39,7 +40,7 @@ const (
 	blockResources = "resources"
 	blockComposite = "composite"
 	blockContext   = "context"
-	blockLocals    = "locals"
+	blockLocals    = locals.BlockLocals
 	blockTemplate  = "template"
 	blockReady     = "ready"
 
@@ -76,13 +77,6 @@ const (
 	selfObservedConnections = "connections"
 	iteratorName            = "each"
 )
-
-var reservedWords = map[string]bool{
-	reservedSelf: true,
-	reservedReq:  true,
-	reservedArg:  true,
-	iteratorName: true,
-}
 
 // DiscardType describes what was discarded by the function.
 type DiscardType string
