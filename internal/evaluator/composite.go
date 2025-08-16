@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/hclutils"
 	"github.com/hashicorp/hcl/v2"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
@@ -103,7 +104,7 @@ func (e *Evaluator) attributesToValueMap(ctx *hcl.EvalContext, expr hcl.Expressi
 			Context:     e.messagesFromDiags(diags),
 		})
 		// remap errors to warnings as we'll handle discarded objects later
-		return nil, mapDiagnosticSeverity(diags, hcl.DiagError, hcl.DiagWarning)
+		return nil, hclutils.DowngradeDiags(diags)
 	}
 	b, err := ctyjson.Marshal(value, value.Type())
 	if err != nil {

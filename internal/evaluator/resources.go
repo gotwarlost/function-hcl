@@ -5,11 +5,17 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/hclutils"
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/locals"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
 )
+
+func (e *Evaluator) processLocals(ctx *hcl.EvalContext, content *hcl.BodyContent) (*hcl.EvalContext, hcl.Diagnostics) {
+	return locals.NewProcessor().Process(ctx, content)
+}
 
 // processGroup processes all blocks at the top-level or at the level of a single group.
 func (e *Evaluator) processGroup(ctx *hcl.EvalContext, content *hcl.BodyContent) hcl.Diagnostics {
@@ -326,7 +332,7 @@ func (e *Evaluator) addResource(ctx *hcl.EvalContext, resourceName string, conte
 			Context:     append(context, fmt.Sprintf("unknown values: %s", unknown)),
 		})
 		// map unknown resource value errors to warnings as we'll handle them later
-		return diags.Extend(mapDiagnosticSeverity(ds, hcl.DiagError, hcl.DiagWarning))
+		return diags.Extend(hclutils.DowngradeDiags(ds))
 	}
 	diags = diags.Extend(ds)
 
@@ -401,7 +407,7 @@ func (e *Evaluator) processReady(ctx *hcl.EvalContext, resourceName string, bloc
 			Context:     e.messagesFromDiags(diags),
 		})
 		// map unknown ready value errors to warnings as we'll handle them later
-		return diags.Extend(mapDiagnosticSeverity(ds, hcl.DiagError, hcl.DiagWarning))
+		return diags.Extend(hclutils.DowngradeDiags(ds))
 	}
 	diags = diags.Extend(ds)
 	if value.Type() != cty.String {

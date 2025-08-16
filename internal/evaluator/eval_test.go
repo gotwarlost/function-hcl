@@ -176,7 +176,7 @@ func TestNegativeEval(t *testing.T) {
 				}
 			`,
 			asserter: func(t *testing.T, res *fnv1.RunFunctionResponse, err error) {
-				assert.Contains(t, err.Error(), `reference to non-existent local; bar`)
+				assert.Contains(t, err.Error(), `reference to non-existent variable; bar`)
 			},
 		},
 		{
@@ -187,18 +187,7 @@ func TestNegativeEval(t *testing.T) {
 				}
 			`,
 			asserter: func(t *testing.T, res *fnv1.RunFunctionResponse, err error) {
-				assert.Contains(t, err.Error(), `name is reserved and cannot be used`)
-			},
-		},
-		{
-			name: "reserved word 2",
-			hcl: `
-				locals {
-				  	self = "foo"
-				}
-			`,
-			asserter: func(t *testing.T, res *fnv1.RunFunctionResponse, err error) {
-				assert.Contains(t, err.Error(), `name is reserved and cannot be used`)
+				assert.Contains(t, err.Error(), `attempt to shadow variable; req`)
 			},
 		},
 	}

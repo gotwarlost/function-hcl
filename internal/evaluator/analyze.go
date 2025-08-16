@@ -3,11 +3,18 @@ package evaluator
 import (
 	"fmt"
 
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/hclutils"
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/locals"
+
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
 	"google.golang.org/protobuf/types/known/structpb"
 )
+
+type sourceFinder interface {
+	sourceCode(r hcl.Range) string
+}
 
 // analyzer provides facilities for HCL analysis.
 type analyzer struct {
@@ -19,14 +26,14 @@ type analyzer struct {
 func newAnalyzer(finder sourceFinder) *analyzer {
 	return &analyzer{
 		finder:          finder,
-		resourceNames:   make(map[string]bool),
-		collectionNames: make(map[string]bool),
+		resourceNames:   map[string]bool{},
+		collectionNames: map[string]bool{},
 	}
 }
 
 func (a *analyzer) addResource(name string, r hcl.Range) hcl.Diagnostics {
 	if a.resourceNames[name] {
-		return toErrorDiag("resource defined more than once", name, r)
+		return hclutils.ToErrorDiag("resource defined more than once", name, r)
 	}
 	a.resourceNames[name] = true
 	return nil
@@ -34,7 +41,7 @@ func (a *analyzer) addResource(name string, r hcl.Range) hcl.Diagnostics {
 
 func (a *analyzer) addCollection(name string, r hcl.Range) hcl.Diagnostics {
 	if a.collectionNames[name] {
-		return toErrorDiag("resource collection defined more than once", name, r)
+		return hclutils.ToErrorDiag("resource collection defined more than once", name, r)
 	}
 	a.collectionNames[name] = true
 	return nil
@@ -43,7 +50,7 @@ func (a *analyzer) addCollection(name string, r hcl.Range) hcl.Diagnostics {
 func (a *analyzer) checkReferences(ctx *hcl.EvalContext, tables map[string]DynamicObject, expr hcl.Traversal) hcl.Diagnostics {
 	var ret hcl.Diagnostics
 	sr := expr.SourceRange()
-	expr = normalizeTraversal(expr)
+	expr = hclutils.NormalizeTraversal(expr)
 	getText := func() string {
 		return a.finder.sourceCode(sr)
 	}
@@ -55,11 +62,11 @@ func (a *analyzer) checkReferences(ctx *hcl.EvalContext, tables map[string]Dynam
 		root := tables[expr.RootName()]
 		second, ok := expr[1].(hcl.TraverseAttr)
 		if !ok {
-			ret = ret.Extend(toErrorDiag("invalid index expression", getText(), sr))
+			ret = ret.Extend(hclutils.ToErrorDiag("invalid index expression", getText(), sr))
 			break
 		}
 		if _, ok := root[second.Name]; !ok {
-			ret = ret.Extend(toErrorDiag(fmt.Sprintf("no such attribute %q", second.Name), getText(), sr))
+			ret = ret.Extend(hclutils.ToErrorDiag(fmt.Sprintf("no such attribute %q", second.Name), getText(), sr))
 			break
 		}
 
@@ -78,15 +85,15 @@ func (a *analyzer) checkReferences(ctx *hcl.EvalContext, tables map[string]Dynam
 		switch {
 		case expr.RootName() == reservedReq && second.Name == "resource":
 			if !a.resourceNames[thirdStep] {
-				ret = ret.Extend(toErrorDiag("invalid resource name reference", thirdStep, sr))
+				ret = ret.Extend(hclutils.ToErrorDiag("invalid resource name reference", thirdStep, sr))
 			}
 		case expr.RootName() == reservedReq && second.Name == "resources":
 			if !a.collectionNames[thirdStep] {
-				ret = ret.Extend(toErrorDiag("invalid resource collection name reference", thirdStep, sr))
+				ret = ret.Extend(hclutils.ToErrorDiag("invalid resource collection name reference", thirdStep, sr))
 			}
 		case expr.RootName() == reservedSelf && second.Name == "each":
 			if thirdStep != "key" && thirdStep != "value" {
-				ret = ret.Extend(toErrorDiag("invalid each reference, must be one of 'key' or 'value'", thirdStep, sr))
+				ret = ret.Extend(hclutils.ToErrorDiag("invalid each reference, must be one of 'key' or 'value'", thirdStep, sr))
 			}
 		}
 
@@ -96,11 +103,11 @@ func (a *analyzer) checkReferences(ctx *hcl.EvalContext, tables map[string]Dynam
 		}
 		second, ok := expr[1].(hcl.TraverseAttr)
 		if !ok {
-			ret = ret.Extend(toErrorDiag("invalid index expression", getText(), sr))
+			ret = ret.Extend(hclutils.ToErrorDiag("invalid index expression", getText(), sr))
 			break
 		}
 		if second.Name != "key" && second.Name != "value" {
-			ret = ret.Extend(toErrorDiag("invalid each reference, must be one of 'key' or 'value'", second.Name, sr))
+			ret = ret.Extend(hclutils.ToErrorDiag("invalid each reference, must be one of 'key' or 'value'", second.Name, sr))
 			break
 		}
 		fallthrough // since each is a local variable added on demand, add the local variable ref checks as well
@@ -109,19 +116,19 @@ func (a *analyzer) checkReferences(ctx *hcl.EvalContext, tables map[string]Dynam
 		reference := expr.RootName()
 		if !hasVariable(ctx, reference) {
 			r := expr[0].SourceRange()
-			ret = ret.Extend(toErrorDiag("invalid local variable reference", reference, r))
+			ret = ret.Extend(hclutils.ToErrorDiag("invalid local variable reference", reference, r))
 		}
 	}
 	return ret
 }
 
 func (a *analyzer) processLocals(ctx *hcl.EvalContext, content *hcl.BodyContent) (*hcl.EvalContext, map[string]hcl.Expression, hcl.Diagnostics) {
-	lp := newLocalsProcessor(a.finder)
-	childCtx, diags := lp.process(ctx, content)
+	lp := locals.NewProcessor()
+	childCtx, diags := lp.Process(ctx, content)
 	if diags.HasErrors() {
 		return nil, nil, diags
 	}
-	exprs, diags := lp.getLocalExpressions(content)
+	exprs, diags := lp.Expressions(content)
 	if diags.HasErrors() {
 		return nil, nil, diags
 	}
