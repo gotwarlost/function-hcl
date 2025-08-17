@@ -23,6 +23,7 @@ func parseFunctionsHCL(t *testing.T, content string) *hcl.BodyContent {
 	schema := &hcl.BodySchema{
 		Blocks: []hcl.BlockHeaderSchema{
 			{Type: "function", LabelNames: []string{"name"}},
+			{Type: "locals"},
 		},
 	}
 
@@ -44,7 +45,9 @@ func parseExpression(t *testing.T, str string) hclsyntax.Expression {
 
 func TestBasicFunctions(t *testing.T) {
 	defs := parseFunctionsHCL(t, `
+locals {}
 function mX {
+	description = "scales a number by m"
 	arg n {
 		description = "input"
 	}
@@ -171,6 +174,141 @@ function mX {
 		t.Run(test.name, func(t *testing.T) {
 			e := parseExpression(t, test.expr)
 			_, diags := e.Value(ctx)
+			require.True(t, diags.HasErrors())
+			assert.Contains(t, diags.Error(), test.msg)
+		})
+	}
+}
+
+func TestProcessFunctionsNegative(t *testing.T) {
+	tests := []struct {
+		name string
+		hcl  string
+		msg  string
+	}{
+		{
+			name: "function does not match schema",
+			msg:  `test.hcl:3,2-6: Unsupported block type; Blocks of type "arg2" are not expected here`,
+			hcl: `
+function x { 
+	arg2 y {} 
+	body = y
+}
+			`,
+		},
+		{
+			name: "function name not identifier",
+			msg:  `test.hcl:2,10-20: function "x plus y" : name must be an identifier`,
+			hcl: `
+function "x plus y" { 
+	arg y {} 
+	body = y
+}
+			`,
+		},
+		{
+			name: "arg name not identifier",
+			msg:  `test.hcl:3,6-14: function "x", arg "plus y" : name must be an identifier`,
+			hcl: `
+function x { 
+	arg "plus y" {} 
+	body = "x"
+}
+			`,
+		},
+		{
+			name: "arg does not match schema",
+			msg:  `test.hcl:3,10-18: Unsupported argument; An argument named "default2" is not expected here`,
+			hcl: `
+function x { 
+	arg y { default2 = 10 } 
+	body = y
+}
+			`,
+		},
+		{
+			name: "duplicate function declaration",
+			msg:  `test.hcl:6,1-11: duplicate function declaration; x`,
+			hcl: `
+function x { 
+	arg y {} 
+	body = y
+}
+function x { 
+	arg z {} 
+	body = z
+}
+			`,
+		},
+		{
+			name: "duplicate arg declaration",
+			msg:  `test.hcl:4,2-7: function x: duplicate definition of argument; y`,
+			hcl: `
+function x { 
+	arg y {} 
+	arg y {}
+	body = y
+}
+			`,
+		},
+		{
+			name: "bad function description",
+			msg:  `test.hcl:3,2-19: function x : description is not a constant string`,
+			hcl: `
+function x { 
+	description = 100
+	arg y {}
+	body = y
+}
+			`,
+		},
+		{
+			name: "bad arg description",
+			msg:  `test.hcl:4,10-27: function "x", arg "y" : description is not a constant string`,
+			hcl: `
+function x { 
+	description = "f(x)"
+	arg y { description = 100 }
+	body = y
+}
+			`,
+		},
+		{
+			name: "non constant default",
+			msg:  `test.hcl:7,10-21: function "x", args "y": default is not a constant`,
+			hcl: `
+locals {
+	z = 100
+}
+function x { 
+	description = "f(x)"
+	arg y { default = z }
+	body = y
+}
+			`,
+		},
+		{
+			name: "bad locals",
+			msg:  `cycle found`,
+			hcl: `
+function x { 
+	description = "f(x)"
+	arg y { default = 100 }
+	locals {
+		a = b
+		b = a
+	}
+	body = y
+}
+			`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			defs := parseFunctionsHCL(t, test.hcl)
+			p := functions.NewProcessor()
+			diags := p.Process(defs)
 			require.True(t, diags.HasErrors())
 			assert.Contains(t, diags.Error(), test.msg)
 		})

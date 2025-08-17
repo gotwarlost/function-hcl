@@ -12,9 +12,8 @@ import (
 
 const (
 	InvokeFunctionName = "invoke"
+	maxDepth           = 100
 )
-
-var maxDepth = 100
 
 func (f *UserFunction) invoke(i *invoker, params DynamicObject) (cty.Value, error) {
 	for pName := range params {
