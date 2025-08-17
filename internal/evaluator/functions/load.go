@@ -52,13 +52,17 @@ func (e *Processor) processFunction(block *hcl.Block) (*UserFunction, hcl.Diagno
 	curDiags = curDiags.Extend(diags)
 	fnName := block.Labels[0]
 
+	if !hclutils.IsIdentifier(fnName) {
+		return nil, emptyDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %q : name must be an identifier", fnName), "", block.LabelRanges[0]))
+	}
+
 	desc := ""
 	descAttr := content.Attributes[attrDescription]
 	if descAttr != nil {
 		v, d := descAttr.Expr.Value(&hcl.EvalContext{})
 		curDiags = curDiags.Extend(d)
 		if !(v.IsWhollyKnown() && v.Type() == cty.String) {
-			return nil, emptyDiags.Extend(hclutils.ToErrorDiag("function : description is not a constant string", fnName, descAttr.Range))
+			return nil, emptyDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %s : description is not a constant string", fnName), "", descAttr.Range))
 		}
 		desc = v.AsString()
 	}
@@ -101,11 +105,15 @@ func (e *Processor) processFunction(block *hcl.Block) (*UserFunction, hcl.Diagno
 func (e *Processor) processArg(fn string, block *hcl.Block) (*Arg, hcl.Diagnostics) {
 	var curDiags, emptyDiags hcl.Diagnostics
 	a, diags := block.Body.Content(argSchema())
+	curDiags = curDiags.Extend(diags)
 	if diags.HasErrors() {
 		return nil, diags
 	}
+
 	argName := block.Labels[0]
-	curDiags = curDiags.Extend(diags)
+	if !hclutils.IsIdentifier(argName) {
+		return nil, emptyDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %q, arg %q : name must be an identifier", fn, argName), "", block.LabelRanges[0]))
+	}
 
 	desc := ""
 	descAttr := a.Attributes[attrDescription]
@@ -113,7 +121,7 @@ func (e *Processor) processArg(fn string, block *hcl.Block) (*Arg, hcl.Diagnosti
 		v, d := descAttr.Expr.Value(&hcl.EvalContext{})
 		curDiags = curDiags.Extend(d)
 		if !(v.IsWhollyKnown() && v.Type() == cty.String) {
-			return nil, emptyDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %q argument description is not a constant string", argName), argName, descAttr.Range))
+			return nil, emptyDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %q, arg %q : description is not a constant string", fn, argName), "", descAttr.Range))
 		}
 		desc = v.AsString()
 	}
@@ -124,7 +132,7 @@ func (e *Processor) processArg(fn string, block *hcl.Block) (*Arg, hcl.Diagnosti
 		v, diags = defAttr.Expr.Value(&hcl.EvalContext{})
 		curDiags = curDiags.Extend(diags)
 		if !v.IsWhollyKnown() {
-			return nil, emptyDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %q default is not a constant", fn), argName, defAttr.Range))
+			return nil, emptyDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %q, args %q: default is not a constant", fn, argName), "", defAttr.Range))
 		}
 	}
 	return &Arg{
