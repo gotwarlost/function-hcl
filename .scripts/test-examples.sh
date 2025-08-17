@@ -4,6 +4,10 @@ set -euo pipefail
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+function-hcl --insecure &
+bg_pid=$!
+trap 'kill ${bg_pid}; exit 1' INT EXIT
+
 filter=${1:-}
 "${SCRIPT_DIR}/gen-comp.sh" ${filter} >/dev/null
 echo ---
@@ -21,10 +25,14 @@ do
   then
     continue
   fi
+
   run=1
   echo $dir>&2
   cd $dir
-  cmd="crossplane render -r -c xr.yaml composition.yaml functions.yaml"
+
+  rm -f /tmp/functions.yaml /tmp/results.yaml
+  cat functions.yaml | "${SCRIPT_DIR}/fn-dev-mode.sh" >/tmp/functions.yaml
+  cmd="crossplane render -r -c xr.yaml composition.yaml /tmp/functions.yaml"
   if [[ -f observed.yaml ]]
   then
     cmd="${cmd} -o observed.yaml"
