@@ -14,6 +14,9 @@ var (
 		{Type: blockComposite, LabelNames: []string{"object"}},
 		{Type: blockContext},
 	}
+
+	topBlocks = append(baseGroupBlocks, hcl.BlockHeaderSchema{Type: blockFunction, LabelNames: []string{"name"}})
+
 	// applicable to resource and template blocks.
 	resourceBlocks = []hcl.BlockHeaderSchema{
 		{Type: blockLocals},
@@ -35,7 +38,7 @@ var schemasByBlockType = map[string]*hcl.BodySchema{
 
 func topLevelSchema() *hcl.BodySchema {
 	return &hcl.BodySchema{
-		Blocks: baseGroupBlocks,
+		Blocks: topBlocks,
 	}
 }
 
