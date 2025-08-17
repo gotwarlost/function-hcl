@@ -6,7 +6,8 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 function-hcl --insecure &
 bg_pid=$!
-trap 'kill ${bg_pid}; exit 1' INT EXIT
+trap 'kill ${bg_pid}; exit 1' INT
+trap 'kill ${bg_pid}' EXIT
 
 filter=${1:-}
 "${SCRIPT_DIR}/gen-comp.sh" ${filter} >/dev/null
