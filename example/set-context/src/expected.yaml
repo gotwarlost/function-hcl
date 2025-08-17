@@ -1,0 +1,45 @@
+---
+apiVersion: example.com/v1
+kind: XS3Bucket
+metadata:
+  name: bucket-36f7e
+status:
+  conditions:
+  - lastTransitionTime: "2024-01-01T00:00:00Z"
+    reason: Available
+    status: "True"
+    type: Ready
+  - lastTransitionTime: "2024-01-01T00:00:00Z"
+    reason: AllItemsProcessed
+    message: "all items complete"
+    status: "True"
+    type: FullyResolved
+  - type: HclDiagnostics
+    lastTransitionTime: "2024-01-01T00:00:00Z"
+    message: "hcl.Diagnostics contains no warnings"
+    reason: Eval
+    status: "True"
+---
+apiVersion: render.crossplane.io/v1beta1
+kind: Result
+metadata:
+  name: r-0
+message: "no warnings"
+severity: SEVERITY_NORMAL
+step: "run hcl composition"
+---
+apiVersion: render.crossplane.io/v1beta1
+kind: Result
+metadata:
+  name: r-1
+message: "hcl module executed successfully"
+severity: SEVERITY_NORMAL
+step: "run hcl composition"
+---
+apiVersion: render.crossplane.io/v1beta1
+kind: Context
+metadata:
+  name: context
+fields:
+  processed: bucket-36f7e
+
