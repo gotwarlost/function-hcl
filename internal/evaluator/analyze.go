@@ -206,7 +206,7 @@ func (a *analyzer) analyzeContent(ctx *hcl.EvalContext, parent *hcl.Block, conte
 
 	// process child blocks
 	for _, block := range content.Blocks {
-		if block.Type == blockLocals {
+		if block.Type == blockLocals || block.Type == blockFunction {
 			continue
 		}
 		childContent, d := block.Body.Content(schemasByBlockType[block.Type])
@@ -241,7 +241,9 @@ func (a *analyzer) checkStructure(body hcl.Body, s *hcl.BodySchema) hcl.Diagnost
 		case blockResources:
 			diags = diags.Extend(a.addCollection(block.Labels[0], block.LabelRanges[0]))
 		}
-		diags = diags.Extend(a.checkStructure(block.Body, schemasByBlockType[block.Type]))
+		if block.Type != blockFunction {
+			diags = diags.Extend(a.checkStructure(block.Body, schemasByBlockType[block.Type]))
+		}
 	}
 	return diags
 }

@@ -1,21 +1,14 @@
 function toProviderK8sObject {
   arg name {
-    // type        = string
     description = "metadata name of the return object"
   }
   arg manifest {
-    // type        = object
     description = "the inner manifest to be wrapped into the k8s provider object"
   }
   arg providerName {
-    // type        = string
     description = "name of the K8s provider"
     default     = "default"
   }
-  //returns {
-    // type        = object
-    //description = "wrapper k8s object"
-  //}
 
   locals {
     objectName = "foo-${name}"

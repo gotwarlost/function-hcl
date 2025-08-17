@@ -43,4 +43,25 @@ spec:
    kind: ProviderConfig
  providerConfigRef:
   name: default
-
+---
+apiVersion: render.crossplane.io/v1beta1
+kind: Result
+metadata:
+  name: r-0
+message: "no warnings"
+severity: SEVERITY_NORMAL
+step: "run hcl composition"
+---
+apiVersion: render.crossplane.io/v1beta1
+kind: Result
+metadata:
+  name: r-1
+message: "hcl module executed successfully"
+severity: SEVERITY_NORMAL
+step: "run hcl composition"
+---
+apiVersion: render.crossplane.io/v1beta1
+kind: Context
+metadata:
+  name: context
+fields: null
