@@ -302,6 +302,21 @@ function x {
 }
 			`,
 		},
+		{
+			name: "bad refs",
+			msg:  `reference to non-existent variable; z, and 1 other diagnostic(s)`,
+			hcl: `
+function x { 
+	arg y {}
+	body = z
+}
+
+function y { 
+	arg p {}
+	body = z
+}
+			`,
+		},
 	}
 
 	for _, test := range tests {

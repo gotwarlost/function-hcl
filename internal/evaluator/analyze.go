@@ -12,20 +12,16 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-type sourceFinder interface {
-	sourceCode(r hcl.Range) string
-}
-
 // analyzer provides facilities for HCL analysis.
 type analyzer struct {
-	finder          sourceFinder
+	e               *Evaluator
 	resourceNames   map[string]bool
 	collectionNames map[string]bool
 }
 
-func newAnalyzer(finder sourceFinder) *analyzer {
+func newAnalyzer(e *Evaluator) *analyzer {
 	return &analyzer{
-		finder:          finder,
+		e:               e,
 		resourceNames:   map[string]bool{},
 		collectionNames: map[string]bool{},
 	}
@@ -52,7 +48,7 @@ func (a *analyzer) checkReferences(ctx *hcl.EvalContext, tables map[string]Dynam
 	sr := expr.SourceRange()
 	expr = hclutils.NormalizeTraversal(expr)
 	getText := func() string {
-		return a.finder.sourceCode(sr)
+		return a.e.sourceCode(sr)
 	}
 	switch expr.RootName() {
 	case reservedReq, reservedSelf:
@@ -135,6 +131,7 @@ func (a *analyzer) processLocals(ctx *hcl.EvalContext, content *hcl.BodyContent)
 	return childCtx, exprs, diags
 }
 
+// analyzeContent analyzes the content in the supplied block after setting up an eval context for it.
 func (a *analyzer) analyzeContent(ctx *hcl.EvalContext, parent *hcl.Block, content *hcl.BodyContent) hcl.Diagnostics {
 	// if in a resources block add the expected self vars
 	if parent.Type == blockResources {
@@ -206,6 +203,7 @@ func (a *analyzer) analyzeContent(ctx *hcl.EvalContext, parent *hcl.Block, conte
 
 	// process child blocks
 	for _, block := range content.Blocks {
+		// function blocks have already been statically analyzed at load for bad references.
 		if block.Type == blockLocals || block.Type == blockFunction {
 			continue
 		}
@@ -218,7 +216,50 @@ func (a *analyzer) analyzeContent(ctx *hcl.EvalContext, parent *hcl.Block, conte
 	return ret
 }
 
-func (a *analyzer) analyze(ctx *hcl.EvalContext, content *hcl.BodyContent) hcl.Diagnostics {
+func (a *analyzer) analyze(files ...File) hcl.Diagnostics {
+	// parse all files
+	bodies, diags := a.e.toBodies(files)
+	if diags.HasErrors() {
+		return diags
+	}
+
+	for _, body := range bodies {
+		diags = diags.Extend(a.checkStructure(body, topLevelSchema()))
+	}
+	if diags.HasErrors() {
+		return diags
+	}
+
+	content, ds := a.e.makeContent(bodies)
+	diags = diags.Extend(ds)
+	if diags.HasErrors() {
+		return diags
+	}
+
+	ctx, ds := a.e.processFunctions(content)
+	diags = diags.Extend(ds)
+	if diags.HasErrors() {
+		return diags
+	}
+
+	req := &fnv1.RunFunctionRequest{
+		Observed: &fnv1.State{
+			Composite: &fnv1.Resource{
+				Resource:          &structpb.Struct{},
+				ConnectionDetails: map[string][]byte{},
+			},
+			Resources: map[string]*fnv1.Resource{},
+		},
+		Context:        &structpb.Struct{},
+		ExtraResources: map[string]*fnv1.Resources{},
+		Credentials:    map[string]*fnv1.Credentials{},
+	}
+
+	ctx, err := a.e.makeVars(ctx, req)
+	if err != nil {
+		return []*hcl.Diagnostic{{Severity: hcl.DiagError, Summary: "internal error: setup dummy vars", Detail: err.Error()}}
+	}
+
 	return a.analyzeContent(ctx, &hcl.Block{}, content)
 }
 
@@ -241,9 +282,7 @@ func (a *analyzer) checkStructure(body hcl.Body, s *hcl.BodySchema) hcl.Diagnost
 		case blockResources:
 			diags = diags.Extend(a.addCollection(block.Labels[0], block.LabelRanges[0]))
 		}
-		if block.Type != blockFunction {
-			diags = diags.Extend(a.checkStructure(block.Body, schemasByBlockType[block.Type]))
-		}
+		diags = diags.Extend(a.checkStructure(block.Body, schemasByBlockType[block.Type]))
 	}
 	return diags
 }
@@ -256,49 +295,5 @@ func (e *Evaluator) doAnalyze(files ...File) (finalErr hcl.Diagnostics) {
 	}()
 
 	a := newAnalyzer(e)
-
-	// parse all files
-	bodies, diags := e.toBodies(files)
-	if diags.HasErrors() {
-		return diags
-	}
-
-	for _, body := range bodies {
-		diags = diags.Extend(a.checkStructure(body, topLevelSchema()))
-	}
-	if diags.HasErrors() {
-		return diags
-	}
-
-	content, ds := e.makeContent(bodies)
-	diags = diags.Extend(ds)
-	if diags.HasErrors() {
-		return diags
-	}
-
-	ctx, ds := e.processFunctions(content)
-	diags = diags.Extend(ds)
-	if diags.HasErrors() {
-		return diags
-	}
-
-	req := &fnv1.RunFunctionRequest{
-		Observed: &fnv1.State{
-			Composite: &fnv1.Resource{
-				Resource:          &structpb.Struct{},
-				ConnectionDetails: map[string][]byte{},
-			},
-			Resources: map[string]*fnv1.Resource{},
-		},
-		Context:        &structpb.Struct{},
-		ExtraResources: map[string]*fnv1.Resources{},
-		Credentials:    map[string]*fnv1.Credentials{},
-	}
-
-	ctx, err := e.makeVars(ctx, req)
-	if err != nil {
-		return []*hcl.Diagnostic{{Severity: hcl.DiagError, Summary: "internal error: setup dummy vars", Detail: err.Error()}}
-	}
-
-	return a.analyze(ctx, content)
+	return a.analyze(files...)
 }

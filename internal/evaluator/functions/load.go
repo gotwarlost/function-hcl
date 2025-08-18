@@ -11,15 +11,15 @@ import (
 
 const (
 	BlockFunction   = "function"
-	blockArg        = "arg"
+	BlockArg        = "arg"
 	attrDescription = "description"
 	attrDefault     = "default"
 	attrBody        = "body"
 	blockLocals     = locals.BlockLocals
 )
 
-// processFunctions processes all function blocks at the top-level and returns an evaluation
-// context that includes all supported functions with an `invoke` function in addition.
+// processFunctions processes all function blocks at the top-level and returns error
+// diagnostics in case of function definition issues.
 func (e *Processor) processFunctions(content *hcl.BodyContent) hcl.Diagnostics {
 	var curDiags, emptyDiags hcl.Diagnostics
 	funcs := map[string]*UserFunction{}
@@ -39,13 +39,16 @@ func (e *Processor) processFunctions(content *hcl.BodyContent) hcl.Diagnostics {
 	}
 	e.Functions = funcs
 	e.invoker = newInvoker(funcs)
-	return nil
+	for _, f := range funcs {
+		curDiags = curDiags.Extend(f.checkRefs(e.invoker))
+	}
+	return curDiags
 }
 
 // processFunction processes a single function block and returns an equivalent UserFunction.
 func (e *Processor) processFunction(block *hcl.Block) (*UserFunction, hcl.Diagnostics) {
 	var curDiags, emptyDiags hcl.Diagnostics
-	content, diags := block.Body.Content(functionSchema())
+	content, diags := block.Body.Content(FunctionSchema())
 	if diags.HasErrors() {
 		return nil, diags
 	}
@@ -69,7 +72,7 @@ func (e *Processor) processFunction(block *hcl.Block) (*UserFunction, hcl.Diagno
 
 	args := map[string]*Arg{}
 	for _, b := range content.Blocks {
-		if b.Type == blockArg {
+		if b.Type == BlockArg {
 			arg, diags := e.processArg(fnName, b)
 			if diags.HasErrors() {
 				return nil, diags
@@ -104,7 +107,7 @@ func (e *Processor) processFunction(block *hcl.Block) (*UserFunction, hcl.Diagno
 // processArg processes a single arg block and returns an Arg.
 func (e *Processor) processArg(fn string, block *hcl.Block) (*Arg, hcl.Diagnostics) {
 	var curDiags, emptyDiags hcl.Diagnostics
-	a, diags := block.Body.Content(argSchema())
+	a, diags := block.Body.Content(ArgSchema())
 	curDiags = curDiags.Extend(diags)
 	if diags.HasErrors() {
 		return nil, diags
@@ -143,10 +146,11 @@ func (e *Processor) processArg(fn string, block *hcl.Block) (*Arg, hcl.Diagnosti
 	}, curDiags
 }
 
-func functionSchema() *hcl.BodySchema {
+// FunctionSchema is the schema for function blocks.
+func FunctionSchema() *hcl.BodySchema {
 	return &hcl.BodySchema{
 		Blocks: []hcl.BlockHeaderSchema{
-			{Type: blockArg, LabelNames: []string{"name"}},
+			{Type: BlockArg, LabelNames: []string{"name"}},
 			{Type: blockLocals},
 		},
 		Attributes: []hcl.AttributeSchema{
@@ -156,7 +160,8 @@ func functionSchema() *hcl.BodySchema {
 	}
 }
 
-func argSchema() *hcl.BodySchema {
+// ArgSchema is the schema for argument blocks.
+func ArgSchema() *hcl.BodySchema {
 	return &hcl.BodySchema{
 		Attributes: []hcl.AttributeSchema{
 			{Name: attrDescription},

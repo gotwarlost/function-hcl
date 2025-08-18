@@ -3,6 +3,7 @@ package functions
 import (
 	"fmt"
 
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/hclutils"
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator/locals"
 	"github.com/crossplane-contrib/function-hcl/internal/funcs"
 	"github.com/hashicorp/hcl/v2"
@@ -14,6 +15,27 @@ const (
 	InvokeFunctionName = "invoke"
 	maxDepth           = 100
 )
+
+func (f *UserFunction) checkRefs(i *invoker) hcl.Diagnostics {
+	values := DynamicObject{}
+	for name, arg := range f.Args {
+		values[name] = arg.Default // does not matter if there is no default
+	}
+	ctx := i.rootContext(values)
+	lp := locals.NewProcessor()
+	ctx, diags := lp.Process(ctx, f.blockContent)
+	if diags.HasErrors() {
+		return diags
+	}
+	vars := f.body.Variables()
+	for _, v := range vars {
+		ref := v.RootName()
+		if !hclutils.HasVariable(ctx, ref) {
+			diags = diags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %s: reference to non-existent variable", f.Name), ref, v.SourceRange()))
+		}
+	}
+	return diags
+}
 
 func (f *UserFunction) invoke(i *invoker, params DynamicObject) (cty.Value, error) {
 	for pName := range params {

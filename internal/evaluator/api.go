@@ -45,16 +45,14 @@ const (
 	blockTemplate  = "template"
 	blockReady     = "ready"
 	blockFunction  = functions.BlockFunction
-	blockArg       = "arg"
+	blockArg       = functions.BlockArg
 
-	attrBody        = "body"
-	attrDescription = "description"
-	attrCondition   = "condition"
-	attrForEach     = "for_each"
-	attrName        = "name"
-	attrKey         = "key"
-	attrValue       = "value"
-	attrDefault     = "default"
+	attrBody      = "body"
+	attrCondition = "condition"
+	attrForEach   = "for_each"
+	attrName      = "name"
+	attrKey       = "key"
+	attrValue     = "value"
 
 	blockLabelStatus     = "status"
 	blockLabelConnection = "connection"
