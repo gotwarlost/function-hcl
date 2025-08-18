@@ -3,8 +3,10 @@ package evaluator
 import (
 	"fmt"
 
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/functions"
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator/hclutils"
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator/locals"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/hashicorp/hcl/v2"
@@ -15,6 +17,7 @@ import (
 // analyzer provides facilities for HCL analysis.
 type analyzer struct {
 	e               *Evaluator
+	p               *functions.Processor
 	resourceNames   map[string]bool
 	collectionNames map[string]bool
 }
@@ -162,12 +165,20 @@ func (a *analyzer) analyzeContent(ctx *hcl.EvalContext, parent *hcl.Block, conte
 
 	var ret hcl.Diagnostics
 
+	checkFunctionRefs := func(x hcl.Expression) {
+		n, ok := x.(hclsyntax.Node)
+		if ok {
+			ret = ret.Extend(a.p.CheckUserFunctionRefs(n))
+		}
+	}
+
 	// first locals
 	for _, expr := range localExpressions {
 		vars := expr.Variables()
 		for _, v := range vars {
 			ret = ret.Extend(a.checkReferences(ctx, tables, v))
 		}
+		checkFunctionRefs(expr)
 	}
 
 	// then attributes
@@ -181,6 +192,7 @@ func (a *analyzer) analyzeContent(ctx *hcl.EvalContext, parent *hcl.Block, conte
 		for _, v := range vars {
 			ret = ret.Extend(a.checkReferences(ctx, tables, v))
 		}
+		checkFunctionRefs(attr.Expr)
 	}
 
 	// if it is a resources block add the iterator context at this point
@@ -236,11 +248,15 @@ func (a *analyzer) analyze(files ...File) hcl.Diagnostics {
 		return diags
 	}
 
-	ctx, ds := a.e.processFunctions(content)
+	p := functions.NewProcessor()
+	ds = p.Process(content)
 	diags = diags.Extend(ds)
 	if diags.HasErrors() {
 		return diags
 	}
+
+	a.p = p
+	ctx := p.RootContext(nil)
 
 	req := &fnv1.RunFunctionRequest{
 		Observed: &fnv1.State{

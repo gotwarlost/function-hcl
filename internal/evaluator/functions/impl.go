@@ -7,6 +7,7 @@ import (
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator/locals"
 	"github.com/crossplane-contrib/function-hcl/internal/funcs"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
 )
@@ -33,6 +34,10 @@ func (f *UserFunction) checkRefs(i *invoker) hcl.Diagnostics {
 		if !hclutils.HasVariable(ctx, ref) {
 			diags = diags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %s: reference to non-existent variable", f.Name), ref, v.SourceRange()))
 		}
+	}
+	n, ok := f.body.(hclsyntax.Node)
+	if ok {
+		diags = diags.Extend(i.checkUserFunctionRefs(n))
 	}
 	return diags
 }
@@ -132,4 +137,33 @@ func (i *invoker) invoke(args []cty.Value, _ cty.Type) (cty.Value, error) {
 	}
 	params := args[1].AsValueMap()
 	return fn.invoke(i, params)
+}
+
+func (i *invoker) checkUserFunctionRefs(expr hclsyntax.Node) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+	_ = hclsyntax.VisitAll(expr, func(node hclsyntax.Node) hcl.Diagnostics {
+		fnCall, ok := node.(*hclsyntax.FunctionCallExpr)
+		if !ok {
+			return nil
+		}
+		if fnCall.Name != InvokeFunctionName {
+			return nil
+		}
+		if len(fnCall.Args) != 2 {
+			diags = diags.Extend(hclutils.ToErrorDiag("user function invocation has incorrect number of arguments", fmt.Sprintf("want 2, got %d", len(fnCall.Args)), fnCall.Range()))
+			return nil
+		}
+		fnName := fnCall.Args[0]
+		v, _ := fnName.Value(&hcl.EvalContext{})
+		if !(v.IsWhollyKnown() && v.Type() == cty.String) {
+			diags = diags.Extend(hclutils.ToErrorDiag("user function invocation is not via a static string", "", fnCall.Args[0].Range()))
+			return nil
+		}
+		if _, ok := i.fns[v.AsString()]; !ok {
+			diags = diags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("invoke called on unknown function: %q", v.AsString()), "", fnCall.Args[0].Range()))
+			return nil
+		}
+		return nil
+	})
+	return diags
 }

@@ -317,6 +317,46 @@ function y {
 }
 			`,
 		},
+		{
+			name: "bad function call 1",
+			msg:  `test.hcl:4,16-17: user function invocation is not via a static string;`,
+			hcl: `
+function x { 
+	arg y {}
+	body = invoke(y, {})
+}
+			`,
+		},
+		{
+			name: "bad function call 2",
+			msg:  `test.hcl:4,9-17: user function invocation has incorrect number of arguments; want 2, got 0`,
+			hcl: `
+function x { 
+	arg y {}
+	body = invoke()
+}
+			`,
+		},
+		{
+			name: "bad function call 3",
+			msg:  `test.hcl:4,15-44: user function invocation has incorrect number of arguments; want 2, got 3`,
+			hcl: `
+function x { 
+	arg y {}
+	body = upper(invoke("y", {a: 10}, {b: 20}))
+}
+			`,
+		},
+		{
+			name: "bad function call 4",
+			msg:  `test.hcl:4,16-19: invoke called on unknown function: "y"`,
+			hcl: `
+function x { 
+	arg y {}
+	body = invoke("y", {a: y})
+}
+			`,
+		},
 	}
 
 	for _, test := range tests {
@@ -328,4 +368,21 @@ function y {
 			assert.Contains(t, diags.Error(), test.msg)
 		})
 	}
+}
+
+func TestProcessorCheckRefs(t *testing.T) {
+	p := functions.NewProcessor()
+	diags := p.Process(parseFunctionsHCL(t, `
+function plus10 {
+	arg n {}
+	body = n + 10
+}
+`))
+	assert.False(t, diags.HasErrors())
+	diags = p.CheckUserFunctionRefs(parseExpression(t, `invoke("plus10",{n : 10})`))
+	assert.False(t, diags.HasErrors())
+
+	diags = p.CheckUserFunctionRefs(parseExpression(t, `invoke("plus20",{n : 10})`))
+	assert.True(t, diags.HasErrors())
+	assert.Contains(t, diags.Error(), `expr.hcl:1,8-16: invoke called on unknown function: "plus20"`)
 }

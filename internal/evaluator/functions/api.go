@@ -2,6 +2,7 @@ package functions
 
 import (
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -52,4 +53,8 @@ func (e *Processor) RootContext(values DynamicObject) *hcl.EvalContext {
 		values = DynamicObject{}
 	}
 	return e.invoker.rootContext(values)
+}
+
+func (e *Processor) CheckUserFunctionRefs(expr hclsyntax.Node) hcl.Diagnostics {
+	return e.invoker.checkUserFunctionRefs(expr)
 }
