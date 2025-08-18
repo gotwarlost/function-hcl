@@ -3,9 +3,9 @@ package functions
 import (
 	"fmt"
 
+	"github.com/crossplane-contrib/function-hcl/internal/evaluator/functions/internal/funcs"
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator/hclutils"
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator/locals"
-	"github.com/crossplane-contrib/function-hcl/internal/funcs"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
