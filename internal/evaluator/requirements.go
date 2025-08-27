@@ -1,11 +1,22 @@
 package evaluator
 
 import (
+	"fmt"
+
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator/hclutils"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
 )
+
+type selection struct {
+	sourceRange hcl.Range
+	apiVersion  hcl.Expression
+	kind        hcl.Expression
+	hasName     bool
+	matchName   hcl.Expression
+	matchLabels hcl.Expression
+}
 
 func (e *Evaluator) processRequirement(ctx *hcl.EvalContext, block *hcl.Block) hcl.Diagnostics {
 	var curDiags hcl.Diagnostics
@@ -37,31 +48,46 @@ func (e *Evaluator) processRequirement(ctx *hcl.EvalContext, block *hcl.Block) h
 		return hclutils.ToErrorDiag("no select block in requirement", name, block.DefRange)
 	}
 
+	// verify basic structure of selection
+	sel, diags := e.selectBlockToSelection(name, selBlock)
+	curDiags = curDiags.Extend(diags)
+	if diags.HasErrors() {
+		return diags
+	}
+
+	// process locals so that selection can be evaluated
 	ctx, diags = e.processLocals(ctx, content)
 	curDiags = curDiags.Extend(diags)
 	if diags.HasErrors() {
 		return diags
 	}
 
-	cond, ds := e.evaluateCondition(ctx, content, discardTypeRequirement, name)
+	// check any conditional setting
+	cond, diags := e.evaluateCondition(ctx, content, discardTypeRequirement, name)
 	curDiags = curDiags.Extend(diags)
-	if ds.HasErrors() {
-		return ds
+	if diags.HasErrors() {
+		return diags
 	}
 	if !cond {
 		return curDiags
 	}
 
-	sel, diags := e.selectBlockToSelector(ctx, selBlock)
+	// evaluate the selector
+	selector, diags := e.selectionToSelector(name, ctx, sel)
 	curDiags = curDiags.Extend(diags)
 	if diags.HasErrors() {
 		return diags
 	}
-	e.requirements[name] = sel
+
+	// the selector can be nil if it is itself incomplete and waiting on other values
+	if sel != nil {
+		e.requirements[name] = selector
+	}
 	return curDiags
 }
 
-func (e *Evaluator) selectBlockToSelector(ctx *hcl.EvalContext, block *hcl.Block) (*fnv1.ResourceSelector, hcl.Diagnostics) {
+// selectBlockToSelection checks for overall correctness of the supplied select block without regard to actual values.
+func (e *Evaluator) selectBlockToSelection(requirementName string, block *hcl.Block) (*selection, hcl.Diagnostics) {
 	var curDiags hcl.Diagnostics
 	content, diags := block.Body.Content(selectSchema())
 	curDiags = curDiags.Extend(diags)
@@ -74,67 +100,94 @@ func (e *Evaluator) selectBlockToSelector(ctx *hcl.EvalContext, block *hcl.Block
 
 	switch {
 	case hasName && hasLabels:
-		return nil, hclutils.ToErrorDiag("requirement selector has both matchName and matchLabels", "", block.DefRange)
+		return nil, hclutils.ToErrorDiag("requirement selector has both matchName and matchLabels", requirementName, block.DefRange)
 	case !(hasName || hasLabels):
-		return nil, hclutils.ToErrorDiag("requirement selector has neither matchName nor matchLabels", "", block.DefRange)
+		return nil, hclutils.ToErrorDiag("requirement selector has neither matchName nor matchLabels", requirementName, block.DefRange)
 	}
 
-	toStringAttr := func(attrName string) (string, hcl.Diagnostics) {
-		val, diags := content.Attributes[attrName].Expr.Value(ctx)
-		if diags.HasErrors() {
-			return "", diags
-		}
-		if val.Type() != cty.String {
-			return "", hclutils.ToErrorDiag("select attribute was not a string", attrName, block.DefRange)
-		}
-		return val.AsString(), nil
+	sel := &selection{
+		sourceRange: block.DefRange,
+		apiVersion:  content.Attributes[attrAPIVersion].Expr,
+		kind:        content.Attributes[attrKind].Expr,
+		hasName:     hasName,
 	}
-
-	apiVersion, diags := toStringAttr(attrAPIVersion)
-	curDiags = curDiags.Extend(diags)
-	if diags.HasErrors() {
-		return nil, diags
-	}
-
-	kind, diags := toStringAttr(attrKind)
-	curDiags = curDiags.Extend(diags)
-	if diags.HasErrors() {
-		return nil, diags
-	}
-
 	if hasName {
-		name, diags := toStringAttr(attrMatchName)
-		curDiags = curDiags.Extend(diags)
-		if diags.HasErrors() {
-			return nil, diags
+		sel.matchName = content.Attributes[attrMatchName].Expr
+	} else {
+		sel.matchLabels = content.Attributes[attrMatchLabels].Expr
+	}
+	return sel, curDiags
+}
+
+// selectionToSelector returns a resource selector for the supplied selection evaluated in the supplied context.
+// It returns a nil selector in case certain values in the selection are unknown. It returns an error if a value
+// is known and is malformed in some way.
+func (e *Evaluator) selectionToSelector(requirementName string, ctx *hcl.EvalContext, s *selection) (out *fnv1.ResourceSelector, outDiags hcl.Diagnostics) {
+	defer func() {
+		if out == nil && !outDiags.HasErrors() {
+			e.discard(DiscardItem{
+				Type:        discardTypeRequirement,
+				Reason:      discardReasonIncomplete,
+				Name:        requirementName,
+				SourceRange: s.sourceRange.String(),
+			})
+		}
+	}()
+
+	apiVersion, diags := s.apiVersion.Value(ctx)
+	if !apiVersion.IsWhollyKnown() {
+		return nil, hclutils.DowngradeDiags(diags)
+	}
+	if apiVersion.Type() != cty.String {
+		return nil, hclutils.ToErrorDiag("api version in requirement selector was not a string", requirementName, s.apiVersion.Range())
+	}
+
+	kind, diags := s.kind.Value(ctx)
+	if !kind.IsWhollyKnown() {
+		return nil, hclutils.DowngradeDiags(diags)
+	}
+	if kind.Type() != cty.String {
+		return nil, hclutils.ToErrorDiag("kind in requirement selector was not a string", requirementName, s.kind.Range())
+	}
+
+	if s.hasName {
+		name, diags := s.matchName.Value(ctx)
+		if !name.IsWhollyKnown() {
+			return nil, hclutils.DowngradeDiags(diags)
+		}
+		if name.Type() != cty.String {
+			return nil, hclutils.ToErrorDiag("matchName in requirement selector was not a string", requirementName, s.matchName.Range())
 		}
 		return &fnv1.ResourceSelector{
-			ApiVersion: apiVersion,
-			Kind:       kind,
-			Match:      &fnv1.ResourceSelector_MatchName{MatchName: name},
-		}, curDiags
+			ApiVersion: apiVersion.AsString(),
+			Kind:       kind.AsString(),
+			Match: &fnv1.ResourceSelector_MatchName{
+				MatchName: name.AsString(),
+			},
+		}, nil
 	}
 
-	val, diags := content.Attributes[attrMatchLabels].Expr.Value(ctx)
-	curDiags = curDiags.Extend(diags)
-	if diags.HasErrors() {
-		return nil, diags
+	labelsVal, diags := s.matchLabels.Value(ctx)
+	if !labelsVal.IsWhollyKnown() {
+		return nil, hclutils.DowngradeDiags(diags)
 	}
 
-	if !val.Type().IsObjectType() {
-		return nil, hclutils.ToErrorDiag("attribute was not an object", attrMatchLabels, block.DefRange)
+	if !labelsVal.Type().IsObjectType() {
+		return nil, hclutils.ToErrorDiag("matchLabels in requirement selector was not an object", requirementName, s.matchLabels.Range())
 	}
-	val2 := val.AsValueMap()
 	labels := map[string]string{}
-	for k, v := range val2 {
+	val := labelsVal.AsValueMap()
+	for k, v := range val {
 		if v.Type() != cty.String {
-			return nil, hclutils.ToErrorDiag("match label was not an string", k, block.DefRange)
+			return nil, hclutils.ToErrorDiag(fmt.Sprintf("match label %q in requirement selector was not an string", k), requirementName, s.matchLabels.Range())
 		}
 		labels[k] = v.AsString()
 	}
 	return &fnv1.ResourceSelector{
-		ApiVersion: apiVersion,
-		Kind:       kind,
-		Match:      &fnv1.ResourceSelector_MatchLabels{MatchLabels: &fnv1.MatchLabels{Labels: labels}},
-	}, curDiags
+		ApiVersion: apiVersion.AsString(),
+		Kind:       kind.AsString(),
+		Match: &fnv1.ResourceSelector_MatchLabels{
+			MatchLabels: &fnv1.MatchLabels{Labels: labels},
+		},
+	}, nil
 }
