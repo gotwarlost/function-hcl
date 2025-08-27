@@ -16,17 +16,19 @@ import (
 
 // analyzer provides facilities for HCL analysis.
 type analyzer struct {
-	e               *Evaluator
-	p               *functions.Processor
-	resourceNames   map[string]bool
-	collectionNames map[string]bool
+	e                *Evaluator
+	p                *functions.Processor
+	resourceNames    map[string]bool
+	collectionNames  map[string]bool
+	requirementNames map[string]bool
 }
 
 func newAnalyzer(e *Evaluator) *analyzer {
 	return &analyzer{
-		e:               e,
-		resourceNames:   map[string]bool{},
-		collectionNames: map[string]bool{},
+		e:                e,
+		resourceNames:    map[string]bool{},
+		collectionNames:  map[string]bool{},
+		requirementNames: map[string]bool{},
 	}
 }
 
@@ -43,6 +45,14 @@ func (a *analyzer) addCollection(name string, r hcl.Range) hcl.Diagnostics {
 		return hclutils.ToErrorDiag("resource collection defined more than once", name, r)
 	}
 	a.collectionNames[name] = true
+	return nil
+}
+
+func (a *analyzer) addRequirement(name string, r hcl.Range) hcl.Diagnostics {
+	if a.requirementNames[name] {
+		return hclutils.ToErrorDiag("requirement defined more than once", name, r)
+	}
+	a.requirementNames[name] = true
 	return nil
 }
 
@@ -297,6 +307,8 @@ func (a *analyzer) checkStructure(body hcl.Body, s *hcl.BodySchema) hcl.Diagnost
 			diags = diags.Extend(a.addResource(block.Labels[0], block.LabelRanges[0]))
 		case blockResources:
 			diags = diags.Extend(a.addCollection(block.Labels[0], block.LabelRanges[0]))
+		case blockRequirement:
+			diags = diags.Extend(a.addRequirement(block.Labels[0], block.LabelRanges[0]))
 		}
 		diags = diags.Extend(a.checkStructure(block.Body, schemasByBlockType[block.Type]))
 	}
