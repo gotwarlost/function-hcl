@@ -116,6 +116,35 @@ func (e *Evaluator) selectBlockToSelection(requirementName string, block *hcl.Bl
 	} else {
 		sel.matchLabels = content.Attributes[attrMatchLabels].Expr
 	}
+
+	// use an empty context to evaluate expressions and check their types when hardcoded values are present
+	ctx := &hcl.EvalContext{Variables: map[string]cty.Value{}}
+
+	checkStringAttr := func(name string, expr hcl.Expression) {
+		v, _ := expr.Value(ctx)
+		if v.IsWhollyKnown() && v.Type() != cty.String {
+			curDiags = curDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("%s in requirement selector was not a string", name), requirementName, expr.Range()))
+		}
+	}
+	checkStringAttr("api version", sel.apiVersion)
+	checkStringAttr("kind", sel.kind)
+	if sel.hasName {
+		checkStringAttr("matchName", sel.matchName)
+	} else {
+		labelsVal, _ := sel.matchLabels.Value(ctx)
+		if labelsVal.IsWhollyKnown() {
+			if !labelsVal.Type().IsObjectType() {
+				curDiags = curDiags.Extend(hclutils.ToErrorDiag("matchLabels in requirement selector was not an object", requirementName, sel.matchLabels.Range()))
+			} else {
+				val := labelsVal.AsValueMap()
+				for k, v := range val {
+					if v.Type() != cty.String {
+						curDiags = curDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("match label %q in requirement selector was not an string", k), requirementName, sel.matchLabels.Range()))
+					}
+				}
+			}
+		}
+	}
 	return sel, curDiags
 }
 

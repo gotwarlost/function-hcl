@@ -335,6 +335,7 @@ requirement cm {
 `,
 			msg: `test.hcl:6,17-26: matchLabels in requirement selector was not an object; cm`,
 		},
+
 		{
 			name: "bad type matchLabels key",
 			hcl: `
@@ -347,6 +348,86 @@ requirement cm {
 }
 `,
 			msg: `test.hcl:6,17-28: match label "foo" in requirement selector was not an string; cm`,
+		},
+		{
+			name: "bad lazy type apiVersion",
+			hcl: `
+requirement cm {
+	locals {
+		val = 10
+	}
+	select {
+		apiVersion = val
+		kind = "ConfigMap"
+		matchLabels = { "foo": "bar" }
+	}
+}
+`,
+			msg: `test.hcl:7,16-19: api version in requirement selector was not a string; cm`,
+		},
+		{
+			name: "bad lazy type kind",
+			hcl: `
+requirement cm {
+	locals {
+		val = ["ConfigMap"]
+	}
+	select {
+		apiVersion = "v1"
+		kind = val
+		matchLabels = { "foo": "bar" }
+	}
+}
+`,
+			msg: `test.hcl:8,10-13: kind in requirement selector was not a string; cm`,
+		},
+		{
+			name: "bad lazy type matchName",
+			hcl: `
+requirement cm {
+	locals {
+		val = 10
+	}
+	select {
+		apiVersion = "v1"
+		kind = "ConfigMap"
+		matchName = val
+	}
+}
+`,
+			msg: `test.hcl:9,15-18: matchName in requirement selector was not a string; cm`,
+		},
+		{
+			name: "bad lazy type matchLabels",
+			hcl: `
+	locals {
+		val = ["ConfigMap"]
+	}
+requirement cm {
+	select {
+		apiVersion = "v1"
+		kind = "ConfigMap"
+		matchLabels = val
+	}
+}
+`,
+			msg: `test.hcl:9,17-20: matchLabels in requirement selector was not an object; cm`,
+		},
+		{
+			name: "bad lazy type matchLabels key",
+			hcl: `
+	locals {
+		val = { foo: 10 }
+	}
+requirement cm {
+	select {
+		apiVersion = "v1"
+		kind = "ConfigMap"
+		matchLabels = val
+	}
+}
+`,
+			msg: `test.hcl:9,17-20: match label "foo" in requirement selector was not an string; cm`,
 		},
 	}
 
