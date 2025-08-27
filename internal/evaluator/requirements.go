@@ -18,6 +18,33 @@ type selection struct {
 	matchLabels hcl.Expression
 }
 
+func (e *Evaluator) checkRequirementBlock(block *hcl.Block, content *hcl.BodyContent) (*selection, hcl.Diagnostics) {
+	name := block.Labels[0]
+
+	var curDiags hcl.Diagnostics
+	// extract a single select block
+	var selBlock *hcl.Block
+	for _, b := range content.Blocks {
+		if b.Type == blockSelect {
+			if selBlock != nil {
+				return nil, hclutils.ToErrorDiag("multiple select blocks in requirement", name, b.DefRange)
+			}
+			selBlock = b
+		}
+	}
+	if selBlock == nil {
+		return nil, hclutils.ToErrorDiag("no select block in requirement", name, block.DefRange)
+	}
+
+	// verify basic structure of selection
+	sel, diags := e.selectBlockToSelection(name, selBlock)
+	curDiags = curDiags.Extend(diags)
+	if diags.HasErrors() {
+		return nil, diags
+	}
+	return sel, curDiags
+}
+
 func (e *Evaluator) processRequirement(ctx *hcl.EvalContext, block *hcl.Block) hcl.Diagnostics {
 	var curDiags hcl.Diagnostics
 
@@ -34,22 +61,8 @@ func (e *Evaluator) processRequirement(ctx *hcl.EvalContext, block *hcl.Block) h
 		return diags
 	}
 
-	// extract a single select block
-	var selBlock *hcl.Block
-	for _, b := range content.Blocks {
-		if b.Type == blockSelect {
-			if selBlock != nil {
-				return hclutils.ToErrorDiag("multiple select blocks in requirement", name, b.DefRange)
-			}
-			selBlock = b
-		}
-	}
-	if selBlock == nil {
-		return hclutils.ToErrorDiag("no select block in requirement", name, block.DefRange)
-	}
-
-	// verify basic structure of selection
-	sel, diags := e.selectBlockToSelection(name, selBlock)
+	// check the block for structural and other errors
+	sel, diags := e.checkRequirementBlock(block, content)
 	curDiags = curDiags.Extend(diags)
 	if diags.HasErrors() {
 		return diags

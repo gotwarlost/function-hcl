@@ -146,6 +146,12 @@ func (a *analyzer) processLocals(ctx *hcl.EvalContext, content *hcl.BodyContent)
 
 // analyzeContent analyzes the content in the supplied block after setting up an eval context for it.
 func (a *analyzer) analyzeContent(ctx *hcl.EvalContext, parent *hcl.Block, content *hcl.BodyContent) hcl.Diagnostics {
+	if parent.Type == blockRequirement {
+		_, diags := a.e.checkRequirementBlock(parent, content)
+		if diags.HasErrors() {
+			return diags
+		}
+	}
 	// if in a resources block add the expected self vars
 	if parent.Type == blockResources {
 		ctx = createSelfChildContext(ctx, DynamicObject{
