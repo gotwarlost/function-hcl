@@ -16,10 +16,10 @@ var (
 		{Type: blockResources, LabelNames: []string{"baseName"}},
 		{Type: blockComposite, LabelNames: []string{"object"}},
 		{Type: blockContext},
+		{Type: blockRequirement, LabelNames: []string{"name"}},
 	}
 
 	topOnlyBlocks = []hcl.BlockHeaderSchema{
-		{Type: blockRequirement, LabelNames: []string{"name"}},
 		{Type: blockFunction, LabelNames: []string{"name"}},
 	}
 	topLevelBlocks = append(baseGroupBlocks, topOnlyBlocks...)

@@ -43,11 +43,22 @@ func TestReqBasicMatchName(t *testing.T) {
 	e := createTestEvaluator(t)
 	ctx := createTestEvalContext()
 	hclContent := `
-requirement cm {
-	select {
-		apiVersion = "v1"
-		kind = "ConfigMap"
-		matchName = "foo-bar"
+// test this in a group and ensure local vars are evaluated correctly
+group {
+	locals {
+		cmPrefix = "foo"
+	}
+
+	requirement cm {
+		locals {
+			cmName = "${cmPrefix}-bar"
+		}
+
+		select {
+			apiVersion = "v1"
+			kind = "ConfigMap"
+			matchName = cmName
+		}
 	}
 }
 `
