@@ -13,5 +13,5 @@ metadata:
       conditional resource creation, other operations, and provides all Terraform functions for use.
       It automatically removes incomplete resources from its output and provides easy mechanisms to update
       composite status and connection details in the context of resource blocks.
-      Read the [spec](https://github.com/elastic/function-hcl/blob/main/spec.md) for a full description.
+      Read the [spec](https://github.com/crossplane-contrib/function-hcl/blob/main/spec.md) for a full description.
 spec: {}
