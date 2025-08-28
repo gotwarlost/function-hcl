@@ -210,7 +210,7 @@ Special variables that are available are:
 * `each.value` - the current value of the iterator which is the value in the array index, value for the map key or the
    value from a set.
 
-### Groups of resources
+## Groups of resources
 
 The `group` block allows you to group related resources together. It allows you to create a "scope" where the local
 variables you define are only available to the resources in the group. 
