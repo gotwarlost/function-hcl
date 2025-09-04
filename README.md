@@ -7,12 +7,6 @@ to model desired resources. It has more than a passing familiarity with Terrafor
 [![Go Report Card](https://goreportcard.com/badge/github.com/crossplane-contrib/function-hcl)](https://goreportcard.com/report/github.com/crossplane-contrib/function-hcl)
 [![Go Coverage](https://github.com/crossplane-contrib/function-hcl/wiki/coverage.svg)](https://raw.githack.com/wiki/crossplane-contrib/function-hcl/coverage.html)
 
-> [!CAUTION]
-> The interface is not yet stable and subject to change. We'd like to give the community 2-3 weeks to provide comments
-> before declaring it as stable. We may still err on the side of not changing things but are open to fixing any footguns you
-> might find. Your feedback is very welcome. Please [create issues](https://github.com/crossplane-contrib/function-hcl/issues/new) with your feedback.
-> We documented some [design choices](design-choices.md) we made to simplify this process.
-
 ```
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
