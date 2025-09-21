@@ -2,6 +2,7 @@ package debug
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +12,7 @@ import (
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var outputWriter io.Writer = os.Stderr
@@ -291,11 +293,17 @@ func (p *Printer) Response(req *fnv1.RunFunctionRequest, res *fnv1.RunFunctionRe
 
 	if res.GetRequirements() != nil && res.GetRequirements().GetExtraResources() != nil {
 		w.file("requirements.yaml")
-		er := object{}
-		for k, v := range res.GetRequirements().GetExtraResources() {
-			er[k] = v
+		// do this in two steps because of the weird Match interface that needs protobuf
+		b, err := protojson.Marshal(res.GetRequirements())
+		if err != nil {
+			return errors.Wrap(err, "marshal requirements")
 		}
-		w.doc(er, "requirements")
+		var er object
+		err = json.Unmarshal(b, &er)
+		if err != nil {
+			return errors.Wrap(err, "unmarshal requirements")
+		}
+		w.doc(er, "")
 	}
 	return w.done()
 }

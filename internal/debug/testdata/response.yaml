@@ -1,0 +1,31 @@
+desired:
+  composite:
+    resource:
+      status:
+        foo: "bar"
+  resources:
+    my-bucket:
+      resource:
+        apiVersion: s3.aws.upbound.io/v1beta1
+        kind: Bucket
+        metadata:
+          name: bucket-36f7e-bucket
+        spec:
+          forProvider:
+            region: eu-west-1
+context:
+  my-key:
+    foo:
+      bar: 10
+results:
+  - severity: 3
+    message: hello world
+    reason: sayhello
+requirements:
+  extraResources:
+    labels-config:
+      match_labels:
+        labels:
+          foo: bar
+      api_version: apiextensions.crossplane.io/v1beta1
+      kind: EnvironmentConfig
