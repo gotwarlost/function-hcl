@@ -15,5 +15,6 @@ spec:
       input:
         apiVersion: function-hcl/v1
         kind: HclInput
+        debug: true
         source: Inline
         hcl: ${script}

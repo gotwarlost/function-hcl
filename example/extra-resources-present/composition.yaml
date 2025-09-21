@@ -16,6 +16,7 @@ spec:
         apiVersion: function-hcl/v1
         kind: HclInput
         source: Inline
+        debug: true
         hcl: |+
           -- src/main.hcl --
           locals {
