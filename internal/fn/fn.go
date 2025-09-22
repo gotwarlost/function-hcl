@@ -105,10 +105,10 @@ func (f *Fn) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) (outRe
 		}
 		defer func() {
 			if finalErr == nil {
-				err = p.Response(req, outRes)
-			}
-			if err != nil {
-				logger.Info(fmt.Sprintf("error printing response: %s", err.Error()))
+				responseErr := p.Response(req, outRes)
+				if responseErr != nil {
+					logger.Info(fmt.Sprintf("error printing response: %s", responseErr.Error()))
+				}
 			}
 		}()
 	}
