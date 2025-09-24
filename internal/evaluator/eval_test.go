@@ -89,6 +89,17 @@ func TestPositiveEval(t *testing.T) {
 				}
 			`,
 		},
+		{
+			name: "incomplete conditions allowed",
+			hcl: `
+				locals {
+				  foo = "${req.resources.primary_bucket.status.arn}"
+				}
+				group {
+				  condition = can(foo)
+				}
+			`,
+		},
 	}
 
 	for _, test := range tests {

@@ -123,7 +123,7 @@ func (e *Evaluator) toContent(files []File) (*hcl.BodyContent, hcl.Diagnostics) 
 func (e *Evaluator) evaluateCondition(ctx *hcl.EvalContext, content *hcl.BodyContent, et DiscardType, name string) (bool, hcl.Diagnostics) {
 	if condAttr, exists := content.Attributes[attrCondition]; exists {
 		val, diags := condAttr.Expr.Value(ctx)
-		if diags.HasErrors() {
+		if diags.HasErrors() || !val.IsKnown() {
 			return false, diags
 		}
 		if val.Type() != cty.Bool {
