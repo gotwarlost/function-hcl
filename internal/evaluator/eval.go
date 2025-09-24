@@ -123,19 +123,24 @@ func (e *Evaluator) toContent(files []File) (*hcl.BodyContent, hcl.Diagnostics) 
 func (e *Evaluator) evaluateCondition(ctx *hcl.EvalContext, content *hcl.BodyContent, et DiscardType, name string) (bool, hcl.Diagnostics) {
 	if condAttr, exists := content.Attributes[attrCondition]; exists {
 		val, diags := condAttr.Expr.Value(ctx)
-		if diags.HasErrors() || !val.IsKnown() {
+		if diags.HasErrors() {
 			return false, diags
 		}
 		if val.Type() != cty.Bool {
 			return false, diags.Append(hclutils.Err2Diag(fmt.Errorf("got type %s, expected %s", val.Type(), cty.Bool)))
 		}
-		if !val.True() {
+		shouldDiscard := !val.IsKnown()
+		if !shouldDiscard {
+			shouldDiscard = !val.True()
+		}
+		if shouldDiscard {
 			e.discard(DiscardItem{
 				Type:        et,
 				Reason:      discardReasonUserCondition,
 				Name:        name,
 				SourceRange: condAttr.Range.String(),
 			})
+			return false, diags
 		}
 		return val.True(), diags
 	}
