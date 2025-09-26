@@ -129,11 +129,16 @@ func (e *Evaluator) evaluateCondition(ctx *hcl.EvalContext, content *hcl.BodyCon
 		if val.Type() != cty.Bool {
 			return false, diags.Append(hclutils.Err2Diag(fmt.Errorf("got type %s, expected %s", val.Type(), cty.Bool)))
 		}
-		shouldDiscard := !val.IsKnown()
-		if !shouldDiscard {
-			shouldDiscard = !val.True()
+		if !val.IsKnown() {
+			e.discard(DiscardItem{
+				Type:        et,
+				Reason:      discardReasonIncomplete,
+				Name:        name,
+				SourceRange: condAttr.Range.String(),
+			})
+			return false, diags
 		}
-		if shouldDiscard {
+		if !val.True() {
 			e.discard(DiscardItem{
 				Type:        et,
 				Reason:      discardReasonUserCondition,
