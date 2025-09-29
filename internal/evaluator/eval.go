@@ -123,20 +123,19 @@ func (e *Evaluator) toContent(files []File) (*hcl.BodyContent, hcl.Diagnostics) 
 func (e *Evaluator) evaluateCondition(ctx *hcl.EvalContext, content *hcl.BodyContent, et DiscardType, name string) (bool, hcl.Diagnostics) {
 	if condAttr, exists := content.Attributes[attrCondition]; exists {
 		val, diags := condAttr.Expr.Value(ctx)
-		if diags.HasErrors() {
-			return false, diags
-		}
-		if val.Type() != cty.Bool {
-			return false, diags.Append(hclutils.Err2Diag(fmt.Errorf("got type %s, expected %s", val.Type(), cty.Bool)))
-		}
-		if !val.IsKnown() {
+		if diags.HasErrors() || !val.IsWhollyKnown() {
 			e.discard(DiscardItem{
 				Type:        et,
 				Reason:      discardReasonIncomplete,
 				Name:        name,
 				SourceRange: condAttr.Range.String(),
+				Context:     e.messagesFromDiags(diags),
 			})
-			return false, diags
+			// map unknown ready value errors to warnings as we'll handle them later
+			return false, diags.Extend(hclutils.DowngradeDiags(diags))
+		}
+		if val.Type() != cty.Bool {
+			return false, diags.Append(hclutils.Err2Diag(fmt.Errorf("got type %s, expected %s", val.Type(), cty.Bool)))
 		}
 		if !val.True() {
 			e.discard(DiscardItem{
@@ -145,7 +144,6 @@ func (e *Evaluator) evaluateCondition(ctx *hcl.EvalContext, content *hcl.BodyCon
 				Name:        name,
 				SourceRange: condAttr.Range.String(),
 			})
-			return false, diags
 		}
 		return val.True(), diags
 	}
