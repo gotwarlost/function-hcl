@@ -62,7 +62,7 @@ func TestRequestExample(t *testing.T) {
 	err := p.Request(req)
 	require.NoError(t, err)
 	// log.Println(buf.String())
-	assert.Equal(t, strings.TrimSpace(runFunctionRequestExpectedOutput), strings.TrimSpace(buf.String()))
+	assert.Equal(t, strings.TrimSpace(buf.String()), strings.TrimSpace(runFunctionRequestExpectedOutput))
 }
 
 func TestResponseExample(t *testing.T) {
@@ -78,5 +78,5 @@ func TestResponseExample(t *testing.T) {
 	err := p.Response(req, res)
 	require.NoError(t, err)
 	// log.Println(buf.String())
-	assert.Equal(t, strings.TrimSpace(runFunctionResponseExpectedOutput), strings.TrimSpace(buf.String()))
+	assert.Equal(t, strings.TrimSpace(buf.String()), strings.TrimSpace(runFunctionResponseExpectedOutput))
 }

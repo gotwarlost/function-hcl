@@ -7,6 +7,9 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/crossplane/crossplane-runtime/pkg/fieldpath"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
@@ -15,7 +18,21 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-var outputWriter io.Writer = os.Stderr
+var (
+	outputWriter      io.Writer = os.Stderr
+	fileRE                      = regexp.MustCompile(`[^a-zA-Z0-9_./-]+`)
+	multiUnderscoreRE           = regexp.MustCompile(`_+`)
+)
+
+// cleanName replaces invalid characters with underscores to create a safe filename.
+// It treats "/" characters as special and replaces them with a double dash "--".
+// This allows recovery of context keys from filenames in a bash script, for instance,
+// when no other special character than a / is present in a context key.
+func cleanName(filename string) string {
+	cleaned := fileRE.ReplaceAllString(filename, "_")
+	cleaned = multiUnderscoreRE.ReplaceAllString(cleaned, "_")
+	return strings.ReplaceAll(cleaned, "/", "--")
+}
 
 type Options struct {
 	Raw bool
@@ -40,7 +57,7 @@ type bufWriter struct {
 func newBufWriter(kind string) *bufWriter {
 	return &bufWriter{
 		kind:     kind,
-		buf:      bytes.NewBuffer([]byte(fmt.Sprintf("-- start %s --\n", kind))),
+		buf:      bytes.NewBuffer([]byte(fmt.Sprintf("## start %s ##\n", kind))),
 		firstDoc: true,
 	}
 }
@@ -51,13 +68,26 @@ func (w *bufWriter) comment(s string) {
 	w.buf.WriteString("\n")
 }
 
+func (w *bufWriter) txtarHeader(s string) {
+	w.buf.WriteString("-- ")
+	w.buf.WriteString(s)
+	w.buf.WriteString(" --\n")
+}
+
 func (w *bufWriter) file(file string) {
 	w.firstDoc = true
 	w.buf.WriteString("\n")
-	w.comment(file)
+	w.txtarHeader(file)
 }
 
-func (w *bufWriter) doc(o object, leadingComment string) {
+func (w *bufWriter) jsonFile(file string, o any) {
+	w.file(file)
+	b, _ := json.MarshalIndent(o, "", "  ")
+	w.buf.Write(b)
+	w.buf.WriteString("\n")
+}
+
+func (w *bufWriter) yamlDoc(o object, leadingComment string) {
 	if w.firstDoc {
 		w.firstDoc = false
 	} else {
@@ -71,7 +101,7 @@ func (w *bufWriter) doc(o object, leadingComment string) {
 }
 
 func (w *bufWriter) done() error {
-	w.buf.WriteString(fmt.Sprintf("-- end %s --\n\n", w.kind))
+	w.buf.WriteString(fmt.Sprintf("\n## end %s ##\n\n", w.kind))
 	log.New(outputWriter, "", 0).Println(w.buf.String())
 	return nil
 }
@@ -82,23 +112,38 @@ func (p *Printer) Request(req *fnv1.RunFunctionRequest) error {
 	// write xr
 	comp := p.cleanObject(req.GetObserved().GetComposite().GetResource().AsMap())
 	w.file("xr.yaml")
-	w.doc(comp, "")
+	w.yamlDoc(comp, "")
 
 	// write observed
 	w.file("observed.yaml")
 	for name, o := range req.GetObserved().GetResources() {
 		k := p.cleanObject(o.Resource.AsMap())
-		w.doc(k, fmt.Sprintf("crossplane name: %s", name))
+		w.yamlDoc(k, fmt.Sprintf("crossplane name: %s", name))
 	}
 
-	// write extra resources
+	// write a context JSON file for each key
+	c0 := req.GetContext()
+	if c0 != nil {
+		c := c0.AsMap()
+		keys := make([]string, 0, len(c))
+		for k := range c {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			fileName := fmt.Sprintf("context-%s.json", cleanName(k))
+			w.jsonFile(fileName, c[k])
+		}
+	}
+
+	// write extra resources conditionally
 	er := req.GetExtraResources()
 	if len(er) > 0 {
 		w.file("extra-resources.yaml")
 		for name, o := range er {
 			w.comment("key: " + name)
 			for _, r := range o.GetItems() {
-				w.doc(p.cleanObject(r.Resource.AsMap()), "")
+				w.yamlDoc(p.cleanObject(r.Resource.AsMap()), "")
 			}
 		}
 	}
@@ -209,7 +254,7 @@ func (p *Printer) Response(req *fnv1.RunFunctionRequest, res *fnv1.RunFunctionRe
 	}
 
 	w.file("rendered.yaml")
-	w.doc(xr, "returned composite status")
+	w.yamlDoc(xr, "returned composite status")
 
 	// calculate owner refs for desired resources
 	oref := object{
@@ -260,7 +305,7 @@ func (p *Printer) Response(req *fnv1.RunFunctionRequest, res *fnv1.RunFunctionRe
 				return errors.Wrap(err, "set crossplane.io/claim-namespace annotation")
 			}
 		}
-		w.doc(r, "desired object: "+name)
+		w.yamlDoc(r, "desired object: "+name)
 	}
 	{
 		var ctx object
@@ -275,7 +320,7 @@ func (p *Printer) Response(req *fnv1.RunFunctionRequest, res *fnv1.RunFunctionRe
 			},
 			"fields": ctx,
 		}
-		w.doc(obj, "context")
+		w.yamlDoc(obj, "context")
 	}
 	for i, result := range res.GetResults() {
 		obj := object{
@@ -288,7 +333,7 @@ func (p *Printer) Response(req *fnv1.RunFunctionRequest, res *fnv1.RunFunctionRe
 			"severity": result.Severity.String(),
 			"step":     "run hcl composition",
 		}
-		w.doc(obj, "result")
+		w.yamlDoc(obj, "result")
 	}
 
 	if res.GetRequirements() != nil && res.GetRequirements().GetExtraResources() != nil {
@@ -303,7 +348,7 @@ func (p *Printer) Response(req *fnv1.RunFunctionRequest, res *fnv1.RunFunctionRe
 		if err != nil {
 			return errors.Wrap(err, "unmarshal requirements")
 		}
-		w.doc(er, "")
+		w.yamlDoc(er, "")
 	}
 	return w.done()
 }

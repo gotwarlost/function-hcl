@@ -1,6 +1,6 @@
--- start request --
+## start request ##
 
-# xr.yaml
+-- xr.yaml --
 apiVersion: example.com/v1
 kind: XS3Bucket
 metadata:
@@ -9,7 +9,7 @@ spec:
   parameters:
     region: eu-west-1
 
-# observed.yaml
+-- observed.yaml --
 # crossplane name: the-bucket
 apiVersion: s3.aws.upbound.io/v1beta1
 kind: Bucket
@@ -34,7 +34,22 @@ status:
   atProvider:
     arn: arn:aws:something
 
-# extra-resources.yaml
+-- context-apiextensions.crossplane.io--environment.json --
+{
+  "baz": 10,
+  "foo": "bar",
+  "nested": {
+    "quux": 20
+  }
+}
+
+-- context-my.custom.function--ip-allow-list.json --
+[
+  "1.1.1.1",
+  "2.2.2.2"
+]
+
+-- extra-resources.yaml --
 # key: foobar
 apiVersion: apiextensions.crossplane.io/v1beta1
 data:
@@ -46,4 +61,5 @@ labels:
   foo: bar
 metadata: null
 name: foo-bar
--- end request --
+
+## end request ##

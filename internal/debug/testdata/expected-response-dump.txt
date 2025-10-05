@@ -1,6 +1,6 @@
--- start response --
+## start response ##
 
-# rendered.yaml
+-- rendered.yaml --
 # returned composite status
 apiVersion: example.com/v1
 kind: XS3Bucket
@@ -54,7 +54,7 @@ metadata:
 severity: SEVERITY_NORMAL
 step: run hcl composition
 
-# requirements.yaml
+-- requirements.yaml --
 extraResources:
   labels-config:
     apiVersion: apiextensions.crossplane.io/v1beta1
@@ -62,4 +62,5 @@ extraResources:
     matchLabels:
       labels:
         foo: bar
--- end response --
+
+## end response ##

@@ -1,3 +1,10 @@
+context:
+  apiextensions.crossplane.io/environment:
+    foo: bar
+    baz: 10
+    nested:
+      quux: 20
+  my.custom.function/ip-allow-list: [ "1.1.1.1", "2.2.2.2" ]
 observed:
   composite:
     resource:
