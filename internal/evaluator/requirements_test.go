@@ -149,6 +149,20 @@ requirement cm {
 }
 `,
 		},
+		{
+			name: "bad condition",
+			hcl: `
+requirement cm {
+	condition = req.foo
+	select {
+		apiVersion = "v1"
+		kind = "ConfigMap"
+		matchLabels = { "foo": "bar" }
+	}
+}
+`,
+			msg: `test.hcl:3,17-21: Unsupported attribute; This object does not have an attribute named "foo"`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -279,20 +293,6 @@ requirement cm {
 }
 `,
 			msg: `test.hcl:4,9-12: reference to non-existent variable; foo`,
-		},
-		{
-			name: "bad condition",
-			hcl: `
-requirement cm {
-	condition = req.foo
-	select {
-		apiVersion = "v1"
-		kind = "ConfigMap"
-		matchLabels = { "foo": "bar" }
-	}
-}
-`,
-			msg: `test.hcl:3,17-21: Unsupported attribute; This object does not have an attribute named "foo"`,
 		},
 		{
 			name: "bad type apiVersion",

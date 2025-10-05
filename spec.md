@@ -243,7 +243,7 @@ You can have conditions for individual resources, resource lists, and groups.
 
 ```hcl
 // The resource block can have an optional condition attribute that is an expression which must evaluate to a 
-// boolean value. Incomplete values are not allowed here. Use `try` and `can` if something could be missing.
+// boolean value. Incomplete values are allowed and treated as false. Use `try` and `can` if something could be missing.
 resource s3_acl {
     condition = try(req.composite.spec.parameters.createAcls, true) // defaults to true if unspecified
     body {
