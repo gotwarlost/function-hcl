@@ -1,0 +1,65 @@
+## start request ##
+
+-- xr.yaml --
+apiVersion: example.com/v1
+kind: XS3Bucket
+metadata:
+  name: bucket-36f7e
+spec:
+  parameters:
+    region: eu-west-1
+
+-- observed.yaml --
+# crossplane name: the-bucket
+apiVersion: s3.aws.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: my-bucket
+  generateName: bucket-36f7e-
+  labels:
+    crossplane.io/composite: bucket-36f7e
+  name: bucket-36f7e-bucket
+  ownerReferences:
+  - apiVersion: example.com/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: XS3Bucket
+    name: bucket-36f7e
+    uid: ""
+spec:
+  forProvider:
+    region: eu-west-1
+status:
+  atProvider:
+    arn: arn:aws:something
+
+-- context-apiextensions.crossplane.io--environment.json --
+{
+  "baz": 10,
+  "foo": "bar",
+  "nested": {
+    "quux": 20
+  }
+}
+
+-- context-my.custom.function--ip-allow-list.json --
+[
+  "1.1.1.1",
+  "2.2.2.2"
+]
+
+-- extra-resources.yaml --
+# key: foobar
+apiVersion: apiextensions.crossplane.io/v1beta1
+data:
+  labels:
+    bar: baz
+    foo: bar
+kind: EnvironmentConfig
+labels:
+  foo: bar
+metadata: null
+name: foo-bar
+
+## end request ##

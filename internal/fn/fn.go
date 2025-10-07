@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	input "github.com/crossplane-contrib/function-hcl/input/v1beta1"
+	"github.com/crossplane-contrib/function-hcl/internal/debug"
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/crossplane/function-sdk-go"
@@ -92,10 +93,24 @@ func (f *Fn) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) (outRe
 	if in.HCL == "" {
 		return nil, fmt.Errorf("input HCL was not specified")
 	}
-	if in.DebugNew {
-		if len(req.GetObserved().GetResources()) == 0 {
-			debugThis = true
+	if in.Debug || (in.DebugNew && len(req.GetObserved().GetResources()) == 0) {
+		debugThis = true
+	}
+
+	if debugThis {
+		p := debug.New(debug.Options{})
+		err := p.Request(req)
+		if err != nil {
+			logger.Info(fmt.Sprintf("error printing request: %s", err.Error()))
 		}
+		defer func() {
+			if finalErr == nil {
+				responseErr := p.Response(req, outRes)
+				if responseErr != nil {
+					logger.Info(fmt.Sprintf("error printing response: %s", responseErr.Error()))
+				}
+			}
+		}()
 	}
 
 	var files []evaluator.File

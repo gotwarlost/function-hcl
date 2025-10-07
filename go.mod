@@ -7,6 +7,7 @@ require (
 	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/crossplane/crossplane-runtime v1.20.0
 	github.com/crossplane/function-sdk-go v0.4.0
+	github.com/ghodss/yaml v1.0.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/hcl/v2 v2.23.1-0.20250203194505-ba0759438da2

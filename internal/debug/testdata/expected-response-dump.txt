@@ -1,0 +1,66 @@
+## start response ##
+
+-- rendered.yaml --
+# returned composite status
+apiVersion: example.com/v1
+kind: XS3Bucket
+metadata:
+  name: bucket-36f7e
+status:
+  conditions:
+  - lastTransitionTime: "2024-01-01T00:00:00Z"
+    reason: Available
+    status: "True"
+    type: Ready
+  foo: bar
+---
+# desired object: my-bucket
+apiVersion: s3.aws.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: my-bucket
+  generateName: bucket-36f7e-
+  labels:
+    crossplane.io/composite: bucket-36f7e
+  name: bucket-36f7e-bucket
+  ownerReferences:
+  - apiVersion: example.com/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: XS3Bucket
+    name: bucket-36f7e
+    uid: ""
+spec:
+  forProvider:
+    region: eu-west-1
+---
+# context
+apiVersion: render.crossplane.io/v1beta1
+fields:
+  my-key:
+    foo:
+      bar: 10
+kind: Context
+metadata:
+  name: context
+---
+# result
+apiVersion: render.crossplane.io/v1beta1
+kind: Result
+message: hello world
+metadata:
+  name: result-0
+severity: SEVERITY_NORMAL
+step: run hcl composition
+
+-- requirements.yaml --
+extraResources:
+  labels-config:
+    apiVersion: apiextensions.crossplane.io/v1beta1
+    kind: EnvironmentConfig
+    matchLabels:
+      labels:
+        foo: bar
+
+## end response ##

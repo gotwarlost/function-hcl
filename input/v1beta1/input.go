@@ -39,7 +39,8 @@ type HclInput struct {
 	// Debug prints inputs to and outputs of the hcl script for all XRs.
 	// Inputs are pre-processed to remove typically irrelevant information like
 	// the last applied kubectl annotation, managed fields etc.
-	// Objects are displayed in compact cue format. (the equivalent of `cue fmt -s`)
+	// Objects are displayed in crossplane render format such that they can easily
+	// be re-used for render unit tests.
 	// When false, individual XRs can still be debugged by annotating them with
 	//    "hcl.fn.crossplane.io/debug: "true"
 	// +optional
