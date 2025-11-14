@@ -114,6 +114,7 @@ func (e *Evaluator) selectBlockToSelection(requirementName string, block *hcl.Bl
 	switch {
 	case hasName && hasLabels:
 		return nil, hclutils.ToErrorDiag("requirement selector has both matchName and matchLabels", requirementName, block.DefRange)
+	//nolint:staticcheck // using De Morgan's law makes code unreadable
 	case !(hasName || hasLabels):
 		return nil, hclutils.ToErrorDiag("requirement selector has neither matchName nor matchLabels", requirementName, block.DefRange)
 	}

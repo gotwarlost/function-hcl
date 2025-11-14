@@ -101,7 +101,7 @@ func (w *bufWriter) yamlDoc(o object, leadingComment string) {
 }
 
 func (w *bufWriter) done() error {
-	w.buf.WriteString(fmt.Sprintf("\n## end %s ##\n\n", w.kind))
+	_, _ = fmt.Fprintf(w.buf, "\n## end %s ##\n\n", w.kind)
 	log.New(outputWriter, "", 0).Println(w.buf.String())
 	return nil
 }

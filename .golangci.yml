@@ -1,19 +1,12 @@
-# Visit https://golangci-lint.run/ for usage documentation
-# and information on other useful linters
-issues:
-  max-same-issues: 0
-
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
     - durationcheck
     - errcheck
     - forcetypeassert
     - gocritic
     - godot
-    - gofumpt
-    - goimports
-    - gosimple
     - govet
     - ineffassign
     - makezero
@@ -21,10 +14,29 @@ linters:
     - nilerr
     - predeclared
     - staticcheck
-    - stylecheck
     - unconvert
     - unparam
     - unused
-
-run:
-  timeout: 10m
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  max-same-issues: 0
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

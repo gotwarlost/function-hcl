@@ -183,6 +183,7 @@ var IndexFunc = function.New(&function.Spec{
 	},
 	Type: function.StaticReturnType(cty.Number),
 	Impl: func(args []cty.Value, retType cty.Type) (ret cty.Value, err error) {
+		//nolint:staticcheck // using De Morgan's law makes code unreadable
 		if !(args[0].Type().IsListType() || args[0].Type().IsTupleType()) {
 			return cty.NilVal, errors.New("argument must be a list or tuple")
 		}
