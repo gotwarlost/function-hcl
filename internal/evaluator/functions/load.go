@@ -64,6 +64,7 @@ func (e *Processor) processFunction(block *hcl.Block) (*UserFunction, hcl.Diagno
 	if descAttr != nil {
 		v, d := descAttr.Expr.Value(&hcl.EvalContext{})
 		curDiags = curDiags.Extend(d)
+		//nolint:staticcheck // using De Morgan's law makes code unreadable
 		if !(v.IsWhollyKnown() && v.Type() == cty.String) {
 			return nil, emptyDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %s : description is not a constant string", fnName), "", descAttr.Range))
 		}
@@ -123,6 +124,7 @@ func (e *Processor) processArg(fn string, block *hcl.Block) (*Arg, hcl.Diagnosti
 	if descAttr != nil {
 		v, d := descAttr.Expr.Value(&hcl.EvalContext{})
 		curDiags = curDiags.Extend(d)
+		//nolint:staticcheck // using De Morgan's law makes code unreadable
 		if !(v.IsWhollyKnown() && v.Type() == cty.String) {
 			return nil, emptyDiags.Extend(hclutils.ToErrorDiag(fmt.Sprintf("function %q, arg %q : description is not a constant string", fn, argName), "", descAttr.Range))
 		}

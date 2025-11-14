@@ -155,6 +155,7 @@ func (i *invoker) checkUserFunctionRefs(expr hclsyntax.Node) hcl.Diagnostics {
 		}
 		fnName := fnCall.Args[0]
 		v, _ := fnName.Value(&hcl.EvalContext{})
+		//nolint:staticcheck // using De Morgan's law makes code unreadable
 		if !(v.IsWhollyKnown() && v.Type() == cty.String) {
 			diags = diags.Extend(hclutils.ToErrorDiag("user function invocation is not via a static string", "", fnCall.Args[0].Range()))
 			return nil
