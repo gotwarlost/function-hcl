@@ -15,7 +15,7 @@ status:
       status: "False"
       type: FullyResolved
     - lastTransitionTime: "2024-01-01T00:00:00Z"
-      message: 'hcl.Diagnostics contains 2 warnings; src/main.hcl:27,49-52: Attempt to index null value; src/main.hcl:27,49-52: Attempt to index null value'
+      message: 'hcl.Diagnostics contains 1 warnings; src/main.hcl:27,49-52: Attempt to index null value'
       reason: Eval
       status: "False"
       type: HclDiagnostics
@@ -33,7 +33,7 @@ metadata:
 ---
 apiVersion: render.crossplane.io/v1beta1
 kind: Result
-message: 'warnings: [src/main.hcl:27,49-52: Attempt to index null value; src/main.hcl:27,49-52: Attempt to index null value]'
+message: 'warnings: [src/main.hcl:27,49-52: Attempt to index null value]'
 severity: SEVERITY_WARNING
 step: run hcl composition
 metadata:
