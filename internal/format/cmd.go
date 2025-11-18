@@ -45,7 +45,7 @@ func (f *FormatCmd) Execute(args []string) error {
 			if f.Check {
 				_, _ = fmt.Fprintln(errorWriter, file)
 			} else {
-				err = os.WriteFile(file, []byte(ret), 0644)
+				err = os.WriteFile(file, []byte(ret), 0o644)
 				if err != nil {
 					return err
 				}
@@ -98,7 +98,7 @@ func (f *FormatCmd) collectFileOrDir(input string) ([]string, error) {
 		if !info.IsDir() && filepath.Ext(info.Name()) == ".hcl" {
 			hclFiles = append(hclFiles, path)
 		}
-		if info.IsDir() && !f.Recursive {
+		if info.IsDir() && !f.Recursive && path != input {
 			return filepath.SkipDir
 		}
 		return nil

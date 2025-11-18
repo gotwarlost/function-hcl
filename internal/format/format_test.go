@@ -295,12 +295,51 @@ resource "foo" "bar" {
 }
 `,
 		},
+		{
+			name: "eol comments",
+			input: `
+locals {
+  region = "us-west-1" // this is a comment
+}
+`,
+			expected: `
+locals {
+  region = "us-west-1" // this is a comment
+}
+`,
+		},
+		{
+			name: "eol comments 2",
+			input: `
+locals {
+  region = "us-west-1" # this is a comment
+}
+`,
+			expected: `
+locals {
+  region = "us-west-1" # this is a comment
+}
+`,
+		},
+		{
+			name: "eol comments 3",
+			input: `
+locals {
+  region = "us-west-1" /* this is a comment */
+}
+`,
+			expected: `
+locals {
+  region = "us-west-1" /* this is a comment */
+}
+`,
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			out := Source(test.input, Options{StandardizeObjectLiterals: true})
-			//log.Println(out)
+			// log.Println(out)
 			e := strings.TrimSpace(test.expected)
 			a := strings.TrimSpace(out)
 			assert.Equal(t, e, a)

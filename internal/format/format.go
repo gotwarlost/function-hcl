@@ -98,6 +98,11 @@ func newStack() *stack {
 	return &stack{ops: []opType{NoContextAvailable}}
 }
 
+// extractContent extracts the attribute value from the full attribute declaration
+// by eliminating the identifier and equals token from the left and line feeds and comments
+// from the right. This is due to the asymmetry of getting attribute expression that include
+// the variable being assigned and trailing comments versus setting the attribute tokens
+// that should omit both these things.
 func extractContent(tokens hclwrite.Tokens) (hclwrite.Tokens, error) {
 	baseIndex := 0
 	for i, t := range tokens {
@@ -110,8 +115,12 @@ func extractContent(tokens hclwrite.Tokens) (hclwrite.Tokens, error) {
 		return tokens, fmt.Errorf("no assignment found")
 	}
 	end := len(tokens)
-	if tokens[end-1].Type == hclsyntax.TokenNewline {
-		end--
+	for end > baseIndex {
+		if tokens[end-1].Type == hclsyntax.TokenNewline || tokens[end-1].Type == hclsyntax.TokenComment {
+			end--
+		} else {
+			break
+		}
 	}
 	return tokens[baseIndex:end], nil
 }
@@ -156,7 +165,7 @@ func fixObjectLiteralStyle(input hclwrite.Tokens) hclwrite.Tokens {
 			case ForExpression, TernaryExpression:
 				s.pop()
 			default:
-				log.Println("fixObjectLiteralStyle: no context available for closing brace")
+				log.Println("fixObjectLiteralStyle: no context available for colon")
 				return tokens
 			}
 		}
