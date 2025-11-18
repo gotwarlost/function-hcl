@@ -125,6 +125,11 @@ func extractContent(tokens hclwrite.Tokens) (hclwrite.Tokens, error) {
 	return tokens[baseIndex:end], nil
 }
 
+// fixObjectLiteralStyle replaces colons with equal signs for object
+// attributes so that they are consistent and format better.
+// This requires selectively replacing colons in a way that they
+// do not get accidentally replaced for `for` expresssions or
+// ternary conditions.
 func fixObjectLiteralStyle(input hclwrite.Tokens) hclwrite.Tokens {
 	tokens, err := extractContent(input)
 	if err != nil {
