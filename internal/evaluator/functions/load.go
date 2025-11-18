@@ -132,7 +132,7 @@ func (e *Processor) processArg(fn string, block *hcl.Block) (*Arg, hcl.Diagnosti
 	}
 
 	defAttr := a.Attributes[attrDefault]
-	var v cty.Value
+	v := cty.DynamicVal
 	if defAttr != nil {
 		v, diags = defAttr.Expr.Value(&hcl.EvalContext{})
 		curDiags = curDiags.Extend(diags)

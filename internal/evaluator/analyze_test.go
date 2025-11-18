@@ -294,3 +294,31 @@ resources foo {
 		})
 	}
 }
+
+// specific test for a panic with a prior implementation.
+func TestAnalyzeFuncSuccess(t *testing.T) {
+	hcl := `
+function ensureMaxNameLength {
+  description = "ensure that the input name is not longer than a specific length. If yes, the name is truncated and appended with its sha256 hash"
+  arg name {
+    description = "the input name that should be truncated if needed"
+  }
+  arg max_length {
+    description = "the maximum allowed length for the input"
+  }
+  arg sha_length {
+    description = "the length of the SHA to use when truncating"
+    default     = 7
+  }
+  locals {
+    sha = substr(sha256(name), 0, sha_length)
+    truncLen = length(name) - sha_length
+  }
+  body = length(name) > max_length ? "${substr(name, 0, truncLen)}${sha}" : name
+}
+`
+	e, err := New(Options{})
+	require.NoError(t, err)
+	diags := e.Analyze(File{Name: "test.hcl", Content: hcl})
+	require.False(t, diags.HasErrors())
+}
