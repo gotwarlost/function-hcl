@@ -299,12 +299,12 @@ resource "foo" "bar" {
 			name: "eol comments",
 			input: `
 locals {
-  region = "us-west-1" // this is a comment
+  region = { name : "us-west-1" } // this is a comment
 }
 `,
 			expected: `
 locals {
-  region = "us-west-1" // this is a comment
+  region = { name = "us-west-1" } // this is a comment
 }
 `,
 		},
@@ -331,6 +331,21 @@ locals {
 			expected: `
 locals {
   region = "us-west-1" /* this is a comment */
+}
+`,
+		},
+		{
+			name: "eol comments 4",
+			input: `
+locals {
+  foo = {name: "foo1" } /* this is a foo comment */
+  bar = {name : x > 0 ? "bar1" : "bar2" } /* this is a bar comment */
+}
+`,
+			expected: `
+locals {
+  foo = { name = "foo1" } /* this is a foo comment */
+  bar = { name = x > 0 ? "bar1" : "bar2" } /* this is a bar comment */
 }
 `,
 		},
