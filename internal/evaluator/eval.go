@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator/functions"
@@ -273,6 +274,33 @@ func (e *Evaluator) toResponse(diags hcl.Diagnostics) (*fnv1.RunFunctionResponse
 	return &ret, nil
 }
 
+type diagKey struct {
+	Sev     hcl.DiagnosticSeverity
+	Range   hcl.Range
+	Message string
+}
+
+func keyFor(d *hcl.Diagnostic) diagKey {
+	var r hcl.Range
+	if d.Subject != nil {
+		r = *d.Subject
+	} else if d.Context != nil {
+		r = *d.Context
+	}
+	return diagKey{Sev: d.Severity, Range: r, Message: d.Summary}
+}
+
+type diagWithKey struct {
+	key  diagKey
+	item *hcl.Diagnostic
+}
+
+var sevOrderMap = map[hcl.DiagnosticSeverity]int{
+	hcl.DiagError:   0,
+	hcl.DiagWarning: 1,
+	hcl.DiagInvalid: 2,
+}
+
 // addDiagnosticsInfo adds diagnostics information to the response.
 func (e *Evaluator) addDiagnosticsInfo(ret *fnv1.RunFunctionResponse, diags hcl.Diagnostics) {
 	target := ptr(fnv1.Target_TARGET_COMPOSITE)
@@ -284,8 +312,38 @@ func (e *Evaluator) addDiagnosticsInfo(ret *fnv1.RunFunctionResponse, diags hcl.
 		Reason: "Eval",
 	}
 
-	summaries := make([]string, 0, len(diags))
+	diagMap := map[diagKey]*diagWithKey{}
 	for _, diag := range diags {
+		k := keyFor(diag)
+		if diagMap[k] == nil {
+			diagMap[k] = &diagWithKey{
+				key:  k,
+				item: diag,
+			}
+		}
+	}
+	var uniques []*diagWithKey
+	for _, v := range diagMap {
+		uniques = append(uniques, v)
+	}
+	sort.Slice(uniques, func(i, j int) bool {
+		lKey := uniques[i].key
+		rKey := uniques[j].key
+		if lKey.Sev != rKey.Sev {
+			return sevOrderMap[lKey.Sev] < sevOrderMap[rKey.Sev]
+		}
+		if lKey.Range.Filename != rKey.Range.Filename {
+			return lKey.Range.Filename < rKey.Range.Filename
+		}
+		return lKey.Range.Start.Byte < rKey.Range.Start.Byte
+	})
+
+	var finalDiags []*hcl.Diagnostic
+	for _, d := range uniques {
+		finalDiags = append(finalDiags, d.item)
+	}
+	summaries := make([]string, 0, len(finalDiags))
+	for _, diag := range finalDiags {
 		if diag.Severity == hcl.DiagWarning {
 			summaries = append(summaries, fmt.Sprintf("%s: %s", diag.Subject, diag.Summary))
 			condition.Status = fnv1.Status_STATUS_CONDITION_FALSE
