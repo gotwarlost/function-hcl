@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/crossplane-contrib/function-hcl/internal/evaluator"
+	"github.com/crossplane-contrib/function-hcl/internal/format"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/spf13/cobra"
 	"golang.org/x/tools/txtar"
@@ -94,5 +95,28 @@ func packageScriptCommand() *cobra.Command {
 	}
 	f := c.Flags()
 	f.BoolVar(&skipAnalysis, "skip-analysis", false, "skip analysis of files before packaging")
+	return c
+}
+
+func formatCommand() *cobra.Command {
+	fc := format.FormatCmd{
+		Check:     false,
+		Recursive: true,
+		Opts: format.Options{
+			StandardizeObjectLiterals: true,
+		},
+	}
+	c := &cobra.Command{
+		Use:   "fmt file1.hcl file2.hcl dir/ ...",
+		Short: "format HCL files",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			return fc.Execute(args)
+		},
+	}
+	f := c.Flags()
+	f.BoolVar(&fc.Opts.StandardizeObjectLiterals, "normalize-literals", fc.Opts.StandardizeObjectLiterals, "normalize object literals to always use key = value syntax")
+	f.BoolVarP(&fc.Check, "check", "c", fc.Check, "check if files are formatted, log names of unformatted files and exit appropriately")
+	f.BoolVarP(&fc.Recursive, "recursive", "r", fc.Recursive, "recursively process directories")
 	return c
 }

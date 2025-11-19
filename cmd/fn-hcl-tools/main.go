@@ -11,6 +11,7 @@ const exe = "fn-hcl-tools"
 func main() {
 	root := &cobra.Command{Use: exe}
 	root.AddCommand(
+		formatCommand(),
 		analyzeCommand(),
 		packageScriptCommand(),
 		versionCommand(),
