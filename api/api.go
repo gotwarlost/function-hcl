@@ -11,10 +11,11 @@ func FormatHCL(code string) string {
 	return format.Source(code, format.Options{StandardizeObjectLiterals: true})
 }
 
-type File = evaluator.File
+// File is a named syntax tree.
+type File = evaluator.RawFile
 
 // Analyze analyzes the supplied files for correctness.
 func Analyze(files ...File) hcl.Diagnostics {
 	e, _ := evaluator.New(evaluator.Options{})
-	return e.Analyze(files...)
+	return e.AnalyzeHCLFiles(files...)
 }
