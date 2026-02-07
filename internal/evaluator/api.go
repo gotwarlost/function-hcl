@@ -11,6 +11,7 @@ import (
 	fn "github.com/crossplane/function-sdk-go"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -188,4 +189,27 @@ func (e *Evaluator) Eval(in *fnv1.RunFunctionRequest, files ...File) (*fnv1.RunF
 // It returns errors and warnings in the process.
 func (e *Evaluator) Analyze(files ...File) hcl.Diagnostics {
 	return e.doAnalyze(files...)
+}
+
+// AnalyzeHCLFiles analyzes the supplied files. It's possible that the input files are not
+// completely well-formed and have syntax error nodes in the AST.
+func (e *Evaluator) AnalyzeHCLFiles(files ...*hclsyntax.File) (ret hcl.Diagnostics) {
+	defer func() {
+		if r := recover(); r != nil {
+			println("recovered from panic:", r)
+			ret = nil
+		}
+	}()
+	var bodies []hcl.Body
+	for _, file := range files {
+		body := file.Body
+		if body == nil {
+			continue
+		}
+		name := body.Range().Filename
+		e.files[name] = file.AsHCLFile()
+		bodies = append(bodies, file.Body)
+	}
+	a := newAnalyzer(e)
+	return a.analyzeBodies(bodies...)
 }
