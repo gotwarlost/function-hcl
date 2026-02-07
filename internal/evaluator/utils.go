@@ -266,6 +266,10 @@ func path2String(path cty.Path) string {
 		case cty.GetAttrStep:
 			segments = append(segments, fmt.Sprintf(".%s", s.Name))
 		case cty.IndexStep:
+			if !s.Key.IsKnown() {
+				segments = append(segments, unknownSegmentMarker)
+				continue
+			}
 			switch s.Key.Type() {
 			case cty.String:
 				segments = append(segments, fmt.Sprintf("[%s]", s.Key.AsString()))
