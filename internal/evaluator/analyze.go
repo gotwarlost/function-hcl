@@ -250,7 +250,11 @@ func (a *analyzer) analyze(files ...File) hcl.Diagnostics {
 	if diags.HasErrors() {
 		return diags
 	}
+	return a.analyzeBodies(bodies...)
+}
 
+func (a *analyzer) analyzeBodies(bodies ...hcl.Body) hcl.Diagnostics {
+	var diags hcl.Diagnostics
 	for _, body := range bodies {
 		diags = diags.Extend(a.checkStructure(body, topLevelSchema()))
 	}

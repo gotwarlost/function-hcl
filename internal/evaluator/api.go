@@ -189,3 +189,32 @@ func (e *Evaluator) Eval(in *fnv1.RunFunctionRequest, files ...File) (*fnv1.RunF
 func (e *Evaluator) Analyze(files ...File) hcl.Diagnostics {
 	return e.doAnalyze(files...)
 }
+
+// RawFile is a named file and associated syntax tree.
+type RawFile struct {
+	Name string
+	File *hcl.File
+}
+
+// AnalyzeHCLFiles analyzes the supplied files. It's possible that the input files are not
+// completely well-formed and have syntax error nodes in the AST.
+func (e *Evaluator) AnalyzeHCLFiles(files ...RawFile) (ret hcl.Diagnostics) {
+	defer func() {
+		if r := recover(); r != nil {
+			println("recovered from panic:", r)
+			ret = nil
+		}
+	}()
+	var bodies []hcl.Body
+	for _, file := range files {
+		name := file.Name
+		body := file.File.Body
+		if body == nil {
+			continue
+		}
+		e.files[name] = file.File
+		bodies = append(bodies, body)
+	}
+	a := newAnalyzer(e)
+	return a.analyzeBodies(bodies...)
+}
