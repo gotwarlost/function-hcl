@@ -1,0 +1,11 @@
+// Override monokai's red operator color to white.
+// Hugo injects inline styles for syntax highlighting (noClasses = true),
+// so !important is needed to override the inline color on operators.
+.highlight span[style*="color:#960050"] {
+  color: #f8f8f2 !important;
+}
+
+.highlight span[style*="color:#f92672"] {
+  color: #f8f8f2 !important;
+}
+

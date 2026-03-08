@@ -1,0 +1,10 @@
+{
+  "name": "function-hcl-docs",
+  "version": "1.0.0",
+  "description": "Documentation site for function-hcl",
+  "devDependencies": {
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "postcss-cli": "^10.0.0"
+  }
+}
