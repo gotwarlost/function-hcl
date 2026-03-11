@@ -1,0 +1,43 @@
+name: Update Homebrew Formula
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get tag version
+        id: tag
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Download tarball and compute sha256
+        id: sha
+        run: |
+          url="https://github.com/${{ github.repository }}/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz"
+          sha256=$(curl -sL "$url" | shasum -a 256 | cut -d ' ' -f 1)
+          echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
+          echo "url=${url}" >> "$GITHUB_OUTPUT"
+
+      - name: Update formula
+        run: |
+          sed -i 's|url "https://github.com/.*/archive/refs/tags/.*\.tar\.gz"|url "${{ steps.sha.outputs.url }}"|' Formula/fn-hcl-tools.rb
+          sed -i 's|sha256 ".*"|sha256 "${{ steps.sha.outputs.sha256 }}"|' Formula/fn-hcl-tools.rb
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/fn-hcl-tools.rb
+          git commit -m "Formula: update fn-hcl-tools to ${{ steps.tag.outputs.version }}"
+          git push
