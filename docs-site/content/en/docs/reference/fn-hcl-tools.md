@@ -9,25 +9,21 @@ description: >
 `fn-hcl-tools` is a companion CLI for function-hcl that helps package, format, and analyze
 HCL compositions.
 
-{{% alert title="Early stage" color="warning" %}}
-`fn-hcl-tools` is early-stage tooling. The interface may change in future releases.
-{{% /alert %}}
-
 ## Installation
 
 ```bash
-go install github.com/crossplane-contrib/function-hcl/cmd/fn-hcl-tools@latest
+go install github.com/crossplane-contrib/function-hcl/function-hcl/cmd/fn-hcl-tools@{{< version >}}
 ```
 
 ## Commands
 
-### `pack`
+### `package`
 
 Packages a directory of HCL files into a single txtar bundle, suitable for embedding in a Composition's
 `input` field.
 
 ```bash
-fn-hcl-tools pack <directory>
+fn-hcl-tools package *.hcl
 ```
 
 The tool runs basic static analysis on the HCL before packing, catching syntax errors early.
@@ -46,7 +42,7 @@ my-composition/
 Run:
 
 ```bash
-fn-hcl-tools pack my-composition/
+fn-hcl-tools package my-composition/*.hcl
 ```
 
 Output (suitable for pasting into a Composition YAML `input` field):
@@ -67,15 +63,22 @@ Output (suitable for pasting into a Composition YAML `input` field):
 Formats HCL files.
 
 ```bash
-fn-hcl-tools format <file-or-directory>
+fn-hcl-tools fmt <file-or-directory> [... <file-or-dorectory>]
 ```
+
+This formats all HCL files in-place.
+
+If you specify `-` as the file name it behaves like a filter, reading from stdin and writing to stdout.
+
+The `--check` option allows you to check formatting of the supplied files. This will exit with an error code
+if the supplied files are not correctly formatted.
 
 ### `analyze`
 
 Analyzes HCL syntax files and reports diagnostics.
 
 ```bash
-fn-hcl-tools analyze <file-or-directory>
+fn-hcl-tools analyze *.hcl
 ```
 
 ### `version`
@@ -91,14 +94,13 @@ fn-hcl-tools version
 A typical development workflow:
 
 1. Write your HCL in separate files in a local directory.
-2. Format with `fn-hcl-tools format`.
-3. Analyze with `fn-hcl-tools analyze` to catch issues early.
-4. Test locally using `crossplane beta render`.
-5. Pack to txtar with `fn-hcl-tools pack`.
-6. Embed the txtar output in your Composition YAML.
-7. Apply to your cluster.
+2. Format with `fn-hcl-tools fmt`.
+3. Package to txtar with `fn-hcl-tools package`.
+4. Embed the txtar output in your Composition YAML.
+5. Test locally using `crossplane beta render`.
+6. Apply to your cluster.
 
 ```bash
-# Pack and copy to clipboard (macOS)
-fn-hcl-tools pack ./my-composition | pbcopy
+# Package and copy to clipboard (macOS)
+fn-hcl-tools package ./my-composition/*.hcl | pbcopy
 ```

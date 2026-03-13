@@ -109,6 +109,3 @@ Locals can access:
 - The `req` variable
 - Other local variables (in the same or parent scope)
 - `self` and `each` variables (when inside a resource or resources block)
-
-Locals **cannot** access information from arbitrary blocks. For example, a top-level local cannot
-reference the body of a resource block.

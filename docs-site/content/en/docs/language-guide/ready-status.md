@@ -6,13 +6,17 @@ description: >
   Controlling resource readiness.
 ---
 
-The `ready` block lets you override Crossplane's default readiness check for a resource.
+The `ready` block lets you assign a ready state for a resource.
+Usually you would use [function-auto-ready](https://github.com/crossplane-contrib/function-auto-ready)
+to automatically set the resource status.
+
+This allows you to set the ready status explicitly.
 
 ## Syntax
 
 ```hcl
 resource foo {
-  body = { ... }
+  body = { /* ... */ }
 
   ready {
     value = "READY_TRUE"
@@ -24,17 +28,17 @@ resource foo {
 
 The `value` attribute must evaluate to a string and be one of:
 
-| Value | Meaning |
-|-------|---------|
-| `"READY_UNSPECIFIED"` | Let Crossplane determine readiness (default behavior) |
-| `"READY_TRUE"` | Mark the resource as ready |
-| `"READY_FALSE"` | Mark the resource as not ready |
+| Value                 | Meaning                  |
+|-----------------------|--------------------------|
+| `"READY_UNSPECIFIED"` | Ready state is not known |
+| `"READY_TRUE"`        | Resource is ready        |
+| `"READY_FALSE"`       | Resource is not ready    |
 
 ## Example: Custom Readiness Check
 
 ```hcl
 resource my-database {
-  body = { ... }
+  body = { /* ... */ }
 
   ready {
     value = self.resource.status.atProvider.state == "available" ? "READY_TRUE" : "READY_FALSE"

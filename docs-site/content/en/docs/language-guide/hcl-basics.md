@@ -141,11 +141,11 @@ Prefer the bare form when no string concatenation is needed.
 
 ### Operators
 
-| Category | Operators |
-|----------|-----------|
-| Arithmetic | `+`, `-`, `*`, `/`, `%` |
+| Category   | Operators                        |
+|------------|----------------------------------|
+| Arithmetic | `+`, `-`, `*`, `/`, `%`          |
 | Comparison | `==`, `!=`, `<`, `>`, `<=`, `>=` |
-| Logical | `&&`, `||`, `!` |
+| Logical    | `&&`, `\|\|`, `!`                |
 
 ### Conditional Expressions
 
@@ -271,11 +271,36 @@ The key distinction:
 
 Inside object literals, you can use expressions, string templates, and function calls freely.
 
+## Incomplete Values
+
+An expression that references a value not yet available produces an **incomplete value**. This
+happens frequently in Crossplane compositions — for example, reading a status field from a resource
+that hasn't been created yet:
+
+```hcl
+locals {
+  # If the VPC doesn't exist yet, this produces an incomplete value
+  vpcId = req.composite.status.vpcId
+}
+```
+
+Incomplete values arise from:
+- Accessing an attribute on `null` (e.g. a resource with no observed status)
+- Indexing into a value that doesn't exist yet
+- Any expression that transitively depends on an incomplete value
+
+When a block contains an incomplete value, function-hcl **defers** the entire block rather than
+raising an error. The block is simply omitted from the output for that reconcile cycle and will be
+re-evaluated on the next one, once the missing value becomes available.
+
+See [Deferred Rendering](../../concepts/deferred-rendering/) for a full explanation of this
+behavior and its safety guarantees.
+
 ## Summary
 
-| Construct | Purpose | Syntax | Can repeat? |
-|-----------|---------|--------|-------------|
-| Block | Contains attributes and blocks | `type [labels] { ... }` | Depends on type |
-| Attribute | Assigns a value to a name | `name = value` | No (once per scope) |
-| Identifier | Names things | `my-bucket`, `compName`, `region_1` | N/A |
-| Object literal | Data value (maps/dicts) | `{ key = value }` | N/A (it's a value) |
+| Construct      | Purpose                        | Syntax                              | Can repeat?         |
+|----------------|--------------------------------|-------------------------------------|---------------------|
+| Block          | Contains attributes and blocks | `type [labels] { ... }`             | Depends on type     |
+| Attribute      | Assigns a value to a name      | `name = value`                      | No (once per scope) |
+| Identifier     | Names things                   | `my-bucket`, `compName`, `region_1` | N/A                 |
+| Object literal | Data value (maps/dicts)        | `{ key = value }`                   | N/A (it's a value)  |

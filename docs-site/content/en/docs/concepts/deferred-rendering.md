@@ -1,25 +1,25 @@
 ---
-title: "Automatic Dependency Resolution"
-linkTitle: "Dependency Resolution"
+title: "Deferred Rendering"
+linkTitle: "Deferred Rendering"
 weight: 2
 description: >
-  How function-hcl automatically defers resources with unresolved dependencies.
+  How function-hcl handles incomplete values by deferring blocks until all values are available.
 ---
 
-Automatic dependency resolution is the headline feature of function-hcl. It eliminates the boilerplate
+Deferred rendering is the headline feature of function-hcl. It eliminates the boilerplate
 conditional logic that is common in Crossplane compositions.
 
 ## The Problem
 
-In a typical Crossplane composition, if resource B depends on a status field from resource A, you need to handle
-the case where resource A hasn't been created yet. This often requires `try()`, `can()`, or manual conditional
-logic scattered throughout your composition.
+In a typical Crossplane composition, if resource B uses a status field from resource A, you need to handle
+the case where resource A hasn't been created yet. This often requires conditional logic 
+scattered throughout your composition.
 
 ## How function-hcl Solves It
 
-function-hcl uses a simple rule: if **any expression** in a block evaluates to an incomplete value
-(null, missing attribute, missing index), the **entire block is dropped** from the output for that
-reconcile cycle.
+function-hcl uses a simple rule: if **any expression** in a block evaluates to an
+[incomplete value](../../language-guide/hcl-basics/#incomplete-values) (null, missing attribute,
+missing index), the **entire block is deferred** — dropped from the output for that reconcile cycle.
 
 This applies to:
 - `resource` blocks (the resource is not rendered)
@@ -27,8 +27,8 @@ This applies to:
 - `composite connection` blocks (the connection detail is skipped)
 - `context` blocks (the context value is skipped)
 - `requirement` blocks (the requirement is skipped)
-
-On the next reconcile, once the missing value becomes available, the block is evaluated normally.
+ 
+The block is evaluated normally once the missing value becomes available on a subsequent reconcile.
 
 ## Example
 
@@ -64,11 +64,11 @@ resource my-subnet {
 }
 ```
 
-| Reconcile | `my-vpc` | `composite status` | `my-subnet` |
-|-----------|----------|-------------------|-------------|
-| 1st | Rendered | Deferred (no observed VPC yet) | Deferred (no `vpcId` in XR status) |
-| 2nd | Rendered | Rendered (VPC now has status) | Deferred (XR status updated, but not yet visible) |
-| 3rd | Rendered | Rendered | Rendered (vpcId now available) |
+| Reconcile | `my-vpc` | `composite status`             | `my-subnet`                                       |
+|-----------|----------|--------------------------------|---------------------------------------------------|
+| 1st       | Rendered | Deferred (no observed VPC yet) | Deferred (no `vpcId` in XR status)                |
+| 2nd       | Rendered | Rendered (VPC now has status)  | Deferred (XR status updated, but not yet visible) |
+| 3rd       | Rendered | Rendered                       | Rendered (vpcId now available)                    |
 
 ## Safety Guarantees
 
@@ -80,6 +80,9 @@ This prevents accidental deletion due to:
 - Typos introduced in code changes
 - Temporary unavailability of upstream status fields
 - Incorrect refactoring
+
+Note that if you really wanted to delete an existing resource, you would simply not render it at all.
+function-hcl will not complain in this case.
 
 ## Observability
 

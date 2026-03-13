@@ -87,10 +87,14 @@ jobs:
           sed -i 's|url "https://github.com/.*/archive/refs/tags/.*\.tar\.gz"|url "${{ steps.sha.outputs.url }}"|' Formula/fn-hcl-tools.rb
           sed -i 's|sha256 ".*"|sha256 "${{ steps.sha.outputs.sha256 }}"|' Formula/fn-hcl-tools.rb
 
+      - name: Update docs version
+        run: |
+          sed -i 's|latest_version = ".*"|latest_version = "${GITHUB_REF_NAME}"|' docs-site/hugo.toml
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Formula/fn-hcl-tools.rb
-          git commit -m "Formula: update fn-hcl-tools to ${GITHUB_REF_NAME}"
+          git add Formula/fn-hcl-tools.rb docs-site/hugo.toml
+          git commit -m "Release: update formula and docs to ${GITHUB_REF_NAME}"
           git push

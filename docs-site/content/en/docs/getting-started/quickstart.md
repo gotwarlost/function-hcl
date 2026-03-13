@@ -115,6 +115,15 @@ Apply it:
 kubectl apply -f composition.yaml
 ```
 
+{{% alert title="Tip" color="info" %}}
+The above YAML contains the HCL script in txtar format. 
+In reality you would author one or more scripts for your composition as `.hcl` files and use
+`fn-hcl-tools package` to produce the combined script, rather than hand-crafting it.
+This validates your HCL before it reaches the cluster, catching typos in variable names, bad
+block structure, and syntax errors at authoring time.
+{{% /alert %}}
+
+
 ## 3. Create a Claim
 
 ```yaml
@@ -148,5 +157,5 @@ because of the `composite status` block in the HCL.
 
 ## Next Steps
 
-- Learn about [Concepts](../concepts/) like locals, resource blocks, and dependency resolution
+- Learn about [Concepts](../concepts/) like locals, resource blocks, and deferred rendering
 - Read the full [Reference](../reference/)

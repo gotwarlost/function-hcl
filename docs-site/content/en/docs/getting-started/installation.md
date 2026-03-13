@@ -23,7 +23,7 @@ kind: Function
 metadata:
   name: function-hcl
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/function-hcl:v0.1.3
+  package: xpkg.upbound.io/crossplane-contrib/function-hcl:{{< version >}}
 ```
 
 Apply it to your cluster:
@@ -46,7 +46,7 @@ You should see `HEALTHY: True` and `INSTALLED: True` in the output.
 Install it with `go install`:
 
 ```bash
-go install github.com/crossplane-contrib/function-hcl/cmd/fn-hcl-tools@latest
+go install github.com/crossplane-contrib/function-hcl/function-hcl/cmd/fn-hcl-tools@{{< version >}}
 ```
 
 Verify it works:
@@ -54,12 +54,6 @@ Verify it works:
 ```bash
 fn-hcl-tools version
 ```
-
-{{% alert title="Tip" color="info" %}}
-Always use `fn-hcl-tools package` to produce your txtar script rather than hand-crafting it.
-This validates your HCL before it reaches the cluster, catching typos in variable names, bad
-block structure, and syntax errors at authoring time.
-{{% /alert %}}
 
 ## Verify Installation
 
@@ -78,13 +72,3 @@ kubectl apply -f function.yaml
 ```
 
 Crossplane will pull the new image and roll out the update automatically.
-
-## Uninstalling
-
-```bash
-kubectl delete function function-hcl
-```
-
-{{% alert title="Note" color="warning" %}}
-Deleting the Function will not delete any composed resources that were created by compositions using it.
-{{% /alert %}}

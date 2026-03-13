@@ -12,16 +12,16 @@ and nested blocks.
 
 ## Fields
 
-| Expression | Type | Description |
-|-----------|------|-------------|
-| `req.composite` | object | The observed composite resource (XR) |
-| `req.composite_connection` | map(string, bytes) | Connection details of the composite resource |
-| `req.resource` | map(string, object) | Observed composed resources, keyed by crossplane resource name |
-| `req.connection` | map(string, map(string, bytes)) | Connection details of observed resources, keyed by resource name |
-| `req.resources` | map(string, list(object)) | Observed resource collections, keyed by collection base name |
-| `req.connections` | map(string, list(map(string, bytes))) | Connection details of resource collections |
-| `req.context` | map(string, any) | Pipeline context values from upstream functions |
-| `req.extra_resources` | map(string, list(object)) | Extra resources fetched via `requirement` blocks |
+| Expression                 | Type                                  | Description                                                      |
+|----------------------------|---------------------------------------|------------------------------------------------------------------|
+| `req.composite`            | k8s object                            | The observed composite resource (XR)                             |
+| `req.composite_connection` | map(string, bytes)                    | Connection details of the composite resource                     |
+| `req.resource`             | map(string, k8s object)               | Observed composed resources, keyed by crossplane resource name   |
+| `req.connection`           | map(string, map(string, bytes))       | Connection details of observed resources, keyed by resource name |
+| `req.resources`            | map(string, list(k8s object))         | Observed resource collections, keyed by collection base name     |
+| `req.connections`          | map(string, list(map(string, bytes))) | Connection details of resource collections                       |
+| `req.context`              | map(string, any)                      | Pipeline context values from upstream functions                  |
+| `req.extra_resources`      | map(string, list(k8s object))         | Extra resources fetched via `requirement` blocks                 |
 
 ## Example
 
@@ -59,7 +59,7 @@ resource my-subnet {
 ```
 
 If the referenced resource hasn't been created yet, the expression is incomplete, and the
-block that uses it will be [automatically deferred](../../concepts/dependency-resolution/).
+block that uses it will be [deferred](../../concepts/deferred-rendering/).
 
 {{% alert title="Note" color="info" %}}
 Inside `resource` and `resources` blocks, additional variables (`self` and `each`) become

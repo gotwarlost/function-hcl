@@ -1,3 +1,12 @@
+// Reduce cover block padding.
+.td-cover-block {
+  padding-top: 1rem !important;
+
+  h1 {
+    margin-top: 0 !important;
+  }
+}
+
 // Override monokai's red operator color to white.
 // Hugo injects inline styles for syntax highlighting (noClasses = true),
 // so !important is needed to override the inline color on operators.

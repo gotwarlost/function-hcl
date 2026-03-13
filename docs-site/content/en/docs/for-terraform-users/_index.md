@@ -20,18 +20,17 @@ This page maps Terraform concepts to their function-hcl equivalents and highligh
 
 ## What's different
 
-| Terraform | function-hcl | Notes |
-|-----------|-------------|-------|
-| `resource "aws_s3_bucket" "my_bucket"` | `resource my-bucket` | One label (crossplane name), not two (type + name). The Kubernetes `apiVersion`/`kind` go in `body`. |
-| `local.foo` | `foo` | Locals are accessed directly by name, no `local.` prefix needed. |
-| `count` | `condition` | Boolean (true/false) instead of a count. Use `resources` with `for_each` for multiple instances. |
-| `for_each` on a resource | `resources` block | A separate block type for collections, with `for_each`, `name`, and `template` sub-blocks. |
-| `data` sources | `requirement` blocks | Request extra resources from Crossplane (e.g. EnvironmentConfigs). |
-| `output` | `composite status` / `composite connection` / `context` | Different mechanisms for different outputs. |
-| `module` | `function` + `invoke()` | User-defined functions that return values, not resource trees. |
-| `depends_on` | Automatic | Dependencies are resolved automatically via expression analysis. No explicit `depends_on`. |
-| `terraform.workspace` | `req.context` | Pipeline context replaces workspace concepts. |
-| State management | Crossplane handles it | No `.tfstate` file. Crossplane tracks observed/desired state. |
+| Terraform                              | function-hcl                                            | Notes                                                                                                |
+|----------------------------------------|---------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| `resource "aws_s3_bucket" "my_bucket"` | `resource my-bucket`                                    | One label (crossplane name), not two (type + name). The Kubernetes `apiVersion`/`kind` go in `body`. |
+| `local.foo`                            | `foo`                                                   | Locals are accessed directly by name, no `local.` prefix needed.                                     |
+| `count`                                | `condition`                                             | Boolean (true/false) instead of a count. Use `resources` with `for_each` for multiple instances.     |
+| `for_each` on a resource               | `resources` block                                       | A separate block type for collections, with `for_each`, `name`, and `template` sub-blocks.           |
+| `data` sources                         | `requirement` blocks                                    | Request extra resources from Crossplane (e.g. EnvironmentConfigs). No true CSP data sources.         |
+| `output`                               | `composite status` / `composite connection` / `context` | Different mechanisms for different outputs.                                                          |
+| `module`                               | `function` + `invoke()`                                 | User-defined functions that return values, not resource trees.                                       |
+| `vars`                                 | `req`                                                   | No user-defined inputs. All inputs come in via the `RunFunctionRequest` available as `req`           |
+| State management                       | Crossplane handles it                                   | No `.tfstate` file. Crossplane tracks observed/desired state.                                        |
 
 ## Local variables: key differences
 
@@ -114,29 +113,6 @@ resources buckets {
 ```
 
 The `each.key` and `each.value` variables work the same way.
-
-## Dependency resolution
-
-This is the biggest conceptual difference. In Terraform, you must handle missing values explicitly
-(often with `try()`, `can()`, or `depends_on`). In function-hcl, if any expression in a resource
-block evaluates to an incomplete value, the **entire resource is silently deferred** to a later
-reconcile cycle. No conditional logic needed.
-
-```hcl
-# This "just works" -- no try() or conditionals needed
-resource my-subnet {
-  body = {
-    # ...
-    spec = {
-      forProvider = {
-        vpcId = req.resource.my-vpc.status.atProvider.id # deferred until available
-      }
-    }
-  }
-}
-```
-
-See [Automatic Dependency Resolution](../concepts/dependency-resolution/) for the full story.
 
 ## No equivalent in function-hcl
 

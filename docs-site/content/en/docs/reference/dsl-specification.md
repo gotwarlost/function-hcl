@@ -42,7 +42,7 @@ locals {
 ```
 
 - Accessed by name directly (no `local.` prefix).
-- Ordering does not matter; dependencies resolved automatically.
+- Ordering does not matter; locals with incomplete values are evaluated lazily.
 - Circular references are an error.
 - Cannot shadow names from parent scopes.
 - Can be defined at: top level, `resource`, `resources` template, `group`, `requirement`, `function`.
