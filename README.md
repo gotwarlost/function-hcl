@@ -91,8 +91,8 @@ This allows you to fix any typos that prevent resources from being rendered as o
 
 Start with the [examples](example/README.md), then read the [spec](spec.md).
 
-There is also some basic tooling in [fn-hcl-tools](cmd/fn-hcl-tools) that can package multiple HCL files into txtar format
-after some rudimentary static analysis. More work is needed here.
+There is also tooling in [fn-hcl-tools](cmd/fn-hcl-tools) that can package multiple HCL files into txtar format
+after static analysis. It also provides a formatter for canonical formatting of HCL files.
 
 **Implementation/ License note:** This repo contains code copied from the Terraform repository and modified for use.
 Care has been taken to copy this from the `v1.5.7` tag of the terraform codebase which had a Mozilla Public 2.0 license.
