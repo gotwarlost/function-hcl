@@ -1,4 +1,4 @@
-class FnHclTools < Formula
+class FnHclToolsAT0_2_0_rc5 < Formula
   desc "CLI tools for function-hcl: format, analyze, and package HCL compositions"
   homepage "https://github.com/crossplane-contrib/function-hcl"
   url "https://github.com/crossplane-contrib/function-hcl/archive/refs/tags/v0.2.0-rc5.tar.gz"
