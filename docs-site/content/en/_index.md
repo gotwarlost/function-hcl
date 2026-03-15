@@ -1,6 +1,7 @@
 ---
 title: "function-hcl"
 linkTitle: "function-hcl"
+description: "Write Crossplane compositions in HCL — with deferred rendering, locals, expressions, and a familiar Terraform-like syntax."
 ---
 
 {{< blocks/cover title="function-hcl" image_anchor="top" height="min" >}}
