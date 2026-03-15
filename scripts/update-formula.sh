@@ -37,8 +37,8 @@ else
 fi
 
 # Validate tag format
-if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)$ ]]; then
-  echo "error: tag '${TAG}' is not in vX.Y.Z format" >&2
+if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$ ]]; then
+  echo "error: tag '${TAG}' is not in vX.Y.Z or vX.Y.Z-rcN format" >&2
   exit 1
 fi
 
@@ -60,6 +60,16 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
   echo "error: working tree is not clean — commit or stash changes before running this script" >&2
   exit 1
 fi
+
+# ---------------------------------------------------------------------------
+# Capture build metadata from the tag commit
+# ---------------------------------------------------------------------------
+
+COMMIT=$(git rev-parse --short "$TAG"^{commit})
+BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+echo "Commit: ${COMMIT}"
+echo "Build date: ${BUILD_DATE}"
 
 # ---------------------------------------------------------------------------
 # Compute SHA256 of the GitHub-generated source tarball for this tag
@@ -95,12 +105,11 @@ class $class < Formula
   depends_on "go" => :build
 
   def install
-    commit = Utils.git_short_head
     cd "function-hcl" do
       ldflags = %W[
-        -X main.Version=#{version}
-        -X main.Commit=#{commit}
-        -X main.BuildDate=#{time.iso8601}
+        -X main.Version=${VERSION}
+        -X main.Commit=${COMMIT}
+        -X main.BuildDate=${BUILD_DATE}
       ]
       system "go", "build", *std_go_args(ldflags:, output: bin/"fn-hcl-tools"), "./cmd/fn-hcl-tools"
     end
@@ -114,11 +123,11 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# Write versioned formula  e.g. Formula/fn-hc-tools@0.1.0.rb
+# Write versioned formula  e.g. Formula/fn-hcl-tools@0.1.0.rb
 # ---------------------------------------------------------------------------
 
 VERSIONED_FILE="${FORMULA_DIR}/${BINARY}@${VERSION}.rb"
-VERSIONED_CLASS="${CLASS_NAME}AT${VERSION//\./_}"  # FunctionHclToolsAT0_1_0
+VERSIONED_CLASS="${CLASS_NAME}AT${VERSION//[.-]/_}"  # FnHclToolsAT0_1_0
 
 if [[ -f "$VERSIONED_FILE" ]]; then
   echo "error: ${VERSIONED_FILE} already exists — has this version already been released?" >&2
@@ -129,7 +138,7 @@ echo "Writing ${VERSIONED_FILE}"
 render_formula "$VERSIONED_CLASS" > "$VERSIONED_FILE"
 
 # ---------------------------------------------------------------------------
-# Update canonical formula  Formula/function-hcl.rb
+# Update canonical formula  Formula/fn-hcl-tools.rb
 # ---------------------------------------------------------------------------
 
 CANONICAL_FILE="${FORMULA_DIR}/${BINARY}.rb"
