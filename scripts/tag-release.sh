@@ -18,7 +18,7 @@ if [ -z "$tag" ]; then
   exit 1
 fi
 
-if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9](-rc[0-9]+)+$ ]]; then
   echo "Error: tag must match vX.Y.Z (got: $tag)" >&2
   exit 1
 fi
