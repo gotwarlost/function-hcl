@@ -13,7 +13,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 
 REPO="crossplane-contrib/function-hcl"
-BINARY="function-hcl"
+BINARY="fn-hcl-tools"
 FORMULA_DIR="Formula"
 GITHUB_URL="https://github.com/${REPO}"
 
@@ -37,7 +37,7 @@ else
 fi
 
 # Validate tag format
-if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)$ ]]; then
   echo "error: tag '${TAG}' is not in vX.Y.Z format" >&2
   exit 1
 fi
