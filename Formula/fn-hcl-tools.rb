@@ -1,7 +1,7 @@
 class FnHclTools < Formula
   desc "CLI tools for function-hcl: format, analyze, and package HCL compositions"
   homepage "https://github.com/crossplane-contrib/function-hcl"
-  url "https://github.com/crossplane-contrib/function-hcl/archive/refs/tags/v0.2.0-rc4.tar.gz"
+  url "https://github.com/crossplane-contrib/function-hcl/archive/refs/tags/v0.2.0-rc5.tar.gz"
   sha256 "89b01e6334a0c8a0a2453d34b352bb022086f3434b1d4302f2c7575d72c52320"
   version "0.2.0-rc4"
   license "Apache-2.0"
