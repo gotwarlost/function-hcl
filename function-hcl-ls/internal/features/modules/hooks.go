@@ -73,6 +73,9 @@ func (m *Modules) findOtherValueFor(ctx decoder.CompletionFuncContext, t fieldTy
 		fld = "kind"
 	}
 	v, _ := bodyAttr.Expr.Value(nil)
+	if v.IsNull() || !v.IsKnown() {
+		return "", fmt.Errorf("find position: incomplete value for %s", fld)
+	}
 	if !v.Type().IsObjectType() {
 		return "", fmt.Errorf("find position: expected object attribute, found %v", v.Type())
 	}

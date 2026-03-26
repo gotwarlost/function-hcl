@@ -263,6 +263,7 @@ func (w *walker) expression(node hclsyntax.Expression) {
 	case *hclsyntax.TemplateWrapExpr:
 		w.expression(node.Wrapped)
 	case *hclsyntax.IndexExpr:
+		w.expression(node.Collection)
 		w.expression(node.Key)
 	case *hclsyntax.SplatExpr:
 		// FIXME

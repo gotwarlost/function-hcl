@@ -1,5 +1,5 @@
 // Package folding provides folding range support for HCL files.
-// This implementation is dependent on the calling extension (vcode versus intellij)
+// This implementation is dependent on the calling extension (vscode versus intellij)
 // that expect slightly different ranges for folding behavior.
 package folding
 

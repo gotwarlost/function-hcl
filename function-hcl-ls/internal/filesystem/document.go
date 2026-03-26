@@ -22,7 +22,7 @@ func documentAsFileInfo(doc *document.Document) fs.FileInfo {
 		name:    doc.Filename,
 		size:    len(doc.Text),
 		modTime: doc.ModTime,
-		mode:    0o755,
+		mode:    0o644,
 		isDir:   false,
 	}
 }

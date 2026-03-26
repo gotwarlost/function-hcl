@@ -110,7 +110,7 @@ func (b *byteCompute) fixBytePos(t *testing.T, pos hcl.Pos) hcl.Pos {
 		require.Fail(t, "line position %d must be at least 1", pos.Line)
 	}
 	if pos.Line > len(b.text)+1 {
-		require.Fail(t, "bas line pos", "line position %d too large (have %d lines)", pos.Line, len(b.text))
+		require.Fail(t, "bad line pos", "line position %d too large (have %d lines)", pos.Line, len(b.text))
 	}
 	offset := 0
 	for i := 0; i < pos.Line-1; i++ {
