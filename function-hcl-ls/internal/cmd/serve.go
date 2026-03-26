@@ -60,9 +60,11 @@ func AddServeCommand(root *cobra.Command) {
 func serve(c serveParams) error {
 	if c.cpuProfile != "" {
 		stop, err := writeCpuProfileInto(c.cpuProfile)
-		defer func() { _ = stop() }()
 		if err != nil {
 			return errors.Wrap(err, "write CPU profile")
+		}
+		if stop != nil {
+			defer func() { _ = stop() }()
 		}
 	}
 

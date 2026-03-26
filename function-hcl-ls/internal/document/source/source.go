@@ -22,7 +22,8 @@ type Line struct {
 	Range hcl.Range
 }
 
-// MakeSourceLines returns the lines in the supplied text.
+// MakeSourceLines returns the lines in the supplied text. The returned lines will
+// have one more extra line than the source for insertion use.
 func MakeSourceLines(filename string, s []byte) []Line {
 	var ret []Line
 
