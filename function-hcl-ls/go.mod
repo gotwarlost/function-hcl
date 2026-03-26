@@ -1,6 +1,6 @@
 module github.com/crossplane-contrib/function-hcl/function-hcl-ls
 
-go 1.25.4
+go 1.25
 
 require (
 	github.com/apparentlymart/go-textseg v1.0.0

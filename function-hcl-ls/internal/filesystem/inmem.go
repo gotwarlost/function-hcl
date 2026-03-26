@@ -10,15 +10,11 @@ import (
 )
 
 type inMemFile struct {
-	bytes  []byte
 	info   fs.FileInfo
 	reader *bytes.Reader
 }
 
 func (f *inMemFile) Read(b []byte) (int, error) {
-	if f.reader == nil {
-		f.reader = bytes.NewReader(f.bytes)
-	}
 	return f.reader.Read(b)
 }
 

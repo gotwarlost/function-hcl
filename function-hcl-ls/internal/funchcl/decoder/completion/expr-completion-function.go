@@ -102,7 +102,7 @@ func (e *expressionCompleter) completeFunction(expr hclsyntax.Expression, as *sc
 func (e *expressionCompleter) matchingFunctions(prefix string, editRange hcl.Range, as *schema.AttributeSchema) []lang.Candidate {
 	var candidates []lang.Candidate
 
-	// DODGY: we are completing literal true and false here instead of in a sance place :(
+	// DODGY: we are completing literal true and false here instead of in a sane place :(
 	if _, ok := as.Constraint.(schema.Bool); ok {
 		candidates = boolLiteralTypeCandidates(prefix, editRange)
 	}

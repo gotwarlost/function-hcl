@@ -9,7 +9,8 @@ Provides the following features:
 * Hover descriptions
 * Goto Declaration/ Find references
 * Semantic tokens
-* Validations
+* Validations and inline errors
+* Code folding
 
 Completion requires provider CRDs to be set up such that the language server can find type definitions. 
 

@@ -4,6 +4,7 @@
 package eventbus
 
 import (
+	"slices"
 	"sync"
 )
 
@@ -43,8 +44,9 @@ func (eb *topic[T]) subscribe(identifier string) <-chan T {
 // publish sends an event to all subscribers of a specific topic
 func (eb *topic[T]) publish(event T) {
 	eb.l.Lock()
-	defer eb.l.Unlock()
-	for _, s := range eb.subscribers {
+	subscribers := slices.Clone(eb.subscribers)
+	eb.l.Unlock()
+	for _, s := range subscribers {
 		s.channel <- event
 	}
 }

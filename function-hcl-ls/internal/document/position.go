@@ -20,9 +20,9 @@ func ByteOffsetForPos(lines []source.Line, pos Pos) (int, error) {
 	return byteOffsetForLSPColumn(lines[pos.Line], pos.Column), nil
 }
 
-// byteForLSPColumn takes an lsp.Position.Character value for the receving line
+// byteForLSPColumn takes an lsp.Position.Character value for the receiving line
 // and finds the byte offset of the start of the UTF-8 sequence that represents
-// it in the overall source buffer. This is different than the byte returned
+// it in the overall source buffer. This is different from the byte returned
 // by posForLSPColumn because it can return offsets that are partway through
 // a grapheme cluster, while HCL positions always round to the nearest
 // grapheme cluster.

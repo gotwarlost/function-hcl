@@ -156,7 +156,7 @@ func AddDumpASTCommand(root *cobra.Command) {
 	c.RunE = func(cmd *cobra.Command, args []string) error {
 		cmd.SilenceUsage = true
 		if code == "" {
-			_, _ = fmt.Fprintf(os.Stderr, "reading stding for source...\n")
+			_, _ = fmt.Fprintf(os.Stderr, "reading stdin for source...\n")
 			b, err := io.ReadAll(os.Stdin)
 			if err != nil {
 				return err

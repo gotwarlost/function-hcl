@@ -1,6 +1,6 @@
 // Package folding provides folding range support for HCL files.
-// This implementation is optimized for IntelliJ/lsp4ij which requires
-// the fold range to start right after '{' and end at '}'.
+// This implementation is dependent on the calling extension (vcode versus intellij)
+// that expect slightly different ranges for folding behavior.
 package folding
 
 import (

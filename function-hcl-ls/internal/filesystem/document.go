@@ -4,15 +4,16 @@
 package filesystem
 
 import (
+	"bytes"
 	"io/fs"
 
 	"github.com/crossplane-contrib/function-hcl/function-hcl-ls/internal/document"
 )
 
 func documentAsFile(doc *document.Document) fs.File {
-	return inMemFile{
-		bytes: doc.Text,
-		info:  documentAsFileInfo(doc),
+	return &inMemFile{
+		reader: bytes.NewReader(doc.Text),
+		info:   documentAsFileInfo(doc),
 	}
 }
 

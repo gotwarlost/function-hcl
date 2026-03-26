@@ -48,8 +48,8 @@ func (m *Modules) makeCandidates(ctx decoder.CompletionFuncContext, t fieldType,
 	keys := make([]string, 0, len(seen))
 	for k := range seen {
 		keys = append(keys, k)
-		sort.Strings(keys)
 	}
+	sort.Strings(keys)
 	for _, k := range keys {
 		// log.Println("candidate:", k)
 		ret = append(ret, lang.ExpressionCompletionCandidate(lang.ExpressionCandidate{
