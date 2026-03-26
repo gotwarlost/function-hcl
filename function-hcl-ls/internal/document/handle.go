@@ -54,7 +54,7 @@ func (h Handle) FullPath() string {
 	return filepath.Join(h.Dir.Path(), h.Filename)
 }
 
-// FullURI returns a URI for thr handle.
+// FullURI returns a URI for the handle.
 func (h Handle) FullURI() string {
 	return h.Dir.URI + "/" + h.Filename
 }

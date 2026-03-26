@@ -42,11 +42,11 @@ func New(docStore DocumentStore) *Filesystem {
 }
 
 // ReadFile provides the content at the supplied path.
-func (fs *Filesystem) ReadFile(name string) ([]byte, error) {
-	doc, err := fs.docStore.Get(document.HandleFromPath(name))
+func (f *Filesystem) ReadFile(name string) ([]byte, error) {
+	doc, err := f.docStore.Get(document.HandleFromPath(name))
 	if err != nil {
 		if document.IsNotFound(err) {
-			return fs.osFs.ReadFile(name)
+			return f.osFs.ReadFile(name)
 		}
 		return nil, err
 	}
@@ -54,11 +54,11 @@ func (fs *Filesystem) ReadFile(name string) ([]byte, error) {
 }
 
 // ReadDir provides entries under the supplied directory path.
-func (fs *Filesystem) ReadDir(dir string) ([]fs.DirEntry, error) {
+func (f *Filesystem) ReadDir(dir string) ([]fs.DirEntry, error) {
 	dirHandle := document.DirHandleFromPath(dir)
-	docList := fs.docStore.List(dirHandle)
+	docList := f.docStore.List(dirHandle)
 
-	osList, err := fs.osFs.ReadDir(dir)
+	osList, err := f.osFs.ReadDir(dir)
 	if err != nil && !os.IsNotExist(err) {
 		return nil, fmt.Errorf("OS FS: %w", err)
 	}
@@ -84,11 +84,11 @@ func entryIsInList(list []fs.DirEntry, entry fs.DirEntry) bool {
 }
 
 // Open implements fs.FS.
-func (fs *Filesystem) Open(name string) (fs.File, error) {
-	doc, err := fs.docStore.Get(document.HandleFromPath(name))
+func (f *Filesystem) Open(name string) (fs.File, error) {
+	doc, err := f.docStore.Get(document.HandleFromPath(name))
 	if err != nil {
 		if document.IsNotFound(err) {
-			return fs.osFs.Open(name)
+			return f.osFs.Open(name)
 		}
 		return nil, err
 	}
@@ -96,11 +96,11 @@ func (fs *Filesystem) Open(name string) (fs.File, error) {
 }
 
 // Stat provides file information at the supplied path.
-func (fs *Filesystem) Stat(name string) (os.FileInfo, error) {
-	doc, err := fs.docStore.Get(document.HandleFromPath(name))
+func (f *Filesystem) Stat(name string) (os.FileInfo, error) {
+	doc, err := f.docStore.Get(document.HandleFromPath(name))
 	if err != nil {
 		if document.IsNotFound(err) {
-			return fs.osFs.Stat(name)
+			return f.osFs.Stat(name)
 		}
 		return nil, err
 	}

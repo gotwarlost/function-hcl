@@ -107,7 +107,7 @@ func TestApplyChanges_partialUpdate(t *testing.T) {
 			Expect: "hello abc world",
 		},
 		{
-			Name:     "add utf-18 character",
+			Name:     "add utf-16 character",
 			Original: "hello world",
 			Change: &testChange{
 				text: "𐐀𐐀 ",
@@ -125,7 +125,7 @@ func TestApplyChanges_partialUpdate(t *testing.T) {
 			Expect: "hello 𐐀𐐀 world",
 		},
 		{
-			Name:     "modify when containing utf-18 character",
+			Name:     "modify when containing utf-16 character",
 			Original: "hello 𐐀𐐀 world",
 			Change: &testChange{
 				text: "aa𐐀",
