@@ -57,10 +57,10 @@ func TestDiscoverSourceStore_CallsCallbackWhenNoSourcesFound(t *testing.T) {
 	// Register the directory - this should trigger discovery
 	s.RegisterOpenDir(tmpDir)
 
-	// Wait for the queue to process
-	time.Sleep(100 * time.Millisecond)
-
-	assert.Equal(t, int32(1), callCount.Load(), "callback should be called once")
+	// Wait for the queue to process by polling on the expected condition
+	require.Eventually(t, func() bool {
+		return callCount.Load() == 1
+	}, time.Second, 10*time.Millisecond, "callback should be called once")
 	assert.Equal(t, tmpDir, callbackDir, "callback should receive the directory path")
 }
 
