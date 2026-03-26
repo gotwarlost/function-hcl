@@ -10,19 +10,23 @@ import (
 )
 
 type inMemFile struct {
-	bytes []byte
-	info  fs.FileInfo
+	bytes  []byte
+	info   fs.FileInfo
+	reader *bytes.Reader
 }
 
-func (f inMemFile) Read(b []byte) (int, error) {
-	return bytes.NewBuffer(f.bytes).Read(b)
+func (f *inMemFile) Read(b []byte) (int, error) {
+	if f.reader == nil {
+		f.reader = bytes.NewReader(f.bytes)
+	}
+	return f.reader.Read(b)
 }
 
-func (f inMemFile) Stat() (fs.FileInfo, error) {
+func (f *inMemFile) Stat() (fs.FileInfo, error) {
 	return f.info, nil
 }
 
-func (f inMemFile) Close() error {
+func (f *inMemFile) Close() error {
 	return nil
 }
 
