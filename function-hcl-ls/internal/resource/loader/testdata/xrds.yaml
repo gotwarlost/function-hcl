@@ -1,0 +1,274 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xawsnetworks.aws.example.com
+spec:
+  claimNames:
+    kind: AWSNetwork
+    plural: awsnetworks
+  defaultCompositeDeletePolicy: Foreground
+  defaultCompositionUpdatePolicy: Automatic
+  group: aws.example.com
+  names:
+    kind: XAWSNetwork
+    plural: xawsnetworks
+  versions:
+  - name: v1alpha1
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        properties:
+          spec:
+            properties:
+              accountConfig:
+                description: CSPAccount configuration parameters.
+                properties:
+                  accountID:
+                    description: AWS account id to use for creating VPCs
+                    type: string
+                  zones:
+                    description: list of one character AZs to be used
+                    items:
+                      type: string
+                    type: array
+                required:
+                - accountID
+                - zones
+                type: object
+              parameters:
+                description: cluster configuration parameters
+                properties:
+                  baseTags:
+                    additionalProperties:
+                      type: string
+                    description: tags to be applied to all created resources
+                    type: object
+                  cidrAllocations:
+                    description: information on how to allocate CIDRs, optional until
+                      callers have caught up.
+                    items:
+                      properties:
+                        allocations:
+                          items:
+                            properties:
+                              internalName:
+                                description: |-
+                                  attribute to maintain back-compatibility with crossplane names for subnets.
+                                  used instead of name, for resource and k8s names if specified.
+                                  Tags will still use the name.
+                                type: string
+                              kind:
+                                description: kind of allocation
+                                enum:
+                                - private
+                                - public
+                                - pod
+                                type: string
+                              name:
+                                description: unique name of the allocation
+                                type: string
+                              netNum:
+                                default: 0
+                                description: the initial net number to use against
+                                  the CIDR
+                                type: integer
+                              newBits:
+                                description: the additional bits to allocate
+                                type: integer
+                              registerWithCloudWan:
+                                default: false
+                                description: |-
+                                  whether the subnets produced from this allocation should be registered with the
+                                  cloud WAN attachment, if the attachement is enabled.
+                                type: boolean
+                            required:
+                            - name
+                            - kind
+                            - netNum
+                            - newBits
+                            - registerWithCloudWan
+                            type: object
+                          type: array
+                        cidr:
+                          type: string
+                      required:
+                      - cidr
+                      - allocations
+                      type: object
+                    type: array
+                  cidrBlock:
+                    default: 192.168.0.0/16
+                    description: primary CIDR block for the VPC, optional until callers
+                      have caught up.
+                    type: string
+                  cloudWanAttachment:
+                    description: optional cloud WAN enablement, omit this if cloud
+                      WAN integration is not needed.
+                    properties:
+                      segment:
+                        description: the cloud WAN segment to which network should
+                          be attached.
+                        type: string
+                    required:
+                    - segment
+                    type: object
+                  createNATGateways:
+                    default: false
+                    description: |-
+                      create NAT gateways only on request since they are expensive.
+                      when false, implies that nodes will have public IPs
+                    type: boolean
+                  createNodesWithPublicIPs:
+                    default: false
+                    description: |-
+                      allows nodes to be created with public IPs even when NAT gateways
+                      are enabled.
+                    type: boolean
+                  createPodNetwork:
+                    default: true
+                    description: whether a pod network is needed.
+                    type: boolean
+                  enableFlowLogs:
+                    default: false
+                    description: whether VPC flow logs should be enabled for the VPC
+                    type: boolean
+                  enableS3Endpoint:
+                    default: true
+                    description: if a private S3 endpoint needs to be enabled.
+                    type: boolean
+                  environment:
+                    default: dev
+                    description: environment for VPC
+                    type: string
+                  flowLogsBucket:
+                    default: arn:aws:s3:::ecsecurity-flowlogs
+                    description: the ecsecurity bucket to which to send flow logs.
+                    type: string
+                  owner:
+                    default: sre
+                    description: owner of the VPC.
+                    type: string
+                  podCidrBlock:
+                    default: 100.64.0.0/16
+                    description: CIDR block for pod network. Used only if createPodNetwork
+                      is true
+                    type: string
+                  providerConfigName:
+                    description: provider to use
+                    type: string
+                  region:
+                    description: desired target region.
+                    enum:
+                    - af-south-1
+                    - ap-east-1
+                    - ap-northeast-1
+                    - ap-northeast-2
+                    - ap-south-1
+                    - ap-southeast-1
+                    - ap-southeast-2
+                    - ca-central-1
+                    - eu-central-1
+                    - eu-central-2
+                    - eu-north-1
+                    - eu-south-1
+                    - eu-west-1
+                    - eu-west-2
+                    - eu-west-3
+                    - me-south-1
+                    - sa-east-1
+                    - us-east-1
+                    - us-east-2
+                    - us-west-1
+                    - us-west-2
+                    type: string
+                  role:
+                    default: workload
+                    description: MKI role of the cluster
+                    enum:
+                    - workload
+                    - workload-internal
+                    - global
+                    - mgmt-csp
+                    - mgmt-unified
+                    - mgmt-crmc
+                    - argocd
+                    - genesis
+                    - ecp-platform-deployer
+                    - ecp-service-deployer
+                    type: string
+                  vpcName:
+                    description: VPC name, if omitted uses the composition name
+                    type: string
+                required:
+                - environment
+                - owner
+                - region
+                - providerConfigName
+                - enableFlowLogs
+                - enableS3Endpoint
+                type: object
+            required:
+            - accountConfig
+            - parameters
+            type: object
+          status:
+            description: status represents the observed state.
+            properties:
+              accountSpec:
+                properties:
+                  accountID:
+                    description: AWS account id
+                    type: string
+                  podSubnetCIDRs:
+                    description: array of pod subnet CIDRs in the same order as subnets
+                    items:
+                      type: string
+                    type: array
+                  podSubnets:
+                    description: pod subnet IDs for the CSP Account
+                    items:
+                      type: string
+                    type: array
+                  subnets:
+                    description: subnet IDs (one per AZ) used for this cluster
+                    items:
+                      properties:
+                        id:
+                          description: AWS subnet id
+                          type: string
+                        name:
+                          description: one character subnet suffix
+                          enum:
+                          - a
+                          - b
+                          - c
+                          - d
+                          - e
+                          - f
+                          type: string
+                      required:
+                      - id
+                      - name
+                      type: object
+                    type: array
+                  vpcId:
+                    description: ID of the VPC for creating clusters
+                    type: string
+                  vpcInfoJson:
+                    description: JSON string passed as an annotation in the inventory
+                      describing the vpc configuration
+                    type: string
+                  zonesInfoJson:
+                    description: JSON string passed as an annotation in the inventory
+                      describing the az configuration
+                    type: string
+                required:
+                - accountID
+                - subnets
+                - vpcId
+                type: object
+            type: object
+        required:
+        - spec
+        type: object
+    served: true

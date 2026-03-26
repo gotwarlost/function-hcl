@@ -1,0 +1,1965 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+    kustomize.config.k8s.io/id: |
+      group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: accessentries.eks.aws.upbound.io
+      version: v1
+  creationTimestamp: "2025-11-11T21:46:44Z"
+  generation: 1
+  name: accessentries.eks.aws.upbound.io
+  ownerReferences:
+    - apiVersion: pkg.crossplane.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ProviderRevision
+      name: provider-aws-eks-18be23366f8d
+      uid: d440ba39-8868-444e-9128-d3699f0e2b52
+    - apiVersion: pkg.crossplane.io/v1
+      blockOwnerDeletion: true
+      controller: false
+      kind: Provider
+      name: provider-aws-eks
+      uid: ca2bc455-b666-46b4-8320-5f965d6791b6
+  resourceVersion: "3416"
+  uid: 1041c9f9-1e94-41fe-83c7-2db4a0c81343
+spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR3akNDQXFxZ0F3SUJBZ0lDQitZd0RRWUpLb1pJaHZjTkFRRUxCUUF3V2pFT01Bd0dBMVVFQmhNRlJXRnkKZEdneERqQU1CZ05WQkFnVEJVVmhjblJvTVE0d0RBWURWUVFIRXdWRllYSjBhREVUTUJFR0ExVUVDaE1LUTNKdgpjM053YkdGdVpURVRNQkVHQTFVRUF4TUtRM0p2YzNOd2JHRnVaVEFlRncweU5URXhNVEV5TVRRMk5ESmFGdzB6Ck5URXhNVEV5TVRRMk5ESmFNRm94RGpBTUJnTlZCQVlUQlVWaGNuUm9NUTR3REFZRFZRUUlFd1ZGWVhKMGFERU8KTUF3R0ExVUVCeE1GUldGeWRHZ3hFekFSQmdOVkJBb1RDa055YjNOemNHeGhibVV4RXpBUkJnTlZCQU1UQ2tOeQpiM056Y0d4aGJtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFEQ0hqREZISjIxCm5sR2s5NmhZUkZuZ1Y3U2RZL3JJLzVIc3M4YWZlbXpBSDIrcUYxbGtFaEJyeXBLMXp4d29pYkFUOGtGNU1LbXcKOTZLckEvK3kxM25Yem9hbFZsekxWZERDTExrN0JNeG04YU9rNi80NzhOY0dCOHhxZXY0ODJTb0dYTTFUUU45agpZRmZiZXd0OHczSlZXY0NGcENaWEY3Y2IrZGNFOEo5Tk1sV3JaZFArdUZEK0VlYmdlRjJUUTZGNmFodE5tU0g2ClBGS0p6bUVmcDZJYVlaQzNKOVBVc09lanNSWXllMU1kQm1WT01rUHdEVTJkNFQ1azV0bFhlNFJld1p6Z0RrenIKZEtyZFBFUmtNQ3ZOdVRSSitnTFpoUVUrdHBaSUI1eCtoU1JUMEp4QnIvSWZQdzFqZUNSakJYU2xHTzZrVzlMYQo4WXpmZ09MYVN5YjdBZ01CQUFHamdaRXdnWTR3RGdZRFZSMFBBUUgvQkFRREFnU3dNQk1HQTFVZEpRUU1NQW9HCkNDc0dBUVVGQndNQk1Bd0dBMVVkRXdFQi93UUNNQUF3V1FZRFZSMFJCRkl3VUlJUWNISnZkbWxrWlhJdFlYZHoKTFdWcmM0SWJjSEp2ZG1sa1pYSXRZWGR6TFdWcmN5NWpjbTl6YzNCc1lXNWxnaDl3Y205MmFXUmxjaTFoZDNNdApaV3R6TG1OeWIzTnpjR3hoYm1VdWMzWmpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUJtVFV5MXhRTi9RaGZMCmdGSWNnS0dNV3JGZk83Vm9wRlZXZTdpY0lMekRCN29WTGIrcDBnSjhSYTROQmxlSy8zQXBTUElkWVd6bERZR0QKeVoyN1c4RW1aTHFOV0Q0YTVncU5ud0h5SnlBSytLZ2FJUXBKYkx6MFMzakYyMkdCUFlidlUrYkRrRERWUG56NAplZUovWHdIcDNWQzR6dks1S1daeEJLREFzTHFIdjlPQzJlOXovdXdDb1B1RXQ3aGhPV2pqWmptbjF3QysvMUNHCnFHU3ZPUjBYYVVRMHBPZjJmU3hqZFBhcjlzUnc4VEJZdnJ5VkpmZit4SU5JVUlyUlB2TVdCb3hvRFVEOUZGL2MKT1ZDZGp4c3FESXVJZml3bFZBVVJVenRITHF0S21kaFY4OEY1QjJUcVVyOEtWRHc5SHRhamhNZG84cTZ6V25FcworSXhFYmIrRgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+        service:
+          name: provider-aws-eks
+          namespace: crossplane
+          path: /convert
+          port: 9443
+      conversionReviewVersions:
+        - v1
+  group: eks.aws.upbound.io
+  names:
+    categories:
+      - crossplane
+      - managed
+      - aws
+    kind: AccessEntry
+    listKind: AccessEntryList
+    plural: accessentries
+    singular: accessentry
+  scope: Cluster
+  versions:
+    - additionalPrinterColumns:
+        - jsonPath: .status.conditions[?(@.type=='Synced')].status
+          name: SYNCED
+          type: string
+        - jsonPath: .status.conditions[?(@.type=='Ready')].status
+          name: READY
+          type: string
+        - jsonPath: .metadata.annotations.crossplane\.io/external-name
+          name: EXTERNAL-NAME
+          type: string
+        - jsonPath: .metadata.creationTimestamp
+          name: AGE
+          type: date
+      name: v1beta1
+      schema:
+        openAPIV3Schema:
+          description: AccessEntry is the Schema for the AccessEntrys API. Access Entry Configurations for an EKS Cluster.
+          properties:
+            apiVersion:
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: AccessEntrySpec defines the desired state of AccessEntry
+              properties:
+                deletionPolicy:
+                  default: Delete
+                  description: |-
+                    DeletionPolicy specifies what will happen to the underlying external
+                    when this managed resource is deleted - either "Delete" or "Orphan" the
+                    external resource.
+                    This field is planned to be deprecated in favor of the ManagementPolicies
+                    field in a future release. Currently, both could be set independently and
+                    non-default values would be honored if the feature flag is enabled.
+                    See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                  enum:
+                    - Orphan
+                    - Delete
+                  type: string
+                forProvider:
+                  properties:
+                    clusterName:
+                      description: –  Name of the EKS Cluster.
+                      type: string
+                    clusterNameRef:
+                      description: Reference to a Cluster in eks to populate clusterName.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                        - name
+                      type: object
+                    clusterNameSelector:
+                      description: Selector for a Cluster in eks to populate clusterName.
+                      properties:
+                        matchControllerRef:
+                          description: |-
+                            MatchControllerRef ensures an object with the same controller reference
+                            as the selecting object is selected.
+                          type: boolean
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: MatchLabels ensures an object with matching labels is selected.
+                          type: object
+                        policy:
+                          description: Policies for selection.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      type: object
+                    kubernetesGroups:
+                      description: –  List of string which can optionally specify the Kubernetes groups the user would belong to when creating an access entry.
+                      items:
+                        type: string
+                      type: array
+                      x-kubernetes-list-type: set
+                    principalArn:
+                      description: –  The IAM Principal ARN which requires Authentication access to the EKS cluster.
+                      type: string
+                    principalArnFromRoleRef:
+                      description: Reference to a Role in iam to populate principalArn.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                        - name
+                      type: object
+                    principalArnFromRoleSelector:
+                      description: Selector for a Role in iam to populate principalArn.
+                      properties:
+                        matchControllerRef:
+                          description: |-
+                            MatchControllerRef ensures an object with the same controller reference
+                            as the selecting object is selected.
+                          type: boolean
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: MatchLabels ensures an object with matching labels is selected.
+                          type: object
+                        policy:
+                          description: Policies for selection.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      type: object
+                    region:
+                      description: Region is the region you'd like your resource to be created in.
+                      type: string
+                    tags:
+                      additionalProperties:
+                        type: string
+                      description: Key-value map of resource tags.
+                      type: object
+                      x-kubernetes-map-type: granular
+                    type:
+                      description: Defaults to STANDARD which provides the standard workflow. EC2_LINUX, EC2_WINDOWS, FARGATE_LINUX types disallow users to input a username or groups, and prevent associations.
+                      type: string
+                    userName:
+                      description: Defaults to principal ARN if user is principal else defaults to assume-role/session-name is role is used.
+                      type: string
+                  required:
+                    - region
+                  type: object
+                initProvider:
+                  description: |-
+                    THIS IS A BETA FIELD. It will be honored
+                    unless the Management Policies feature flag is disabled.
+                    InitProvider holds the same fields as ForProvider, with the exception
+                    of Identifier and other resource reference fields. The fields that are
+                    in InitProvider are merged into ForProvider when the resource is created.
+                    The same fields are also added to the terraform ignore_changes hook, to
+                    avoid updating them after creation. This is useful for fields that are
+                    required on creation, but we do not desire to update them after creation,
+                    for example because of an external controller is managing them, like an
+                    autoscaler.
+                  properties:
+                    kubernetesGroups:
+                      description: –  List of string which can optionally specify the Kubernetes groups the user would belong to when creating an access entry.
+                      items:
+                        type: string
+                      type: array
+                      x-kubernetes-list-type: set
+                    tags:
+                      additionalProperties:
+                        type: string
+                      description: Key-value map of resource tags.
+                      type: object
+                      x-kubernetes-map-type: granular
+                    type:
+                      description: Defaults to STANDARD which provides the standard workflow. EC2_LINUX, EC2_WINDOWS, FARGATE_LINUX types disallow users to input a username or groups, and prevent associations.
+                      type: string
+                    userName:
+                      description: Defaults to principal ARN if user is principal else defaults to assume-role/session-name is role is used.
+                      type: string
+                  type: object
+                managementPolicies:
+                  default:
+                    - '*'
+                  description: |-
+                    THIS IS A BETA FIELD. It is on by default but can be opted out
+                    through a Crossplane feature flag.
+                    ManagementPolicies specify the array of actions Crossplane is allowed to
+                    take on the managed and external resources.
+                    This field is planned to replace the DeletionPolicy field in a future
+                    release. Currently, both could be set independently and non-default
+                    values would be honored if the feature flag is enabled. If both are
+                    custom, the DeletionPolicy field will be ignored.
+                    See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                    and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                  items:
+                    description: |-
+                      A ManagementAction represents an action that the Crossplane controllers
+                      can take on an external resource.
+                    enum:
+                      - Observe
+                      - Create
+                      - Update
+                      - Delete
+                      - LateInitialize
+                      - '*'
+                    type: string
+                  type: array
+                providerConfigRef:
+                  default:
+                    name: default
+                  description: |-
+                    ProviderConfigReference specifies how the provider that will be used to
+                    create, observe, update, and delete this managed resource should be
+                    configured.
+                  properties:
+                    name:
+                      description: Name of the referenced object.
+                      type: string
+                    policy:
+                      description: Policies for referencing.
+                      properties:
+                        resolution:
+                          default: Required
+                          description: |-
+                            Resolution specifies whether resolution of this reference is required.
+                            The default is 'Required', which means the reconcile will fail if the
+                            reference cannot be resolved. 'Optional' means this reference will be
+                            a no-op if it cannot be resolved.
+                          enum:
+                            - Required
+                            - Optional
+                          type: string
+                        resolve:
+                          description: |-
+                            Resolve specifies when this reference should be resolved. The default
+                            is 'IfNotPresent', which will attempt to resolve the reference only when
+                            the corresponding field is not present. Use 'Always' to resolve the
+                            reference on every reconcile.
+                          enum:
+                            - Always
+                            - IfNotPresent
+                          type: string
+                      type: object
+                  required:
+                    - name
+                  type: object
+                publishConnectionDetailsTo:
+                  description: |-
+                    PublishConnectionDetailsTo specifies the connection secret config which
+                    contains a name, metadata and a reference to secret store config to
+                    which any connection details for this managed resource should be written.
+                    Connection details frequently include the endpoint, username,
+                    and password required to connect to the managed resource.
+                  properties:
+                    configRef:
+                      default:
+                        name: default
+                      description: |-
+                        SecretStoreConfigRef specifies which secret store config should be used
+                        for this ConnectionSecret.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                        - name
+                      type: object
+                    metadata:
+                      description: Metadata is the metadata for connection secret.
+                      properties:
+                        annotations:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Annotations are the annotations to be added to connection secret.
+                            - For Kubernetes secrets, this will be used as "metadata.annotations".
+                            - It is up to Secret Store implementation for others store types.
+                          type: object
+                        labels:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Labels are the labels/tags to be added to connection secret.
+                            - For Kubernetes secrets, this will be used as "metadata.labels".
+                            - It is up to Secret Store implementation for others store types.
+                          type: object
+                        type:
+                          description: |-
+                            Type is the SecretType for the connection secret.
+                            - Only valid for Kubernetes Secret Stores.
+                          type: string
+                      type: object
+                    name:
+                      description: Name is the name of the connection secret.
+                      type: string
+                  required:
+                    - name
+                  type: object
+                writeConnectionSecretToRef:
+                  description: |-
+                    WriteConnectionSecretToReference specifies the namespace and name of a
+                    Secret to which any connection details for this managed resource should
+                    be written. Connection details frequently include the endpoint, username,
+                    and password required to connect to the managed resource.
+                    This field is planned to be replaced in a future release in favor of
+                    PublishConnectionDetailsTo. Currently, both could be set independently
+                    and connection details would be published to both without affecting
+                    each other.
+                  properties:
+                    name:
+                      description: Name of the secret.
+                      type: string
+                    namespace:
+                      description: Namespace of the secret.
+                      type: string
+                  required:
+                    - name
+                    - namespace
+                  type: object
+              required:
+                - forProvider
+              type: object
+            status:
+              description: AccessEntryStatus defines the observed state of AccessEntry.
+              properties:
+                atProvider:
+                  properties:
+                    accessEntryArn:
+                      description: Amazon Resource Name (ARN) of the Access Entry.
+                      type: string
+                    clusterName:
+                      description: –  Name of the EKS Cluster.
+                      type: string
+                    createdAt:
+                      description: Date and time in RFC3339 format that the EKS add-on was created.
+                      type: string
+                    id:
+                      type: string
+                    kubernetesGroups:
+                      description: –  List of string which can optionally specify the Kubernetes groups the user would belong to when creating an access entry.
+                      items:
+                        type: string
+                      type: array
+                      x-kubernetes-list-type: set
+                    modifiedAt:
+                      description: Date and time in RFC3339 format that the EKS add-on was updated.
+                      type: string
+                    principalArn:
+                      description: –  The IAM Principal ARN which requires Authentication access to the EKS cluster.
+                      type: string
+                    tags:
+                      additionalProperties:
+                        type: string
+                      description: Key-value map of resource tags.
+                      type: object
+                      x-kubernetes-map-type: granular
+                    tagsAll:
+                      additionalProperties:
+                        type: string
+                      description: Key-value map of resource tags, including those inherited from the provider default_tags configuration block.
+                      type: object
+                      x-kubernetes-map-type: granular
+                    type:
+                      description: Defaults to STANDARD which provides the standard workflow. EC2_LINUX, EC2_WINDOWS, FARGATE_LINUX types disallow users to input a username or groups, and prevent associations.
+                      type: string
+                    userName:
+                      description: Defaults to principal ARN if user is principal else defaults to assume-role/session-name is role is used.
+                      type: string
+                  type: object
+                conditions:
+                  description: Conditions of the resource.
+                  items:
+                    description: A Condition that may apply to a resource.
+                    properties:
+                      lastTransitionTime:
+                        description: |-
+                          LastTransitionTime is the last time this condition transitioned from one
+                          status to another.
+                        format: date-time
+                        type: string
+                      message:
+                        description: |-
+                          A Message containing details about this condition's last transition from
+                          one status to another, if any.
+                        type: string
+                      observedGeneration:
+                        description: |-
+                          ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                          For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                          with respect to the current state of the instance.
+                        format: int64
+                        type: integer
+                      reason:
+                        description: A Reason for this condition's last transition from one status to another.
+                        type: string
+                      status:
+                        description: Status of this condition; is it currently True, False, or Unknown?
+                        type: string
+                      type:
+                        description: |-
+                          Type of this condition. At most one of each condition type may apply to
+                          a resource at any point in time.
+                        type: string
+                    required:
+                      - lastTransitionTime
+                      - reason
+                      - status
+                      - type
+                    type: object
+                  type: array
+                  x-kubernetes-list-map-keys:
+                    - type
+                  x-kubernetes-list-type: map
+                observedGeneration:
+                  description: |-
+                    ObservedGeneration is the latest metadata.generation
+                    which resulted in either a ready state, or stalled due to error
+                    it can not recover from without human intervention.
+                  format: int64
+                  type: integer
+              type: object
+          required:
+            - spec
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
+status:
+  acceptedNames:
+    categories:
+      - crossplane
+      - managed
+      - aws
+    kind: AccessEntry
+    listKind: AccessEntryList
+    plural: accessentries
+    singular: accessentry
+  conditions:
+    - lastTransitionTime: "2025-11-11T21:46:44Z"
+      message: no conflicts found
+      reason: NoConflicts
+      status: "True"
+      type: NamesAccepted
+    - lastTransitionTime: "2025-11-11T21:46:44Z"
+      message: the initial names have been accepted
+      reason: InitialNamesAccepted
+      status: "True"
+      type: Established
+  storedVersions:
+    - v1beta1
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+    kustomize.config.k8s.io/id: |
+      group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: accesskeys.iam.aws.upbound.io
+      version: v1
+  creationTimestamp: "2025-11-11T21:46:45Z"
+  generation: 1
+  name: accesskeys.iam.aws.upbound.io
+  ownerReferences:
+    - apiVersion: pkg.crossplane.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ProviderRevision
+      name: provider-aws-iam-25cc3bef490f
+      uid: 506f6c09-315f-43ff-862c-7823f3b86918
+    - apiVersion: pkg.crossplane.io/v1
+      blockOwnerDeletion: true
+      controller: false
+      kind: Provider
+      name: provider-aws-iam
+      uid: cd91b0ac-3cd2-45d7-8c48-ea15c81326a3
+  resourceVersion: "4240"
+  uid: 9a584f44-013a-405d-a61a-a6afe63b2dc5
+spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR3akNDQXFxZ0F3SUJBZ0lDQitZd0RRWUpLb1pJaHZjTkFRRUxCUUF3V2pFT01Bd0dBMVVFQmhNRlJXRnkKZEdneERqQU1CZ05WQkFnVEJVVmhjblJvTVE0d0RBWURWUVFIRXdWRllYSjBhREVUTUJFR0ExVUVDaE1LUTNKdgpjM053YkdGdVpURVRNQkVHQTFVRUF4TUtRM0p2YzNOd2JHRnVaVEFlRncweU5URXhNVEV5TVRRMk5ESmFGdzB6Ck5URXhNVEV5TVRRMk5ESmFNRm94RGpBTUJnTlZCQVlUQlVWaGNuUm9NUTR3REFZRFZRUUlFd1ZGWVhKMGFERU8KTUF3R0ExVUVCeE1GUldGeWRHZ3hFekFSQmdOVkJBb1RDa055YjNOemNHeGhibVV4RXpBUkJnTlZCQU1UQ2tOeQpiM056Y0d4aGJtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDOGZQU2ZTTlBwCnU3Q1pnZzcrUWMySm1Ub2lmZDNtYjk0QjNiTUVBaWJDK0t3bm1mOVpCUnZqSkNyT0Z3bnBnN3BpdnBJR2N5U0EKd3VRL2RsSnVzSDgyOEoyVU55dHYvS1l5eWJrOVRBV1czVzlyUEQvcXp0MmZjcGd4NTRMVzQxYnJCRWtmN0xHYgpEZnppWVVuRVZlOVlUZzNlMTFsbmY3Vks1K1daMFQxd2xsYUowU1kyaWtyM2NVRmVCTkkrd0ZkUEgyWjJHelBqCnRCRlFSMjQzaEZBZE9ucm8yZTlpdHEwUko2T0VYYUJsUGJteDhkNlNNWUErUGJvMVdzdnFQM1V0UWlNUzg3bUoKNzU2eVllTUVMRWFnYjVSYUdnb0pET1RRK25TVzlRUVlsMGE2UGgvQy91ZjEvMTVQTWxDNGdNOWNDdkhNQ1lwWgprQ2d1cGJ4dUpXQmRBZ01CQUFHamdaRXdnWTR3RGdZRFZSMFBBUUgvQkFRREFnU3dNQk1HQTFVZEpRUU1NQW9HCkNDc0dBUVVGQndNQk1Bd0dBMVVkRXdFQi93UUNNQUF3V1FZRFZSMFJCRkl3VUlJUWNISnZkbWxrWlhJdFlYZHoKTFdsaGJZSWJjSEp2ZG1sa1pYSXRZWGR6TFdsaGJTNWpjbTl6YzNCc1lXNWxnaDl3Y205MmFXUmxjaTFoZDNNdAphV0Z0TG1OeWIzTnpjR3hoYm1VdWMzWmpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUJ1ekNrdHJCaFZ3elZOCitINHk4S2NENzViQ0FoTDJQSGd6Q0c5OXduaFNWa041eHNCSU1HMjJpa3RCWTUwdVI3NHBacnRLTFJMSWc0N3kKOTkzZ2FxaWxPZmovL0MzOUtJOVdKL09yMGpabTR2T0pwdkJIOXdMS2NYWUJNaEhuYjY3em9lK285L1JjSGdsZQpUeFJPdHp0b05ZUE41aW9UZnc0YVZBTjZHTEJ5K01WdU9OeFhmVFYxYTQ0YWhnS3l5T0RkU01Hb2ZLcUZvVzJ6CkJRT1FkT0JXMUZ2WXRPMjhkRkhIU1ZsWGhGMWwwM0lUeFN0WDdFdUY3UHdGMzkrcXE3N1VKRFIxRk9GUEpoVEYKVkFwTU5PR3lWVU5QeGo5ai9PMmN2U3RxLzNieE1HbGhmQStnSTZkSjNtSGpVbzNZNUM4OE1xNFN4dlYvZHhkSgpaNFRVb0pUUwotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+        service:
+          name: provider-aws-iam
+          namespace: crossplane
+          path: /convert
+          port: 9443
+      conversionReviewVersions:
+        - v1
+  group: iam.aws.upbound.io
+  names:
+    categories:
+      - crossplane
+      - managed
+      - aws
+    kind: AccessKey
+    listKind: AccessKeyList
+    plural: accesskeys
+    singular: accesskey
+  scope: Cluster
+  versions:
+    - additionalPrinterColumns:
+        - jsonPath: .status.conditions[?(@.type=='Synced')].status
+          name: SYNCED
+          type: string
+        - jsonPath: .status.conditions[?(@.type=='Ready')].status
+          name: READY
+          type: string
+        - jsonPath: .metadata.annotations.crossplane\.io/external-name
+          name: EXTERNAL-NAME
+          type: string
+        - jsonPath: .metadata.creationTimestamp
+          name: AGE
+          type: date
+      name: v1beta1
+      schema:
+        openAPIV3Schema:
+          description: AccessKey is the Schema for the AccessKeys API. Provides an IAM access key. This is a set of credentials that allow API requests to be made as an IAM user.
+          properties:
+            apiVersion:
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: AccessKeySpec defines the desired state of AccessKey
+              properties:
+                deletionPolicy:
+                  default: Delete
+                  description: |-
+                    DeletionPolicy specifies what will happen to the underlying external
+                    when this managed resource is deleted - either "Delete" or "Orphan" the
+                    external resource.
+                    This field is planned to be deprecated in favor of the ManagementPolicies
+                    field in a future release. Currently, both could be set independently and
+                    non-default values would be honored if the feature flag is enabled.
+                    See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                  enum:
+                    - Orphan
+                    - Delete
+                  type: string
+                forProvider:
+                  properties:
+                    pgpKey:
+                      description: Either a base-64 encoded PGP public key, or a keybase username in the form keybase:some_person_that_exists, for use in the encrypted_secret output attribute. If providing a base-64 encoded PGP public key, make sure to provide the "raw" version and not the "armored" one (e.g. avoid passing the -a option to gpg --export).
+                      type: string
+                    status:
+                      description: Access key status to apply. Defaults to Active. Valid values are Active and Inactive.
+                      type: string
+                    user:
+                      description: IAM user to associate with this access key.
+                      type: string
+                    userRef:
+                      description: Reference to a User in iam to populate user.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                        - name
+                      type: object
+                    userSelector:
+                      description: Selector for a User in iam to populate user.
+                      properties:
+                        matchControllerRef:
+                          description: |-
+                            MatchControllerRef ensures an object with the same controller reference
+                            as the selecting object is selected.
+                          type: boolean
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: MatchLabels ensures an object with matching labels is selected.
+                          type: object
+                        policy:
+                          description: Policies for selection.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      type: object
+                  type: object
+                initProvider:
+                  description: |-
+                    THIS IS A BETA FIELD. It will be honored
+                    unless the Management Policies feature flag is disabled.
+                    InitProvider holds the same fields as ForProvider, with the exception
+                    of Identifier and other resource reference fields. The fields that are
+                    in InitProvider are merged into ForProvider when the resource is created.
+                    The same fields are also added to the terraform ignore_changes hook, to
+                    avoid updating them after creation. This is useful for fields that are
+                    required on creation, but we do not desire to update them after creation,
+                    for example because of an external controller is managing them, like an
+                    autoscaler.
+                  properties:
+                    pgpKey:
+                      description: Either a base-64 encoded PGP public key, or a keybase username in the form keybase:some_person_that_exists, for use in the encrypted_secret output attribute. If providing a base-64 encoded PGP public key, make sure to provide the "raw" version and not the "armored" one (e.g. avoid passing the -a option to gpg --export).
+                      type: string
+                    status:
+                      description: Access key status to apply. Defaults to Active. Valid values are Active and Inactive.
+                      type: string
+                    user:
+                      description: IAM user to associate with this access key.
+                      type: string
+                    userRef:
+                      description: Reference to a User in iam to populate user.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                        - name
+                      type: object
+                    userSelector:
+                      description: Selector for a User in iam to populate user.
+                      properties:
+                        matchControllerRef:
+                          description: |-
+                            MatchControllerRef ensures an object with the same controller reference
+                            as the selecting object is selected.
+                          type: boolean
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: MatchLabels ensures an object with matching labels is selected.
+                          type: object
+                        policy:
+                          description: Policies for selection.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      type: object
+                  type: object
+                managementPolicies:
+                  default:
+                    - '*'
+                  description: |-
+                    THIS IS A BETA FIELD. It is on by default but can be opted out
+                    through a Crossplane feature flag.
+                    ManagementPolicies specify the array of actions Crossplane is allowed to
+                    take on the managed and external resources.
+                    This field is planned to replace the DeletionPolicy field in a future
+                    release. Currently, both could be set independently and non-default
+                    values would be honored if the feature flag is enabled. If both are
+                    custom, the DeletionPolicy field will be ignored.
+                    See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                    and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                  items:
+                    description: |-
+                      A ManagementAction represents an action that the Crossplane controllers
+                      can take on an external resource.
+                    enum:
+                      - Observe
+                      - Create
+                      - Update
+                      - Delete
+                      - LateInitialize
+                      - '*'
+                    type: string
+                  type: array
+                providerConfigRef:
+                  default:
+                    name: default
+                  description: |-
+                    ProviderConfigReference specifies how the provider that will be used to
+                    create, observe, update, and delete this managed resource should be
+                    configured.
+                  properties:
+                    name:
+                      description: Name of the referenced object.
+                      type: string
+                    policy:
+                      description: Policies for referencing.
+                      properties:
+                        resolution:
+                          default: Required
+                          description: |-
+                            Resolution specifies whether resolution of this reference is required.
+                            The default is 'Required', which means the reconcile will fail if the
+                            reference cannot be resolved. 'Optional' means this reference will be
+                            a no-op if it cannot be resolved.
+                          enum:
+                            - Required
+                            - Optional
+                          type: string
+                        resolve:
+                          description: |-
+                            Resolve specifies when this reference should be resolved. The default
+                            is 'IfNotPresent', which will attempt to resolve the reference only when
+                            the corresponding field is not present. Use 'Always' to resolve the
+                            reference on every reconcile.
+                          enum:
+                            - Always
+                            - IfNotPresent
+                          type: string
+                      type: object
+                  required:
+                    - name
+                  type: object
+                publishConnectionDetailsTo:
+                  description: |-
+                    PublishConnectionDetailsTo specifies the connection secret config which
+                    contains a name, metadata and a reference to secret store config to
+                    which any connection details for this managed resource should be written.
+                    Connection details frequently include the endpoint, username,
+                    and password required to connect to the managed resource.
+                  properties:
+                    configRef:
+                      default:
+                        name: default
+                      description: |-
+                        SecretStoreConfigRef specifies which secret store config should be used
+                        for this ConnectionSecret.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                        - name
+                      type: object
+                    metadata:
+                      description: Metadata is the metadata for connection secret.
+                      properties:
+                        annotations:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Annotations are the annotations to be added to connection secret.
+                            - For Kubernetes secrets, this will be used as "metadata.annotations".
+                            - It is up to Secret Store implementation for others store types.
+                          type: object
+                        labels:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Labels are the labels/tags to be added to connection secret.
+                            - For Kubernetes secrets, this will be used as "metadata.labels".
+                            - It is up to Secret Store implementation for others store types.
+                          type: object
+                        type:
+                          description: |-
+                            Type is the SecretType for the connection secret.
+                            - Only valid for Kubernetes Secret Stores.
+                          type: string
+                      type: object
+                    name:
+                      description: Name is the name of the connection secret.
+                      type: string
+                  required:
+                    - name
+                  type: object
+                writeConnectionSecretToRef:
+                  description: |-
+                    WriteConnectionSecretToReference specifies the namespace and name of a
+                    Secret to which any connection details for this managed resource should
+                    be written. Connection details frequently include the endpoint, username,
+                    and password required to connect to the managed resource.
+                    This field is planned to be replaced in a future release in favor of
+                    PublishConnectionDetailsTo. Currently, both could be set independently
+                    and connection details would be published to both without affecting
+                    each other.
+                  properties:
+                    name:
+                      description: Name of the secret.
+                      type: string
+                    namespace:
+                      description: Namespace of the secret.
+                      type: string
+                  required:
+                    - name
+                    - namespace
+                  type: object
+              required:
+                - forProvider
+              type: object
+            status:
+              description: AccessKeyStatus defines the observed state of AccessKey.
+              properties:
+                atProvider:
+                  properties:
+                    createDate:
+                      description: Date and time in RFC3339 format that the access key was created.
+                      type: string
+                    encryptedSecret:
+                      description: Encrypted secret, base64 encoded, if pgp_key was specified. This attribute is not available for imported resources.
+                      type: string
+                    encryptedSesSmtpPasswordV4:
+                      description: Encrypted SES SMTP password, base64 encoded, if pgp_key was specified. This attribute is not available for imported resources.
+                      type: string
+                    id:
+                      description: Access key ID.
+                      type: string
+                    keyFingerprint:
+                      description: Fingerprint of the PGP key used to encrypt the secret. This attribute is not available for imported resources.
+                      type: string
+                    pgpKey:
+                      description: Either a base-64 encoded PGP public key, or a keybase username in the form keybase:some_person_that_exists, for use in the encrypted_secret output attribute. If providing a base-64 encoded PGP public key, make sure to provide the "raw" version and not the "armored" one (e.g. avoid passing the -a option to gpg --export).
+                      type: string
+                    status:
+                      description: Access key status to apply. Defaults to Active. Valid values are Active and Inactive.
+                      type: string
+                    user:
+                      description: IAM user to associate with this access key.
+                      type: string
+                  type: object
+                conditions:
+                  description: Conditions of the resource.
+                  items:
+                    description: A Condition that may apply to a resource.
+                    properties:
+                      lastTransitionTime:
+                        description: |-
+                          LastTransitionTime is the last time this condition transitioned from one
+                          status to another.
+                        format: date-time
+                        type: string
+                      message:
+                        description: |-
+                          A Message containing details about this condition's last transition from
+                          one status to another, if any.
+                        type: string
+                      observedGeneration:
+                        description: |-
+                          ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                          For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                          with respect to the current state of the instance.
+                        format: int64
+                        type: integer
+                      reason:
+                        description: A Reason for this condition's last transition from one status to another.
+                        type: string
+                      status:
+                        description: Status of this condition; is it currently True, False, or Unknown?
+                        type: string
+                      type:
+                        description: |-
+                          Type of this condition. At most one of each condition type may apply to
+                          a resource at any point in time.
+                        type: string
+                    required:
+                      - lastTransitionTime
+                      - reason
+                      - status
+                      - type
+                    type: object
+                  type: array
+                  x-kubernetes-list-map-keys:
+                    - type
+                  x-kubernetes-list-type: map
+                observedGeneration:
+                  description: |-
+                    ObservedGeneration is the latest metadata.generation
+                    which resulted in either a ready state, or stalled due to error
+                    it can not recover from without human intervention.
+                  format: int64
+                  type: integer
+              type: object
+          required:
+            - spec
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
+status:
+  acceptedNames:
+    categories:
+      - crossplane
+      - managed
+      - aws
+    kind: AccessKey
+    listKind: AccessKeyList
+    plural: accesskeys
+    singular: accesskey
+  conditions:
+    - lastTransitionTime: "2025-11-11T21:46:47Z"
+      message: no conflicts found
+      reason: NoConflicts
+      status: "True"
+      type: NamesAccepted
+    - lastTransitionTime: "2025-11-11T21:46:48Z"
+      message: the initial names have been accepted
+      reason: InitialNamesAccepted
+      status: "True"
+      type: Established
+  storedVersions:
+    - v1beta1
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+    kustomize.config.k8s.io/id: |
+      group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: vpcs.ec2.aws.upbound.io
+      version: v1
+  creationTimestamp: "2025-11-11T21:46:51Z"
+  generation: 1
+  name: vpcs.ec2.aws.upbound.io
+  ownerReferences:
+    - apiVersion: pkg.crossplane.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ProviderRevision
+      name: provider-aws-ec2-a1a3e9ea009b
+      uid: 68bdd8bd-3e98-4d77-ab94-25cbfbd6f5dd
+    - apiVersion: pkg.crossplane.io/v1
+      blockOwnerDeletion: true
+      controller: false
+      kind: Provider
+      name: provider-aws-ec2
+      uid: c4ec571c-6ee6-4b9a-83f2-3b6066bd7007
+  resourceVersion: "5240"
+  uid: 02079e36-68d1-4c9e-b2cb-eebc80276102
+spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR3akNDQXFxZ0F3SUJBZ0lDQitZd0RRWUpLb1pJaHZjTkFRRUxCUUF3V2pFT01Bd0dBMVVFQmhNRlJXRnkKZEdneERqQU1CZ05WQkFnVEJVVmhjblJvTVE0d0RBWURWUVFIRXdWRllYSjBhREVUTUJFR0ExVUVDaE1LUTNKdgpjM053YkdGdVpURVRNQkVHQTFVRUF4TUtRM0p2YzNOd2JHRnVaVEFlRncweU5URXhNVEV5TVRRMk5EWmFGdzB6Ck5URXhNVEV5TVRRMk5EWmFNRm94RGpBTUJnTlZCQVlUQlVWaGNuUm9NUTR3REFZRFZRUUlFd1ZGWVhKMGFERU8KTUF3R0ExVUVCeE1GUldGeWRHZ3hFekFSQmdOVkJBb1RDa055YjNOemNHeGhibVV4RXpBUkJnTlZCQU1UQ2tOeQpiM056Y0d4aGJtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDOVZQVVV3MHFlCmJKckFmcWNEd29BK1BGWjk0cW14YVlNV3pYbmMzeEN3clA2SE9TU1ZjVEhKcU5odFBqWXdUVXBMWHJBUko2WE0KVDlYM083L2o5UGEra1pLOUdnSzZkeXRVajBRamVRMmpFU0F4bTZQWHJrODArSmtxTVVUTHAwYml4ZmM0S2lhZQozWm54NmViR0VMS2phSjEyR094YXFGY1VtWnJnL0M2Zm5kcGxnZmJ2RlFoeUNHK2xkTjBiUW5IVVBUZW0zYlBECnRNbU9LVXgwZ1p5cU10Y0taUVdrV0RhYTRkWkwzTGpJQ3ZOVlBXU3c2NjY3SHNLMjF1WE96ZGs2aTFSVG9pRFAKY1ROV1VkS3drazRJV1RvZVhHNXpUOGxEVmZtYjJVUlk5SHA1NFFjblVyN25vT2hHYTIwQ2lGZGoxRjRycUZnaQpnS0lDbnM0ek4rQmRBZ01CQUFHamdaRXdnWTR3RGdZRFZSMFBBUUgvQkFRREFnU3dNQk1HQTFVZEpRUU1NQW9HCkNDc0dBUVVGQndNQk1Bd0dBMVVkRXdFQi93UUNNQUF3V1FZRFZSMFJCRkl3VUlJUWNISnZkbWxrWlhJdFlYZHoKTFdWak1vSWJjSEp2ZG1sa1pYSXRZWGR6TFdWak1pNWpjbTl6YzNCc1lXNWxnaDl3Y205MmFXUmxjaTFoZDNNdApaV015TG1OeWIzTnpjR3hoYm1VdWMzWmpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUFXZzNQTlJqUmU4TjF4CkhSNTlkb3ZNR3RjQlpqdXY4dGNGNVJXRHRXTFVwcEFmLzRWQ1IxR3JTbmRBR09pT2NCNUw5WjZLaDQwZ0ViTjMKM0FaQ3JMNU9UcnB2UFNjcVlra0hKTThubjBtMkhqYld2Nmp4bDdUMjk2NkV0eVdOYVhub0UrSTBQQXU1ZVl5VgpJKzd0YjYxWXpFTDZGbVg2a3RKU0YyalBCMzFVTzBYa0o1T0RibDgzaFJLeDJrY2ZJbVlrUXdFZUVGcXRrRzFXCkJvNUE0WkM3TmwrTlVFZ1V1bUpyT3hLOXprT1dsTDI4TDczV2VpeHlKMVNpME9RRi9WcVJCYUxnZVg2WUc1WS8KQzJBd3RkL2QyM25FUUFzRWdyMVlWaDdTTnppODNVeVI2dzlQbURjUGxQd3dPZEZxbDJEUGdzUXJ3NFZvY2plUgpWT04yNXhTRAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+        service:
+          name: provider-aws-ec2
+          namespace: crossplane
+          path: /convert
+          port: 9443
+      conversionReviewVersions:
+        - v1
+  group: ec2.aws.upbound.io
+  names:
+    categories:
+      - crossplane
+      - managed
+      - aws
+    kind: VPC
+    listKind: VPCList
+    plural: vpcs
+    singular: vpc
+  scope: Cluster
+  versions:
+    - additionalPrinterColumns:
+        - jsonPath: .status.conditions[?(@.type=='Synced')].status
+          name: SYNCED
+          type: string
+        - jsonPath: .status.conditions[?(@.type=='Ready')].status
+          name: READY
+          type: string
+        - jsonPath: .metadata.annotations.crossplane\.io/external-name
+          name: EXTERNAL-NAME
+          type: string
+        - jsonPath: .metadata.creationTimestamp
+          name: AGE
+          type: date
+      name: v1beta1
+      schema:
+        openAPIV3Schema:
+          description: VPC is the Schema for the VPCs API. Provides a VPC resource.
+          properties:
+            apiVersion:
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: VPCSpec defines the desired state of VPC
+              properties:
+                deletionPolicy:
+                  default: Delete
+                  description: |-
+                    DeletionPolicy specifies what will happen to the underlying external
+                    when this managed resource is deleted - either "Delete" or "Orphan" the
+                    external resource.
+                    This field is planned to be deprecated in favor of the ManagementPolicies
+                    field in a future release. Currently, both could be set independently and
+                    non-default values would be honored if the feature flag is enabled.
+                    See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                  enum:
+                    - Orphan
+                    - Delete
+                  type: string
+                forProvider:
+                  properties:
+                    assignGeneratedIpv6CidrBlock:
+                      description: Requests an Amazon-provided IPv6 CIDR block with
+                        a /56 prefix length for the VPC. You cannot specify the range
+                        of IP addresses, or the size of the CIDR block. Default is false.
+                        Conflicts with ipv6_ipam_pool_id
+                      type: boolean
+                    cidrBlock:
+                      description: The IPv4 CIDR block for the VPC. CIDR can be explicitly
+                        set or it can be derived from IPAM using ipv4_netmask_length.
+                      type: string
+                    enableDnsHostnames:
+                      description: A boolean flag to enable/disable DNS hostnames in
+                        the VPC. Defaults false.
+                      type: boolean
+                    enableDnsSupport:
+                      description: A boolean flag to enable/disable DNS support in the
+                        VPC. Defaults to true.
+                      type: boolean
+                    enableNetworkAddressUsageMetrics:
+                      description: Indicates whether Network Address Usage metrics are
+                        enabled for your VPC. Defaults to false.
+                      type: boolean
+                    instanceTenancy:
+                      description: A tenancy option for instances launched into the
+                        VPC. Default is default, which ensures that EC2 instances launched
+                        in this VPC use the EC2 instance tenancy attribute specified
+                        when the EC2 instance is launched. The only other option is
+                        dedicated, which ensures that EC2 instances launched in this
+                        VPC are run on dedicated tenancy instances regardless of the
+                        tenancy attribute specified at launch. This has a dedicated
+                        per region fee of $2 per hour, plus an hourly per instance usage
+                        fee.
+                      type: string
+                    ipv4IpamPoolId:
+                      description: The ID of an IPv4 IPAM pool you want to use for allocating
+                        this VPC's CIDR. IPAM is a VPC feature that you can use to automate
+                        your IP address management workflows including assigning, tracking,
+                        troubleshooting, and auditing IP addresses across AWS Regions
+                        and accounts. Using IPAM you can monitor IP address usage throughout
+                        your AWS Organization.
+                      type: string
+                    ipv4IpamPoolIdRef:
+                      description: Reference to a VPCIpamPool in ec2 to populate ipv4IpamPoolId.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                        - name
+                      type: object
+                    ipv4IpamPoolIdSelector:
+                      description: Selector for a VPCIpamPool in ec2 to populate ipv4IpamPoolId.
+                      properties:
+                        matchControllerRef:
+                          description: |-
+                            MatchControllerRef ensures an object with the same controller reference
+                            as the selecting object is selected.
+                          type: boolean
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: MatchLabels ensures an object with matching labels
+                            is selected.
+                          type: object
+                        policy:
+                          description: Policies for selection.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      type: object
+                    ipv4NetmaskLength:
+                      description: The netmask length of the IPv4 CIDR you want to allocate
+                        to this VPC. Requires specifying a ipv4_ipam_pool_id.
+                      type: number
+                    ipv6CidrBlock:
+                      description: IPv6 CIDR block to request from an IPAM Pool. Can
+                        be set explicitly or derived from IPAM using ipv6_netmask_length.
+                      type: string
+                    ipv6CidrBlockNetworkBorderGroup:
+                      description: By default when an IPv6 CIDR is assigned to a VPC
+                        a default ipv6_cidr_block_network_border_group will be set to
+                        the region of the VPC. This can be changed to restrict advertisement
+                        of public addresses to specific Network Border Groups such as
+                        LocalZones.
+                      type: string
+                    ipv6IpamPoolId:
+                      description: IPAM Pool ID for a IPv6 pool. Conflicts with assign_generated_ipv6_cidr_block.
+                      type: string
+                    ipv6NetmaskLength:
+                      description: Netmask length to request from IPAM Pool. Conflicts
+                        with ipv6_cidr_block. This can be omitted if IPAM pool as a
+                        allocation_default_netmask_length set. Valid values are from
+                        44 to 60 in increments of 4.
+                      type: number
+                    region:
+                      description: Region is the region you'd like your resource to
+                        be created in.
+                      type: string
+                    tags:
+                      additionalProperties:
+                        type: string
+                      description: Key-value map of resource tags.
+                      type: object
+                      x-kubernetes-map-type: granular
+                  required:
+                    - region
+                  type: object
+                initProvider:
+                  description: |-
+                    THIS IS A BETA FIELD. It will be honored
+                    unless the Management Policies feature flag is disabled.
+                    InitProvider holds the same fields as ForProvider, with the exception
+                    of Identifier and other resource reference fields. The fields that are
+                    in InitProvider are merged into ForProvider when the resource is created.
+                    The same fields are also added to the terraform ignore_changes hook, to
+                    avoid updating them after creation. This is useful for fields that are
+                    required on creation, but we do not desire to update them after creation,
+                    for example because of an external controller is managing them, like an
+                    autoscaler.
+                  properties:
+                    assignGeneratedIpv6CidrBlock:
+                      description: Requests an Amazon-provided IPv6 CIDR block with
+                        a /56 prefix length for the VPC. You cannot specify the range
+                        of IP addresses, or the size of the CIDR block. Default is false.
+                        Conflicts with ipv6_ipam_pool_id
+                      type: boolean
+                    cidrBlock:
+                      description: The IPv4 CIDR block for the VPC. CIDR can be explicitly
+                        set or it can be derived from IPAM using ipv4_netmask_length.
+                      type: string
+                    enableDnsHostnames:
+                      description: A boolean flag to enable/disable DNS hostnames in
+                        the VPC. Defaults false.
+                      type: boolean
+                    enableDnsSupport:
+                      description: A boolean flag to enable/disable DNS support in the
+                        VPC. Defaults to true.
+                      type: boolean
+                    enableNetworkAddressUsageMetrics:
+                      description: Indicates whether Network Address Usage metrics are
+                        enabled for your VPC. Defaults to false.
+                      type: boolean
+                    instanceTenancy:
+                      description: A tenancy option for instances launched into the
+                        VPC. Default is default, which ensures that EC2 instances launched
+                        in this VPC use the EC2 instance tenancy attribute specified
+                        when the EC2 instance is launched. The only other option is
+                        dedicated, which ensures that EC2 instances launched in this
+                        VPC are run on dedicated tenancy instances regardless of the
+                        tenancy attribute specified at launch. This has a dedicated
+                        per region fee of $2 per hour, plus an hourly per instance usage
+                        fee.
+                      type: string
+                    ipv4IpamPoolId:
+                      description: The ID of an IPv4 IPAM pool you want to use for allocating
+                        this VPC's CIDR. IPAM is a VPC feature that you can use to automate
+                        your IP address management workflows including assigning, tracking,
+                        troubleshooting, and auditing IP addresses across AWS Regions
+                        and accounts. Using IPAM you can monitor IP address usage throughout
+                        your AWS Organization.
+                      type: string
+                    ipv4IpamPoolIdRef:
+                      description: Reference to a VPCIpamPool in ec2 to populate ipv4IpamPoolId.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                        - name
+                      type: object
+                    ipv4IpamPoolIdSelector:
+                      description: Selector for a VPCIpamPool in ec2 to populate ipv4IpamPoolId.
+                      properties:
+                        matchControllerRef:
+                          description: |-
+                            MatchControllerRef ensures an object with the same controller reference
+                            as the selecting object is selected.
+                          type: boolean
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: MatchLabels ensures an object with matching labels
+                            is selected.
+                          type: object
+                        policy:
+                          description: Policies for selection.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      type: object
+                    ipv4NetmaskLength:
+                      description: The netmask length of the IPv4 CIDR you want to allocate
+                        to this VPC. Requires specifying a ipv4_ipam_pool_id.
+                      type: number
+                    ipv6CidrBlock:
+                      description: IPv6 CIDR block to request from an IPAM Pool. Can
+                        be set explicitly or derived from IPAM using ipv6_netmask_length.
+                      type: string
+                    ipv6CidrBlockNetworkBorderGroup:
+                      description: By default when an IPv6 CIDR is assigned to a VPC
+                        a default ipv6_cidr_block_network_border_group will be set to
+                        the region of the VPC. This can be changed to restrict advertisement
+                        of public addresses to specific Network Border Groups such as
+                        LocalZones.
+                      type: string
+                    ipv6IpamPoolId:
+                      description: IPAM Pool ID for a IPv6 pool. Conflicts with assign_generated_ipv6_cidr_block.
+                      type: string
+                    ipv6NetmaskLength:
+                      description: Netmask length to request from IPAM Pool. Conflicts
+                        with ipv6_cidr_block. This can be omitted if IPAM pool as a
+                        allocation_default_netmask_length set. Valid values are from
+                        44 to 60 in increments of 4.
+                      type: number
+                    tags:
+                      additionalProperties:
+                        type: string
+                      description: Key-value map of resource tags.
+                      type: object
+                      x-kubernetes-map-type: granular
+                  type: object
+                managementPolicies:
+                  default:
+                    - '*'
+                  description: |-
+                    THIS IS A BETA FIELD. It is on by default but can be opted out
+                    through a Crossplane feature flag.
+                    ManagementPolicies specify the array of actions Crossplane is allowed to
+                    take on the managed and external resources.
+                    This field is planned to replace the DeletionPolicy field in a future
+                    release. Currently, both could be set independently and non-default
+                    values would be honored if the feature flag is enabled. If both are
+                    custom, the DeletionPolicy field will be ignored.
+                    See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                    and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                  items:
+                    description: |-
+                      A ManagementAction represents an action that the Crossplane controllers
+                      can take on an external resource.
+                    enum:
+                      - Observe
+                      - Create
+                      - Update
+                      - Delete
+                      - LateInitialize
+                      - '*'
+                    type: string
+                  type: array
+                providerConfigRef:
+                  default:
+                    name: default
+                  description: |-
+                    ProviderConfigReference specifies how the provider that will be used to
+                    create, observe, update, and delete this managed resource should be
+                    configured.
+                  properties:
+                    name:
+                      description: Name of the referenced object.
+                      type: string
+                    policy:
+                      description: Policies for referencing.
+                      properties:
+                        resolution:
+                          default: Required
+                          description: |-
+                            Resolution specifies whether resolution of this reference is required.
+                            The default is 'Required', which means the reconcile will fail if the
+                            reference cannot be resolved. 'Optional' means this reference will be
+                            a no-op if it cannot be resolved.
+                          enum:
+                            - Required
+                            - Optional
+                          type: string
+                        resolve:
+                          description: |-
+                            Resolve specifies when this reference should be resolved. The default
+                            is 'IfNotPresent', which will attempt to resolve the reference only when
+                            the corresponding field is not present. Use 'Always' to resolve the
+                            reference on every reconcile.
+                          enum:
+                            - Always
+                            - IfNotPresent
+                          type: string
+                      type: object
+                  required:
+                    - name
+                  type: object
+                publishConnectionDetailsTo:
+                  description: |-
+                    PublishConnectionDetailsTo specifies the connection secret config which
+                    contains a name, metadata and a reference to secret store config to
+                    which any connection details for this managed resource should be written.
+                    Connection details frequently include the endpoint, username,
+                    and password required to connect to the managed resource.
+                  properties:
+                    configRef:
+                      default:
+                        name: default
+                      description: |-
+                        SecretStoreConfigRef specifies which secret store config should be used
+                        for this ConnectionSecret.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: |-
+                                Resolution specifies whether resolution of this reference is required.
+                                The default is 'Required', which means the reconcile will fail if the
+                                reference cannot be resolved. 'Optional' means this reference will be
+                                a no-op if it cannot be resolved.
+                              enum:
+                                - Required
+                                - Optional
+                              type: string
+                            resolve:
+                              description: |-
+                                Resolve specifies when this reference should be resolved. The default
+                                is 'IfNotPresent', which will attempt to resolve the reference only when
+                                the corresponding field is not present. Use 'Always' to resolve the
+                                reference on every reconcile.
+                              enum:
+                                - Always
+                                - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                        - name
+                      type: object
+                    metadata:
+                      description: Metadata is the metadata for connection secret.
+                      properties:
+                        annotations:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Annotations are the annotations to be added to connection secret.
+                            - For Kubernetes secrets, this will be used as "metadata.annotations".
+                            - It is up to Secret Store implementation for others store types.
+                          type: object
+                        labels:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Labels are the labels/tags to be added to connection secret.
+                            - For Kubernetes secrets, this will be used as "metadata.labels".
+                            - It is up to Secret Store implementation for others store types.
+                          type: object
+                        type:
+                          description: |-
+                            Type is the SecretType for the connection secret.
+                            - Only valid for Kubernetes Secret Stores.
+                          type: string
+                      type: object
+                    name:
+                      description: Name is the name of the connection secret.
+                      type: string
+                  required:
+                    - name
+                  type: object
+                writeConnectionSecretToRef:
+                  description: |-
+                    WriteConnectionSecretToReference specifies the namespace and name of a
+                    Secret to which any connection details for this managed resource should
+                    be written. Connection details frequently include the endpoint, username,
+                    and password required to connect to the managed resource.
+                    This field is planned to be replaced in a future release in favor of
+                    PublishConnectionDetailsTo. Currently, both could be set independently
+                    and connection details would be published to both without affecting
+                    each other.
+                  properties:
+                    name:
+                      description: Name of the secret.
+                      type: string
+                    namespace:
+                      description: Namespace of the secret.
+                      type: string
+                  required:
+                    - name
+                    - namespace
+                  type: object
+              required:
+                - forProvider
+              type: object
+            status:
+              description: VPCStatus defines the observed state of VPC.
+              properties:
+                atProvider:
+                  properties:
+                    arn:
+                      description: Amazon Resource Name (ARN) of VPC
+                      type: string
+                    assignGeneratedIpv6CidrBlock:
+                      description: Requests an Amazon-provided IPv6 CIDR block with
+                        a /56 prefix length for the VPC. You cannot specify the range
+                        of IP addresses, or the size of the CIDR block. Default is false.
+                        Conflicts with ipv6_ipam_pool_id
+                      type: boolean
+                    cidrBlock:
+                      description: The IPv4 CIDR block for the VPC. CIDR can be explicitly
+                        set or it can be derived from IPAM using ipv4_netmask_length.
+                      type: string
+                    defaultNetworkAclId:
+                      description: The ID of the network ACL created by default on VPC
+                        creation
+                      type: string
+                    defaultRouteTableId:
+                      description: The ID of the route table created by default on VPC
+                        creation
+                      type: string
+                    defaultSecurityGroupId:
+                      description: The ID of the security group created by default on
+                        VPC creation
+                      type: string
+                    dhcpOptionsId:
+                      description: DHCP options id of the desired VPC.
+                      type: string
+                    enableDnsHostnames:
+                      description: A boolean flag to enable/disable DNS hostnames in
+                        the VPC. Defaults false.
+                      type: boolean
+                    enableDnsSupport:
+                      description: A boolean flag to enable/disable DNS support in the
+                        VPC. Defaults to true.
+                      type: boolean
+                    enableNetworkAddressUsageMetrics:
+                      description: Indicates whether Network Address Usage metrics are
+                        enabled for your VPC. Defaults to false.
+                      type: boolean
+                    id:
+                      description: The ID of the VPC
+                      type: string
+                    instanceTenancy:
+                      description: A tenancy option for instances launched into the
+                        VPC. Default is default, which ensures that EC2 instances launched
+                        in this VPC use the EC2 instance tenancy attribute specified
+                        when the EC2 instance is launched. The only other option is
+                        dedicated, which ensures that EC2 instances launched in this
+                        VPC are run on dedicated tenancy instances regardless of the
+                        tenancy attribute specified at launch. This has a dedicated
+                        per region fee of $2 per hour, plus an hourly per instance usage
+                        fee.
+                      type: string
+                    ipv4IpamPoolId:
+                      description: The ID of an IPv4 IPAM pool you want to use for allocating
+                        this VPC's CIDR. IPAM is a VPC feature that you can use to automate
+                        your IP address management workflows including assigning, tracking,
+                        troubleshooting, and auditing IP addresses across AWS Regions
+                        and accounts. Using IPAM you can monitor IP address usage throughout
+                        your AWS Organization.
+                      type: string
+                    ipv4NetmaskLength:
+                      description: The netmask length of the IPv4 CIDR you want to allocate
+                        to this VPC. Requires specifying a ipv4_ipam_pool_id.
+                      type: number
+                    ipv6AssociationId:
+                      description: The association ID for the IPv6 CIDR block.
+                      type: string
+                    ipv6CidrBlock:
+                      description: IPv6 CIDR block to request from an IPAM Pool. Can
+                        be set explicitly or derived from IPAM using ipv6_netmask_length.
+                      type: string
+                    ipv6CidrBlockNetworkBorderGroup:
+                      description: By default when an IPv6 CIDR is assigned to a VPC
+                        a default ipv6_cidr_block_network_border_group will be set to
+                        the region of the VPC. This can be changed to restrict advertisement
+                        of public addresses to specific Network Border Groups such as
+                        LocalZones.
+                      type: string
+                    ipv6IpamPoolId:
+                      description: IPAM Pool ID for a IPv6 pool. Conflicts with assign_generated_ipv6_cidr_block.
+                      type: string
+                    ipv6NetmaskLength:
+                      description: Netmask length to request from IPAM Pool. Conflicts
+                        with ipv6_cidr_block. This can be omitted if IPAM pool as a
+                        allocation_default_netmask_length set. Valid values are from
+                        44 to 60 in increments of 4.
+                      type: number
+                    mainRouteTableId:
+                      description: |-
+                        The ID of the main route table associated with
+                        this VPC. Note that you can change a VPC's main route table by using an
+                        aws_main_route_table_association.
+                      type: string
+                    ownerId:
+                      description: The ID of the AWS account that owns the VPC.
+                      type: string
+                    tags:
+                      additionalProperties:
+                        type: string
+                      description: Key-value map of resource tags.
+                      type: object
+                      x-kubernetes-map-type: granular
+                    tagsAll:
+                      additionalProperties:
+                        type: string
+                      description: A map of tags assigned to the resource, including
+                        those inherited from the provider default_tags configuration
+                        block.
+                      type: object
+                      x-kubernetes-map-type: granular
+                  type: object
+                conditions:
+                  description: Conditions of the resource.
+                  items:
+                    description: A Condition that may apply to a resource.
+                    properties:
+                      lastTransitionTime:
+                        description: |-
+                          LastTransitionTime is the last time this condition transitioned from one
+                          status to another.
+                        format: date-time
+                        type: string
+                      message:
+                        description: |-
+                          A Message containing details about this condition's last transition from
+                          one status to another, if any.
+                        type: string
+                      observedGeneration:
+                        description: |-
+                          ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                          For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                          with respect to the current state of the instance.
+                        format: int64
+                        type: integer
+                      reason:
+                        description: A Reason for this condition's last transition from
+                          one status to another.
+                        type: string
+                      status:
+                        description: Status of this condition; is it currently True,
+                          False, or Unknown?
+                        type: string
+                      type:
+                        description: |-
+                          Type of this condition. At most one of each condition type may apply to
+                          a resource at any point in time.
+                        type: string
+                    required:
+                      - lastTransitionTime
+                      - reason
+                      - status
+                      - type
+                    type: object
+                  type: array
+                  x-kubernetes-list-map-keys:
+                    - type
+                  x-kubernetes-list-type: map
+                observedGeneration:
+                  description: |-
+                    ObservedGeneration is the latest metadata.generation
+                    which resulted in either a ready state, or stalled due to error
+                    it can not recover from without human intervention.
+                  format: int64
+                  type: integer
+              type: object
+          required:
+            - spec
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
+status:
+  acceptedNames:
+    categories:
+      - crossplane
+      - managed
+      - aws
+    kind: VPC
+    listKind: VPCList
+    plural: vpcs
+    singular: vpc
+  conditions:
+    - lastTransitionTime: "2025-11-11T21:46:59Z"
+      message: no conflicts found
+      reason: NoConflicts
+      status: "True"
+      type: NamesAccepted
+    - lastTransitionTime: "2025-11-11T21:47:00Z"
+      message: the initial names have been accepted
+      reason: InitialNamesAccepted
+      status: "True"
+      type: Established
+  storedVersions:
+    - v1beta1
