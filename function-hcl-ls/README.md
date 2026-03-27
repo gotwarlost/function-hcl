@@ -17,6 +17,10 @@ Completion requires provider CRDs to be set up such that the language server can
 The exact mechanics of how to set this up along with IDE integration will be documented under 
 [the docs page](https://crossplane-contrib.github.io/function-hcl/) when the client code is added to the repo.
 
+## Internals
+
+See [modules and flows](modules-and-flows.md) for some details of how it works, if you want to hack on it. 
+
 ## Standing on the shoulders of giants
 
 This repo owes a lot to the [HCL language library](https://github.com/hashicorp/hcl-lang) and 
