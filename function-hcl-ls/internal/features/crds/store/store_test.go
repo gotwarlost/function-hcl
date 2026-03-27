@@ -114,10 +114,10 @@ func TestDiscoverSourceStore_CallbackOnlyOnFirstDiscovery(t *testing.T) {
 	s.RegisterOpenDir(tmpDir)
 	s.RegisterOpenDir(tmpDir)
 
-	// Wait for the queue to process
-	time.Sleep(100 * time.Millisecond)
-
-	assert.Equal(t, int32(1), callCount.Load(), "callback should only be called once per directory")
+	// Wait for the queue to process by polling on the expected condition
+	require.Eventually(t, func() bool {
+		return callCount.Load() == 1
+	}, time.Second, 100*time.Millisecond, "callback should be called once")
 }
 
 func TestDiscoverSourceStore_NilCallbackDoesNotPanic(t *testing.T) {

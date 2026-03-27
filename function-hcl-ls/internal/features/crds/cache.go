@@ -13,24 +13,38 @@ import (
 	"github.com/crossplane-contrib/function-hcl/function-hcl-ls/internal/resource/loader"
 	types "github.com/crossplane-contrib/function-hcl/function-hcl-ls/types/v1"
 	"github.com/ghodss/yaml"
+	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func writeCacheFile(dir string, image string, objects []runtime.Object) (filename string, finalErr error) {
-	parts := strings.Split(image, ":")
-	var base, version string
-	switch len(parts) {
-	case 1:
-		base = parts[0]
-		version = "latest"
-	case 2:
-		base = parts[0]
-		version = parts[1]
-	default:
-		return "", fmt.Errorf("invalid image format, expected exactly one ':': %s", image)
+	ref, err := name.ParseReference(image, name.WithDefaultTag("latest"))
+	if err != nil {
+		return "", fmt.Errorf("invalid image reference %q: %w", image, err)
 	}
-	file := filepath.Join(dir, fmt.Sprintf("%s-%s.yaml", path.Base(base), version))
+	var (
+		repo    string
+		version string
+	)
+	switch r := ref.(type) {
+	case name.Tag:
+		// e.g. gcr.io/repo/img:tag
+		repo = r.RepositoryStr()
+		version = r.TagStr()
+	case name.Digest:
+		// e.g. gcr.io/repo/img@sha256:abcdef...
+		repo = r.RepositoryStr()
+		// Replace ':' in digest to keep filename filesystem-safe.
+		version = r.DigestStr()
+	default:
+		repo = ref.Context().RepositoryStr()
+		version = ref.Identifier()
+	}
+	base := path.Base(repo)
+	version = strings.ReplaceAll(version, ":", "-")
+
+	file := filepath.Join(dir, fmt.Sprintf("%s-%s.yaml", base, version))
 	f, err := os.Create(file)
 	if err != nil {
 		return file, err
