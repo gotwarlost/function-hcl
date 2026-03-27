@@ -24,7 +24,7 @@ jobs:
       - name: update coverage report
         uses: ncruces/go-coverage-report@v0
         with:
-          coverage-file: function-hcl/cover.out
+          coverage-file: cover.out
           module-dir: function-hcl
           amend: false
           reuse-go: true
@@ -50,7 +50,7 @@ jobs:
       - name: update coverage report
         uses: ncruces/go-coverage-report@v0
         with:
-          coverage-file: function-hcl-ls/cover.out
+          coverage-file: cover.out
           module-dir: function-hcl-ls
           output-dir: function-hcl-ls
           amend: false
