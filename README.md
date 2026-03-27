@@ -5,7 +5,8 @@ to model desired resources. It has more than a passing familiarity with Terrafor
 
 ![CI](https://github.com/crossplane-contrib/function-hcl/actions/workflows/ci.yaml/badge.svg?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/crossplane-contrib/function-hcl)](https://goreportcard.com/report/github.com/crossplane-contrib/function-hcl)
-[![Go Coverage](https://github.com/crossplane-contrib/function-hcl/wiki/coverage.svg)](https://raw.githack.com/wiki/crossplane-contrib/function-hcl/coverage.html)
+[![function-hcl coverage](https://github.com/crossplane-contrib/function-hcl/wiki/coverage.svg)](https://raw.githack.com/wiki/crossplane-contrib/function-hcl/coverage.html)
+[![function-hcl-ls coverage](https://github.com/crossplane-contrib/function-hcl/wiki/function-hcl-ls/coverage.svg)](https://raw.githack.com/wiki/crossplane-contrib/function-hcl/function-hcl-ls/coverage.html)
 
 ```
 apiVersion: apiextensions.crossplane.io/v1
