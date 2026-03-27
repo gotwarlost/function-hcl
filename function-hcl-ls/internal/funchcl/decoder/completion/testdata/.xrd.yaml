@@ -1,0 +1,3 @@
+apiVersion: aws.example.com/v1alpha1
+kind: XAWSNetwork
+

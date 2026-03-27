@@ -1,0 +1,360 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+spec:
+  claimNames:
+    kind: EKS
+    plural: eks
+  defaultCompositeDeletePolicy: Foreground
+  group: aws.xrd.example.com
+  names:
+    kind: XEKS
+    plural: xeks
+  versions:
+    - additionalPrinterColumns:
+        - jsonPath: .status.APIEndpoint
+          name: Endpoint
+          type: string
+        - jsonPath: .spec.resourceRef.name
+          name: external-name
+          type: string
+      name: v1alpha1
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          properties:
+            spec:
+              properties:
+                CSPAccountConfig:
+                  description: CSPAccount configuration parameters.
+                  properties:
+                    accountID:
+                      description: AWS account id
+                      type: string
+                    podSubnetCIDRs:
+                      description: array of pod subnet CIDRs in the same order as subnets
+                      items:
+                        type: string
+                      type: array
+                    podSubnets:
+                      description: pod subnet IDs for the CSP Account
+                      items:
+                        type: string
+                      type: array
+                    subnets:
+                      description: subnet IDs (one per AZ) used for this cluster
+                      items:
+                        properties:
+                          id:
+                            description: AWS subnet id
+                            type: string
+                          name:
+                            description: one character subnet suffix
+                            enum:
+                              - a
+                              - b
+                              - c
+                              - d
+                              - e
+                              - "f"
+                            type: string
+                        required:
+                          - id
+                          - name
+                        type: object
+                      type: array
+                    vpcId:
+                      description: ID of the VPC for creating clusters
+                      type: string
+                    vpcInfoJson:
+                      description: JSON string passed as an annotation in the inventory describing the vpc configuration
+                      type: string
+                    zonesInfoJson:
+                      description: JSON string passed as an annotation in the inventory describing the az configuration
+                      type: string
+                  required:
+                    - accountID
+                    - subnets
+                    - vpcId
+                  type: object
+                importFrom:
+                  properties:
+                    logging:
+                      properties:
+                        subscriptionFilterID:
+                          type: string
+                      required:
+                        - subscriptionFilterID
+                      type: object
+                    oidcProviderARN:
+                      description: ARN of the OIDC provider
+                      type: string
+                    publicEIPAllocations:
+                      items:
+                        type: string
+                      type: array
+                    queues:
+                      properties:
+                        apm:
+                          properties:
+                            queueARN:
+                              type: string
+                            securityGroupID:
+                              type: string
+                            securityGroupRuleID:
+                              type: string
+                            userPolicyAttachmentID:
+                              type: string
+                          required:
+                            - queueARN
+                            - securityGroupID
+                            - securityGroupRuleID
+                            - userPolicyAttachmentID
+                          type: object
+                        usageData:
+                          properties:
+                            queueARN:
+                              type: string
+                            securityGroupID:
+                              type: string
+                            securityGroupRuleID:
+                              type: string
+                            userPolicyAttachmentID:
+                              type: string
+                          required:
+                            - queueARN
+                            - securityGroupID
+                            - securityGroupRuleID
+                            - userPolicyAttachmentID
+                          type: object
+                      required:
+                        - apm
+                        - usageData
+                      type: object
+                    sshSecurityGroupID:
+                      description: security group ID of the security group that provides ssh access to nodes in the cluster
+                      type: string
+                    sshSecurityGroupRuleID:
+                      description: SSH security group rule
+                      type: string
+                  required:
+                    - sshSecurityGroupID
+                    - sshSecurityGroupRuleID
+                    - oidcProviderARN
+                    - queues
+                  type: object
+                parameters:
+                  description: cluster configuration parameters
+                  properties:
+                    apiServerAuthorizedIpRanges:
+                      description: desired Authorized IP ranges list.
+                      items:
+                        type: string
+                      type: array
+                    apiServerPrivateAuthorizedIpRanges:
+                      description: desired Authorized IP ranges list (Private).
+                      items:
+                        type: string
+                      type: array
+                    environment:
+                      description: desired environment in which to create cluster
+                      enum:
+                        - dev
+                        - qa
+                        - staging
+                        - production
+                      type: string
+                    hardwareProfiles:
+                      description: list of hardware profiles to be installed for the cluster, missing property means "all"
+                      items:
+                        type: string
+                      type: array
+                    name:
+                      description: 'TODO: Deprecate this - not used or set'
+                      type: string
+                    numNodepoolZones:
+                      description: |-
+                        number of zones to use for creating nodepools.
+                        when not specified, this is the same as the number of zones found in the account spec.
+                        when specified the number should be between 1 and the number of available zones.
+                      type: integer
+                    overrideVersion:
+                      description: |-
+                        K8s version to use - overrides back-end computation when version is higher than what is
+                        currently supported.
+                      type: string
+                    owner:
+                      default: sre
+                      description: owner of the cluster.
+                      type: string
+                    providerConfigName:
+                      description: the name of the ProviderConfig to use to provision CSP resources.
+                      type: string
+                    publicKeyName:
+                      description: name of the public key for SSH access.
+                      type: string
+                    region:
+                      description: desired target region.
+                      enum:
+                        - af-south-1
+                        - ap-east-1
+                        - ap-northeast-1
+                        - ap-northeast-2
+                        - ap-south-1
+                        - ap-southeast-1
+                        - ap-southeast-2
+                        - ca-central-1
+                        - eu-central-1
+                        - eu-central-2
+                        - eu-north-1
+                        - eu-south-1
+                        - eu-west-1
+                        - eu-west-2
+                        - eu-west-3
+                        - me-south-1
+                        - sa-east-1
+                        - us-east-1
+                        - us-east-2
+                        - us-west-1
+                        - us-west-2
+                      type: string
+                    role:
+                      default: workload
+                      description: MKI role of the cluster
+                      enum:
+                        - workload
+                        - workload-internal
+                        - global
+                        - mgmt-csp
+                        - mgmt-unified
+                        - mgmt-crmc
+                        - argocd
+                        - genesis
+                        - ecp-platform-deployer
+                        - ecp-service-deployer
+                      type: string
+                    serviceIpv4Cidr:
+                      default: 10.253.0.0/16
+                      description: service CIDR for the cluster.
+                      type: string
+                    version:
+                      description: 'DEPRECATED: desired k8s version, this is no longer used.'
+                      type: string
+                  required:
+                    - environment
+                    - providerConfigName
+                    - region
+                  type: object
+              required:
+                - CSPAccountConfig
+                - parameters
+              type: object
+            status:
+              description: A Status represents the observed state
+              properties:
+                APIEndpoint:
+                  description: Kubernetes API Endpoint
+                  type: string
+                ClusterID:
+                  description: Kubernetes ClusterID for referencing
+                  type: string
+                OIDC:
+                  additionalProperties: true
+                  description: Freeform field containing status information for oidc
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                clusterRoleARN:
+                  type: string
+                clusterSecurityGroupId:
+                  description: Security group created for this cluster.
+                  type: string
+                cniDeployed:
+                  description: whether the CNI has been deployed
+                  type: boolean
+                connectionSecretName:
+                  description: k8s secret name containing the kubeconfig for the cluster.
+                  type: string
+                connectionSecretNames:
+                  description: List of secrets names to surface
+                  items:
+                    type: string
+                  type: array
+                controlPlaneVersion:
+                  description: the current known control plane version
+                  type: string
+                desiredControlPlaneVersion:
+                  description: the desired control plane version to use
+                  type: string
+                exportSpec:
+                  description: export the spec to import elsewhere
+                  properties:
+                    logging:
+                      properties:
+                        subscriptionFilterID:
+                          type: string
+                      type: object
+                    oidcProviderARN:
+                      description: ARN of the OIDC provider
+                      type: string
+                    publicEIPAllocations:
+                      items:
+                        type: string
+                      type: array
+                    queues:
+                      properties:
+                        apm:
+                          properties:
+                            queueARN:
+                              type: string
+                            securityGroupID:
+                              type: string
+                            securityGroupRuleID:
+                              type: string
+                            userPolicyAttachmentID:
+                              type: string
+                          type: object
+                        usageData:
+                          properties:
+                            queueARN:
+                              type: string
+                            securityGroupID:
+                              type: string
+                            securityGroupRuleID:
+                              type: string
+                            userPolicyAttachmentID:
+                              type: string
+                          type: object
+                      type: object
+                    sshSecurityGroupID:
+                      description: security group ID of the security group that provides ssh access to nodes in the cluster
+                      type: string
+                    sshSecurityGroupRuleID:
+                      description: SSH security group rule
+                      type: string
+                  type: object
+                helmProviderConfigName:
+                  description: Name of the helm provider connected to this cluster
+                  type: string
+                k8sProviderConfigName:
+                  description: Name of the k8s provider connected to this cluster
+                  type: string
+                mgmtClusterUsed:
+                  description: Management cluster name for the cluster producing this composite
+                  type: string
+                nodeRoleARN:
+                  type: string
+                queues:
+                  description: queue IDs for referencing
+                  properties:
+                    APM:
+                      description: APM queue ID
+                      type: string
+                    usageData:
+                      description: usage-data queue ID
+                      type: string
+                  type: object
+              type: object
+          required:
+            - spec
+          type: object
+      served: true
