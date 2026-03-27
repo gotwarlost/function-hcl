@@ -30,7 +30,7 @@ jobs:
           echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
-      - name: Build binaries
+      - name: Build fn-hcl-tools binaries
         working-directory: function-hcl
         run: |
           ldflags="-s -w -X main.Version=${{ steps.vars.outputs.version }} -X main.Commit=${{ steps.vars.outputs.commit }} -X main.BuildDate=${{ steps.vars.outputs.date }}"
@@ -44,23 +44,56 @@ jobs:
           for platform in "${platforms[@]}"; do
             os="${platform%/*}"
             arch="${platform#*/}"
-            output="fn-hcl-tools-${os}-${arch}"
+            binary="fn-hcl-tools"
             if [ "$os" = "windows" ]; then
-              output="${output}.exe"
+              binary="${binary}.exe"
             fi
             echo "Building ${os}/${arch}..."
-            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -ldflags="$ldflags" -o "../dist/${output}" ./cmd/fn-hcl-tools
+            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -ldflags="$ldflags" -o "../dist/${binary}" ./cmd/fn-hcl-tools
+            chmod +x "../dist/${binary}"
+            cd ../dist
+            shasum -a 256 "${binary}" > checksums.txt
+            tar czf "fn-hcl-tools-${os}-${arch}.tar.gz" "${binary}" checksums.txt
+            rm "${binary}" checksums.txt
+            cd ../function-hcl
           done
 
-      - name: Create checksums
+      - name: Build function-hcl-ls binaries
+        working-directory: function-hcl-ls
+        run: |
+          platforms=(
+            "linux/amd64"
+            "linux/arm64"
+            "darwin/amd64"
+            "darwin/arm64"
+            "windows/amd64"
+          )
+          for platform in "${platforms[@]}"; do
+            os="${platform%/*}"
+            arch="${platform#*/}"
+            binary="function-hcl-ls"
+            if [ "$os" = "windows" ]; then
+              binary="${binary}.exe"
+            fi
+            echo "Building ${os}/${arch}..."
+            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -o "../dist/${binary}" .
+            chmod +x "../dist/${binary}"
+            cd ../dist
+            shasum -a 256 "${binary}" > checksums.txt
+            tar czf "function-hcl-ls-${os}-${arch}.tar.gz" "${binary}" checksums.txt
+            rm "${binary}" checksums.txt
+            cd ../function-hcl-ls
+          done
+
+      - name: Create archive checksums
         run: |
           cd dist
-          shasum -a 256 fn-hcl-tools-* > checksums.txt
+          shasum -a 256 *.tar.gz > checksums.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |
-            dist/fn-hcl-tools-*
+            dist/*.tar.gz
             dist/checksums.txt
