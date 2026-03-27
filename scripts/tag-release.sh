@@ -24,6 +24,7 @@ if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9](-rc[0-9]+)+$ ]]; then
 fi
 
 module_tag="function-hcl/${tag}"
+ls_module_tag="function-hcl-ls/${tag}"
 
 # Ensure clean working tree
 if [ -n "$(git status --porcelain)" ]; then
@@ -39,6 +40,10 @@ if [ "$force" = false ]; then
   fi
   if git rev-parse "$module_tag" >/dev/null 2>&1; then
     echo "Error: tag $module_tag already exists. Use --force to update it." >&2
+    exit 1
+  fi
+  if git rev-parse "$ls_module_tag" >/dev/null 2>&1; then
+    echo "Error: tag $ls_module_tag already exists. Use --force to update it." >&2
     exit 1
   fi
 fi
@@ -69,10 +74,13 @@ echo "Created tag: ${tag}"
 git tag $tag_flags "$module_tag" -m "Release ${module_tag}"
 echo "Created tag: ${module_tag}"
 
+git tag $tag_flags "$ls_module_tag" -m "Release ${ls_module_tag}"
+echo "Created tag: ${ls_module_tag}"
+
 echo ""
 echo "Done. Push with:"
 if [ "$force" = true ]; then
-  echo "  git push origin main ${tag} ${module_tag} --force"
+  echo "  git push origin main ${tag} ${module_tag} ${ls_module_tag} --force"
 else
-  echo "  git push origin main ${tag} ${module_tag}"
+  echo "  git push origin main ${tag} ${module_tag} ${ls_module_tag}"
 fi
