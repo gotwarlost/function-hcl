@@ -142,6 +142,9 @@ func dependentSchema(dyn DynamicLookup, bodyBlock *hclsyntax.Block) (*schema.Att
 	if !val.Type().IsObjectType() && !val.Type().IsMapType() {
 		return nil, false
 	}
+	if val.IsNull() || !val.IsKnown() {
+		return nil, false
+	}
 	obj := val.AsValueMap()
 	apiVersion, apiOK := obj["apiVersion"]
 	kind, kindOK := obj["kind"]
