@@ -26,6 +26,7 @@ jobs:
         with:
           coverage-file: cover.out
           module-dir: function-hcl
+          badge-title: function-hcl
           amend: false
           reuse-go: true
         continue-on-error: true
@@ -53,6 +54,7 @@ jobs:
           coverage-file: cover.out
           module-dir: function-hcl-ls
           output-dir: function-hcl-ls
+          badge-title: function-hcl-ls
           amend: false
           reuse-go: true
         continue-on-error: true
