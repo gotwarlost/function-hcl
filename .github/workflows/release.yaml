@@ -136,6 +136,10 @@ jobs:
         working-directory: vscode
         run: node build/downloadServer.mjs --target ${{ matrix.vscode_target }} --local-tarball ../dist/${{ matrix.ls_tarball }}
 
+      - name: Set version from tag
+        working-directory: vscode
+        run: npm version ${GITHUB_REF_NAME#v} --no-git-tag-version
+
       - name: Package extension
         working-directory: vscode
         run: npx @vscode/vsce package --target ${{ matrix.vscode_target }}
@@ -147,11 +151,76 @@ jobs:
           path: vscode/*.vsix
           retention-days: 1
 
+  jetbrains-package:
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - platform: darwin-arm64
+            ls_tarball: function-hcl-ls-darwin-arm64.tar.gz
+            ls_binary: function-hcl-ls
+          - platform: darwin-amd64
+            ls_tarball: function-hcl-ls-darwin-amd64.tar.gz
+            ls_binary: function-hcl-ls
+          - platform: linux-arm64
+            ls_tarball: function-hcl-ls-linux-arm64.tar.gz
+            ls_binary: function-hcl-ls
+          - platform: linux-amd64
+            ls_tarball: function-hcl-ls-linux-amd64.tar.gz
+            ls_binary: function-hcl-ls
+          - platform: windows-amd64
+            ls_tarball: function-hcl-ls-windows-amd64.tar.gz
+            ls_binary: function-hcl-ls.exe
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Download dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Extract language server binary
+        run: |
+          mkdir -p jetbrains/bin
+          tar -xzf dist/${{ matrix.ls_tarball }} -C jetbrains/bin ${{ matrix.ls_binary }}
+          chmod +x jetbrains/bin/${{ matrix.ls_binary }}
+
+      - name: Build plugin
+        working-directory: jetbrains
+        run: ./gradlew buildPlugin -PpluginVersion=${GITHUB_REF_NAME#v}
+
+      - name: Rename plugin ZIP with platform suffix
+        run: |
+          cd jetbrains/build/distributions
+          for f in *.zip; do
+            mv "$f" "${f%.zip}-${{ matrix.platform }}.zip"
+          done
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jetbrains-${{ matrix.platform }}
+          path: jetbrains/build/distributions/*.zip
+          retention-days: 1
+
   release:
     runs-on: ubuntu-latest
     needs:
       - build
       - vscode-package
+      - jetbrains-package
     steps:
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -171,6 +240,13 @@ jobs:
           path: vsix/
           merge-multiple: true
 
+      - name: Download all JetBrains plugin artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: jetbrains-*
+          path: jetbrains-plugins/
+          merge-multiple: true
+
       - name: Publish to VS Code Marketplace
         run: |
           for vsix in vsix/*.vsix; do
@@ -188,3 +264,4 @@ jobs:
             dist/*.tar.gz
             dist/checksums.txt
             vsix/*.vsix
+            jetbrains-plugins/*.zip

@@ -4,7 +4,7 @@
   "publisher": "function-hcl-authors",
   "description": "support for function-hcl DSL",
   "repository": "https://github.com/crossplane-contrib/function-hcl/tree/main/vscode",
-  "version": "0.0.1",
+  "version": "0.0.999",
   "engines": {
     "vscode": "^1.106.1"
   },

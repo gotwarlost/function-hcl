@@ -51,6 +51,22 @@ the next `.hcl` file is opened.
 This creates a plugin ZIP under `build/distributions/` that can be installed
 via **Settings → Plugins → ⚙ → Install Plugin from Disk**.
 
+The ZIP contains the language server binary for your current platform only.
+
+## Publishing to the JetBrains Marketplace
+
+The plugin is published automatically by the release workflow (`.github/workflows/release.yaml`)
+when a `v*` tag is pushed. The workflow builds platform-specific plugin ZIPs for
+`darwin-arm64`, `darwin-amd64`, `linux-arm64`, `linux-amd64`, and `windows-amd64`, each bundling
+the corresponding language server binary. These are attached to the GitHub release.
+
+### First-time setup
+
+1. Create an account at https://plugins.jetbrains.com/author/me
+2. Generate a Marketplace token at https://plugins.jetbrains.com/author/me/tokens with "Plugin upload" scope
+3. Upload the initial version manually via https://plugins.jetbrains.com/plugin/add (required for the first release)
+4. Store the token as the `PUBLISH_TOKEN` GitHub Actions secret for subsequent automated releases
+
 ## Gradle tasks
 
 | Task                       | Description                                                                                                      |
@@ -78,8 +94,6 @@ via **Settings → Plugins → ⚙ → Install Plugin from Disk**.
 | `src/.../HclCodeStyleSettingsProvider.kt` | Code style settings (tab size, etc.) |
 | `src/.../FunctionHclBundle.kt` | Message bundle for i18n strings |
 | `src/main/resources/META-INF/plugin.xml` | Plugin descriptor — extensions, services, dependencies |
-| `src/main/resources/META-INF/terraform-support.xml` | Optional Terraform plugin integration for HCL syntax highlighting |
 | `src/main/resources/messages/FunctionHclBundle.properties` | User-facing strings (settings labels, notifications, errors) |
-| `build.gradle.kts` | Build configuration — dependencies, IntelliJ Platform config, sandbox wiring |
+| `build.gradle.kts` | Build configuration — dependencies, IntelliJ Platform config, download task, sandbox wiring |
 | `gradle.properties` | Plugin version, platform version, build settings |
-| `build.gradle.kts` (`downloadLanguageServer` task) | Downloads the language server binary from GitHub releases for the current platform |
