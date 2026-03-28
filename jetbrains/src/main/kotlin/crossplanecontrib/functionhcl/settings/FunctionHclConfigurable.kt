@@ -77,7 +77,7 @@ class FunctionHclConfigurable : BoundConfigurable(FunctionHclBundle.message("set
     }
 
     private fun getCurrentBinaryPath(): String {
-        return BinaryPathResolver.resolve() ?: "Not found"
+        return BinaryPathResolver.resolve() ?: FunctionHclBundle.message("settings.currentBinary.notFound")
     }
 
     private fun restartLanguageServer() {

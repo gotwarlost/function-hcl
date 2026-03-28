@@ -46,12 +46,15 @@ class FunctionHclLanguageServerFactory : LanguageServerFactory {
     override fun createClientFeatures(): LSPClientFeatures {
         return object : LSPClientFeatures() {
             override fun initializeParams(initializeParams: InitializeParams) {
+                val pluginVersion = PluginManagerCore.getPlugin(
+                    PluginId.getId("crossplanecontrib.functionhcl")
+                )?.version ?: "unknown"
                 val lsp4ijVersion = PluginManagerCore.getPlugin(
                     PluginId.getId("com.redhat.devtools.lsp4ij")
                 )?.version ?: "unknown"
                 initializeParams.clientInfo = ClientInfo(
                     "function-hcl-intellij",
-                    "0.0.1; lsp4ij $lsp4ijVersion"
+                    "$pluginVersion; lsp4ij $lsp4ijVersion"
                 )
             }
         }
