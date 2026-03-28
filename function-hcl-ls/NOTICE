@@ -1,0 +1,51 @@
+This project contains code derived from two HashiCorp projects, both used
+under the terms of the Mozilla Public License 2.0 (MPL-2.0). The full
+license text is in LICENSE-MPL-2.0.txt.
+
+The derived code has been substantially modified — packages were renamed,
+restructured, and refactored. The list below identifies the upstream
+origin of each affected package as accurately as possible.
+
+-----------------------------------------------------------------------
+
+terraform-ls
+  https://github.com/hashicorp/terraform-ls
+  Copyright (c) HashiCorp, Inc.
+  License: MPL-2.0
+
+  The following packages are derived from or based on terraform-ls:
+
+    internal/document/         ← internal/document/
+    internal/eventbus/         ← internal/eventbus/
+    internal/features/modules/ ← internal/features/modules/
+    internal/filesystem/       ← internal/filesystem/
+    internal/langserver/       ← internal/langserver/
+    internal/utils/logging/    ← internal/logging/
+    internal/utils/mdplain/    ← internal/mdplain/
+    internal/utils/uri/        ← internal/uri/
+    main.go                    ← main.go
+
+-----------------------------------------------------------------------
+
+hcl-lang
+  https://github.com/hashicorp/hcl-lang
+  Copyright (c) HashiCorp, Inc.
+  License: MPL-2.0
+
+  The following package is derived from or based on hcl-lang:
+
+    internal/langhcl/          ← decoder/, lang/, schema/
+
+-----------------------------------------------------------------------
+
+Additionally, one file contains code from the Crossplane project:
+
+    internal/resource/loader/parser.go
+    Copyright 2020 The Crossplane Authors.
+    License: Apache-2.0
+
+-----------------------------------------------------------------------
+
+All other code in this project is original work or a refactoring that does not resemble the original work in any
+significant way.
+

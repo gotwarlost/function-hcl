@@ -29,7 +29,9 @@ the [Terraform language server](https://github.com/hashicorp/terraform-ls) imple
 This repo contains code copied from the above repos and modified for use. Since function-hcl is different
 enough from Terraform, the borrowed code did not work well for it but gave the authors a great starting
 point. A lot of refactoring has been done on both these copied codebases to make the language server
-work for function-hcl.
+work for function-hcl. Both upstream projects are licensed under the Mozilla Public License 2.0 (MPL-2.0).
+See [NOTICE](NOTICE) for specific attribution details and [LICENSE-MPL-2.0.txt](LICENSE-MPL-2.0.txt)
+for the full license text.
 
 In addition, the `go.mod` replaces the [HCL dependency](https://github.com/hashicorp/hcl) 
 with a [fork](https://github.com/gotwarlost/hcl) because of a [critical fix](https://github.com/hashicorp/hcl/pull/785) 
