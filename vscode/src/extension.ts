@@ -5,7 +5,7 @@ import {ExtensionContext, window, workspace} from 'vscode';
 import {LanguageClient, LanguageClientOptions, ServerOptions, TransportKind} from 'vscode-languageclient/node';
 import {getBundledServerPath} from './languageServer';
 
-let client: LanguageClient;
+let client: LanguageClient | undefined = undefined;
 
 console.log('Extension module loaded');
 

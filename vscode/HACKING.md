@@ -37,8 +37,8 @@ extension loaded from source. The setup that makes this work is in `.vscode/`:
 - **`launch.json`** — defines a launch configuration of type `extensionHost` that
   starts VS Code with `--extensionDevelopmentPath` pointing to this directory.
   It sets a pre-launch task that runs `npm run watch`.
-- **`tasks.json`** — defines the `watch` task (`tsc -b -w`) as a background build
-  that recompiles TypeScript on every save, so changes are picked up automatically
+- **`tasks.json`** — defines the `watch` task (`node esbuild.js --watch`) as a background build
+  that rebundles the extension on every save, so changes are picked up automatically
   in the debug session.
 
 To pick up changes, save the file and reload the Extension Development Host
@@ -48,7 +48,7 @@ window (`Ctrl+Shift+P` / `Cmd+Shift+P` → "Developer: Reload Window").
 
 The extension is published automatically by the release workflow (`.github/workflows/release.yaml`)
 when a `v*` tag is pushed. The workflow builds platform-specific `.vsix` packages for
-`darwin-arm64`, `darwin-x64`, `linux-arm64`, and `linux-x64`, each bundling the
+`darwin-arm64`, `darwin-x64`, `linux-arm64`, `linux-x64`, and `win32-x64`, each bundling the
 corresponding language server binary. These are published to the Marketplace and
 attached to the GitHub release.
 
@@ -69,6 +69,7 @@ attached to the GitHub release.
 | `npm run watch`           | Runs esbuild in watch mode, rebuilding `dist/extension.js` on file changes. Used by the debug launch configuration                                    |
 | `npm run package`         | Produces a `.vsix` package for local installation                                                                                                     |
 | `npm run download:server` | Downloads the language server binary for your platform into `bin/`. Accepts `--target` and `--local-tarball` flags                                    |
+| `npm run test`            | Type-checks with `tsc` and runs the test suite via `vscode-test`                                                                                      |
 | `npm run clean`           | Removes all generated directories: `bin/`, `dist/`, `out/`, and `node_modules/`                                                                       |
 | `npm run setup`           | First-time setup: installs dependencies, downloads the language server binary, and builds the extension                                                |
 | `vscode:prepublish`       | Runs automatically during `vsce package` — downloads the language server and builds the extension in production mode. Not intended to be run directly |
