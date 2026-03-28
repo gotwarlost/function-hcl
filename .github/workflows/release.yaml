@@ -136,10 +136,6 @@ jobs:
         working-directory: vscode
         run: node build/downloadServer.mjs --target ${{ matrix.vscode_target }} --local-tarball ../dist/${{ matrix.ls_tarball }}
 
-      - name: Build extension
-        working-directory: vscode
-        run: node esbuild.js --production
-
       - name: Package extension
         working-directory: vscode
         run: npx vsce package --target ${{ matrix.vscode_target }}
