@@ -11,6 +11,8 @@ import kotlin.io.path.isRegularFile
 
 private const val BINARY_NAME = "function-hcl-ls"
 private const val PLUGIN_ID = "crossplanecontrib.functionhcl"
+private val IS_WINDOWS = System.getProperty("os.name").lowercase().startsWith("win")
+private val EXECUTABLE_NAME = if (IS_WINDOWS) "$BINARY_NAME.exe" else BINARY_NAME
 
 /**
  * Resolves the path to the language server binary using a priority-based approach
@@ -67,7 +69,7 @@ object BinaryPathResolver {
      */
     fun getBundledBinaryPath(): Path? {
         val plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID)) ?: return null
-        return plugin.pluginPath.resolve("bin").resolve(BINARY_NAME)
+        return plugin.pluginPath.resolve("bin").resolve(EXECUTABLE_NAME)
     }
 
     private fun validatePath(path: Path, source: String): Boolean {

@@ -1,3 +1,4 @@
+import java.net.HttpURLConnection
 import java.net.URL
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
@@ -152,7 +153,9 @@ abstract class DownloadLanguageServerTask @javax.inject.Inject constructor(
         val name = binaryName.get()
         val repo = githubRepo.get()
         val outDir = binDir.get().asFile
-        val isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows
+
+        val osName = System.getProperty("os.name").lowercase()
+        val isWindows = osName.startsWith("win")
         val exeName = if (isWindows) "$name.exe" else name
         val binaryFile = File(outDir, exeName)
 
@@ -162,22 +165,19 @@ abstract class DownloadLanguageServerTask @javax.inject.Inject constructor(
         }
 
         val os = when {
-            org.gradle.internal.os.OperatingSystem.current().isMacOsX -> "darwin"
-            org.gradle.internal.os.OperatingSystem.current().isLinux -> "linux"
+            osName.contains("mac") || osName.contains("darwin") -> "darwin"
+            osName.contains("linux") -> "linux"
             isWindows -> "windows"
-            else -> error("Unsupported OS")
+            else -> error("Unsupported OS: $osName")
         }
-        val arch = when (System.getProperty("os.arch").lowercase()) {
+        val arch = when (val a = System.getProperty("os.arch").lowercase()) {
             "x86_64", "amd64", "x64" -> "amd64"
             "aarch64", "arm64" -> "arm64"
-            else -> error("Unsupported architecture: ${System.getProperty("os.arch")}")
+            else -> error("Unsupported architecture: $a")
         }
 
         // Fetch latest release version from GitHub API
-        val releaseUrl = URL("https://api.github.com/repos/$repo/releases/latest")
-        val releaseJson = releaseUrl.readText()
-        val version = Regex(""""tag_name"\s*:\s*"v([^"]+)"""").find(releaseJson)
-            ?.groupValues?.get(1) ?: error("Could not determine latest release version")
+        val version = fetchLatestVersion(repo)
 
         val assetName = "$name-$os-$arch.tar.gz"
         val downloadUrl = "https://github.com/$repo/releases/download/v$version/$assetName"
@@ -185,9 +185,7 @@ abstract class DownloadLanguageServerTask @javax.inject.Inject constructor(
 
         logger.lifecycle("Downloading $name v$version for $os/$arch...")
         outDir.mkdirs()
-        URL(downloadUrl).openStream().use { input ->
-            tarball.outputStream().use { output -> input.copyTo(output) }
-        }
+        downloadFile(URL(downloadUrl), tarball)
 
         // Extract the binary from the tarball
         fs.copy {
@@ -202,6 +200,48 @@ abstract class DownloadLanguageServerTask @javax.inject.Inject constructor(
         }
 
         logger.lifecycle("Language server ready at ${binaryFile.absolutePath}")
+    }
+
+    private fun fetchLatestVersion(repo: String): String {
+        val url = URL("https://api.github.com/repos/$repo/releases/latest")
+        val conn = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 15_000
+            readTimeout = 30_000
+            setRequestProperty("Accept", "application/vnd.github.v3+json")
+        }
+        try {
+            val code = conn.responseCode
+            if (code != 200) {
+                val body = conn.errorStream?.bufferedReader()?.readText() ?: ""
+                error("GitHub API returned HTTP $code for $url: $body")
+            }
+            val json = conn.inputStream.bufferedReader().readText()
+            return Regex(""""tag_name"\s*:\s*"v([^"]+)"""").find(json)
+                ?.groupValues?.get(1) ?: error("Could not find tag_name in GitHub API response")
+        } finally {
+            conn.disconnect()
+        }
+    }
+
+    private fun downloadFile(url: URL, target: File) {
+        val conn = (url.openConnection() as HttpURLConnection).apply {
+            connectTimeout = 15_000
+            readTimeout = 60_000
+            instanceFollowRedirects = true
+        }
+        try {
+            val code = conn.responseCode
+            if (code != 200) {
+                val body = conn.errorStream?.bufferedReader()?.readText() ?: ""
+                error("Download failed with HTTP $code for $url: $body")
+            }
+            conn.inputStream.use { input ->
+                target.outputStream().use { output -> input.copyTo(output) }
+            }
+        } finally {
+            conn.disconnect()
+        }
     }
 }
 
