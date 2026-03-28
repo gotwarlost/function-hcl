@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>crossplanecontrib.functionhcl</id>
-    <vendor email="krishnan.anantheswaran@yahoo.com" url="https://github.com/crossplane-contrib/function-hcl">The function-hcl authors</vendor>
+    <vendor url="https://github.com/crossplane-contrib/function-hcl">The function-hcl authors</vendor>
 
     <description><![CDATA[
     Provides language support for function-hcl files using the function-hcl language server.

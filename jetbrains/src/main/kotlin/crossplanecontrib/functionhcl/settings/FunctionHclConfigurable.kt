@@ -11,6 +11,7 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.dsl.builder.*
+import javax.swing.JLabel
 import com.redhat.devtools.lsp4ij.LanguageServerManager
 import java.nio.file.Path
 import kotlin.io.path.exists
@@ -23,6 +24,7 @@ import kotlin.io.path.isRegularFile
  */
 class FunctionHclConfigurable : BoundConfigurable(FunctionHclBundle.message("settings.name")) {
     private val settings = FunctionHclSettings.getInstance()
+    private lateinit var binaryPathLabel: JLabel
 
     override fun createPanel(): DialogPanel = panel {
         group(FunctionHclBundle.message("settings.group.configuration")) {
@@ -41,7 +43,7 @@ class FunctionHclConfigurable : BoundConfigurable(FunctionHclBundle.message("set
 
         group(FunctionHclBundle.message("settings.group.binaryStatus")) {
             row(FunctionHclBundle.message("settings.currentBinary.label")) {
-                label(getCurrentBinaryPath())
+                binaryPathLabel = label(getCurrentBinaryPath()).component
             }
 
             row {
@@ -56,6 +58,16 @@ class FunctionHclConfigurable : BoundConfigurable(FunctionHclBundle.message("set
                 comment(FunctionHclBundle.message("settings.priorityInfo.text"))
             }
         }
+    }
+
+    override fun apply() {
+        super.apply()
+        binaryPathLabel.text = getCurrentBinaryPath()
+    }
+
+    override fun reset() {
+        super.reset()
+        binaryPathLabel.text = getCurrentBinaryPath()
     }
 
     private fun validateServerPath(pathString: String): ValidationInfo? {
