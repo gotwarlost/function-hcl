@@ -1,6 +1,6 @@
 {
-  "name": "function-hcl-vscode-extension",
-  "displayName": "function-hcl-vscode-extension",
+  "name": "function-hcl",
+  "displayName": "Crossplane Function HCL",
   "publisher": "function-hcl-authors",
   "description": "support for function-hcl DSL",
   "repository": "https://github.com/crossplane-contrib/function-hcl/tree/main/vscode",
