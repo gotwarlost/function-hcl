@@ -154,6 +154,7 @@ object BinaryDownloader {
             connectTimeout = 15_000
             readTimeout = 30_000
             setRequestProperty("Accept", "application/vnd.github.v3+json")
+            setRequestProperty("User-Agent", "function-hcl-intellij")
         }
         try {
             val code = conn.responseCode
@@ -174,6 +175,7 @@ object BinaryDownloader {
             connectTimeout = 15_000
             readTimeout = 60_000
             instanceFollowRedirects = true
+            setRequestProperty("User-Agent", "function-hcl-intellij")
         }
         try {
             val code = conn.responseCode
