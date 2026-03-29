@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as os from 'os';
 import {ExtensionContext, window, workspace} from 'vscode';
 import {LanguageClient, LanguageClientOptions, ServerOptions, TransportKind} from 'vscode-languageclient/node';
-import {getBundledServerPath} from './languageServer';
+import {ensureServerBinary} from './languageServer';
 
 let client: LanguageClient | undefined = undefined;
 
@@ -11,7 +11,7 @@ console.log('Extension module loaded');
 
 export async function activate(context: ExtensionContext) {
     try {
-        const serverPath = getLanguageServerPath(context);
+        const serverPath = await getLanguageServerPath(context);
         await startLanguageClient(context, serverPath);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -68,7 +68,7 @@ async function startLanguageClient(context: ExtensionContext, serverPath: string
     await client.start();
 }
 
-function getLanguageServerPath(context: ExtensionContext): string {
+async function getLanguageServerPath(context: ExtensionContext): Promise<string> {
     const config = workspace.getConfiguration('function-hcl');
 
     // Priority 1: User-provided path from VSCode settings
@@ -95,8 +95,8 @@ function getLanguageServerPath(context: ExtensionContext): string {
         }
     }
 
-    // Priority 3: Bundled binary
-    return getBundledServerPath(context);
+    // Priority 3: Download (or use cached) binary
+    return ensureServerBinary(context);
 }
 
 function resolvePath(p: string): string {

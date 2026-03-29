@@ -1,5 +1,3 @@
-import java.net.HttpURLConnection
-import java.net.URL
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
@@ -133,124 +131,25 @@ kover {
     }
 }
 
-// Downloads the language server binary from GitHub releases for the current platform.
-// Pure Gradle — no shell scripts — works on macOS, Linux, and Windows.
-abstract class DownloadLanguageServerTask @javax.inject.Inject constructor(
-    private val fs: FileSystemOperations,
-    private val archiveOps: ArchiveOperations,
-) : DefaultTask() {
-    @get:Input
-    abstract val binaryName: Property<String>
-
-    @get:Input
-    abstract val githubRepo: Property<String>
-
-    @get:OutputDirectory
-    abstract val binDir: DirectoryProperty
-
-    @TaskAction
-    fun download() {
-        val name = binaryName.get()
-        val repo = githubRepo.get()
-        val outDir = binDir.get().asFile
-
-        val osName = System.getProperty("os.name").lowercase()
-        val isWindows = osName.startsWith("win")
-        val exeName = if (isWindows) "$name.exe" else name
-        val binaryFile = File(outDir, exeName)
-
-        if (binaryFile.exists()) {
-            logger.lifecycle("Language server already exists at ${binaryFile.absolutePath}, skipping.")
-            return
-        }
-
-        val os = when {
-            osName.contains("mac") || osName.contains("darwin") -> "darwin"
-            osName.contains("linux") -> "linux"
-            isWindows -> "windows"
-            else -> error("Unsupported OS: $osName")
-        }
-        val arch = when (val a = System.getProperty("os.arch").lowercase()) {
-            "x86_64", "amd64", "x64" -> "amd64"
-            "aarch64", "arm64" -> "arm64"
-            else -> error("Unsupported architecture: $a")
-        }
-
-        // Fetch latest release version from GitHub API
-        val version = fetchLatestVersion(repo)
-
-        val assetName = "$name-$os-$arch.tar.gz"
-        val downloadUrl = "https://github.com/$repo/releases/download/v$version/$assetName"
-        val tarball = File(outDir, assetName)
-
-        logger.lifecycle("Downloading $name v$version for $os/$arch...")
-        outDir.mkdirs()
-        downloadFile(URL(downloadUrl), tarball)
-
-        // Extract the binary from the tarball
-        fs.copy {
-            from(archiveOps.tarTree(tarball))
-            include(exeName)
-            into(outDir)
-        }
-        tarball.delete()
-
-        if (!isWindows) {
-            binaryFile.setExecutable(true, false)
-        }
-
-        logger.lifecycle("Language server ready at ${binaryFile.absolutePath}")
-    }
-
-    private fun fetchLatestVersion(repo: String): String {
-        val url = URL("https://api.github.com/repos/$repo/releases/latest")
-        val conn = (url.openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
-            connectTimeout = 15_000
-            readTimeout = 30_000
-            setRequestProperty("Accept", "application/vnd.github.v3+json")
-        }
-        try {
-            val code = conn.responseCode
-            if (code != 200) {
-                val body = conn.errorStream?.bufferedReader()?.readText() ?: ""
-                error("GitHub API returned HTTP $code for $url: $body")
-            }
-            val json = conn.inputStream.bufferedReader().readText()
-            return Regex(""""tag_name"\s*:\s*"v([^"]+)"""").find(json)
-                ?.groupValues?.get(1) ?: error("Could not find tag_name in GitHub API response")
-        } finally {
-            conn.disconnect()
-        }
-    }
-
-    private fun downloadFile(url: URL, target: File) {
-        val conn = (url.openConnection() as HttpURLConnection).apply {
-            connectTimeout = 15_000
-            readTimeout = 60_000
-            instanceFollowRedirects = true
-        }
-        try {
-            val code = conn.responseCode
-            if (code != 200) {
-                val body = conn.errorStream?.bufferedReader()?.readText() ?: ""
-                error("Download failed with HTTP $code for $url: $body")
-            }
-            conn.inputStream.use { input ->
-                target.outputStream().use { output -> input.copyTo(output) }
-            }
-        } finally {
-            conn.disconnect()
-        }
+// Generate a resource file containing the pinned language server version.
+// For release builds, pass -PlanguageServerVersion=X.Y.Z to pin the version.
+// For local dev, the file is empty which causes the plugin to download the latest release.
+val generateVersionResource by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated/resources/ls-version")
+    val lsVersion = providers.gradleProperty("languageServerVersion").orElse("")
+    outputs.dir(outputDir)
+    inputs.property("languageServerVersion", lsVersion)
+    doLast {
+        val dir = outputDir.get().asFile
+        dir.mkdirs()
+        File(dir, "language-server-version.txt").writeText(lsVersion.get())
     }
 }
 
-val downloadLanguageServer by tasks.registering(DownloadLanguageServerTask::class) {
-    description = "Downloads the function-hcl-ls binary for the current platform"
-    group = "build setup"
-    binaryName.set("function-hcl-ls")
-    githubRepo.set("crossplane-contrib/function-hcl")
-    binDir.set(layout.projectDirectory.dir("bin"))
+sourceSets {
+    main {
+        resources.srcDir(generateVersionResource.map { it.outputs.files.singleFile })
+    }
 }
 
 tasks {
@@ -260,15 +159,8 @@ tasks {
     publishPlugin {
         dependsOn(patchChangelog)
     }
-    clean {
-        delete(layout.projectDirectory.dir("bin"))
-    }
-    // Copy the language server binary into the plugin sandbox so it's available during runIde
-    prepareSandbox {
-        dependsOn(downloadLanguageServer)
-        from(layout.projectDirectory.dir("bin")) {
-            into("${intellijPlatform.projectName.get()}/bin")
-        }
+    processResources {
+        dependsOn(generateVersionResource)
     }
 }
 

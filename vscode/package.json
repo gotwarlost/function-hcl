@@ -41,7 +41,7 @@
         "function-hcl.languageServerPath": {
           "type": "string",
           "default": "",
-          "description": "Custom path to the language server binary. If set, this takes precedence over the bundled version."
+          "description": "Custom path to the language server binary. If set, this takes precedence over the automatically downloaded version."
         }
       }
     },
@@ -54,14 +54,13 @@
     "commands": []
   },
   "scripts": {
-    "vscode:prepublish": "node -e \"require('fs').copyFileSync('../LICENSE','LICENSE.txt')\" && node build/downloadServer.mjs && node esbuild.js --production",
+    "vscode:prepublish": "node -e \"require('fs').copyFileSync('../LICENSE','LICENSE.txt')\" && node esbuild.js --production",
     "compile": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "package": "vsce package",
-    "download:server": "node build/downloadServer.mjs",
     "test": "tsc -p . && vscode-test",
-    "clean": "node -e \"const fs=require('fs');['bin','dist','out','node_modules'].forEach(d=>fs.rmSync(d,{recursive:true,force:true}))\"",
-    "setup": "npm ci --ignore-scripts && node build/downloadServer.mjs && node esbuild.js"
+    "clean": "node -e \"const fs=require('fs');['dist','out','node_modules'].forEach(d=>fs.rmSync(d,{recursive:true,force:true}))\"",
+    "setup": "npm ci --ignore-scripts && node esbuild.js"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

@@ -1,25 +1,17 @@
 package crossplanecontrib.functionhcl.binary
 
 import crossplanecontrib.functionhcl.settings.FunctionHclSettings
-import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.extensions.PluginId
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
 
-private const val BINARY_NAME = "function-hcl-ls"
-private const val PLUGIN_ID = "crossplanecontrib.functionhcl"
-private val IS_WINDOWS = System.getProperty("os.name").lowercase().startsWith("win")
-private val EXECUTABLE_NAME = if (IS_WINDOWS) "$BINARY_NAME.exe" else BINARY_NAME
-
 /**
- * Resolves the path to the language server binary using a priority-based approach
- * matching the VS Code extension:
+ * Resolves the path to the language server binary using a priority-based approach:
  * 1. Custom path from IntelliJ settings
  * 2. Environment variable FUNCTION_HCL_LS_PATH
- * 3. Bundled binary shipped with the plugin
+ * 3. Cached binary downloaded from GitHub releases
  */
 object BinaryPathResolver {
     private val log = logger<BinaryPathResolver>()
@@ -52,24 +44,15 @@ object BinaryPathResolver {
             log.warn("FUNCTION_HCL_LS_PATH is set but invalid: $envPath")
         }
 
-        // Priority 3: Bundled binary
-        val bundledPath = getBundledBinaryPath()
-        if (bundledPath != null && validatePath(bundledPath, "bundled plugin")) {
-            log.info("Using bundled language server: $bundledPath")
-            return bundledPath.toString()
+        // Priority 3: Cached download
+        val cachedPath = BinaryDownloader.resolveCache()
+        if (cachedPath != null) {
+            log.info("Using cached language server: $cachedPath")
+            return cachedPath.toString()
         }
 
-        log.warn("No language server binary found")
+        log.info("No language server binary found")
         return null
-    }
-
-    /**
-     * Returns the path to the bundled binary shipped with the plugin, or null
-     * if the plugin path cannot be determined.
-     */
-    fun getBundledBinaryPath(): Path? {
-        val plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID)) ?: return null
-        return plugin.pluginPath.resolve("bin").resolve(EXECUTABLE_NAME)
     }
 
     private fun validatePath(path: Path, source: String): Boolean {

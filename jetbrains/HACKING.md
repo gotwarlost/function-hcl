@@ -4,16 +4,17 @@
 ./gradlew runIde
 ```
 
-This downloads the language server binary for your platform into `bin/`,
-copies it into the IntelliJ sandbox, builds the plugin, and launches a
-development instance of IntelliJ IDEA with the plugin loaded.
+This builds the plugin and launches a development instance of IntelliJ IDEA
+with the plugin loaded. The language server binary is **not** bundled — it is
+downloaded automatically from GitHub releases the first time you open an `.hcl`
+file.
 
-The `bin/function-hcl-ls` binary is cached — the download is a no-op if it
-already exists. To force a re-download, delete the `bin/` directory first:
+The resulting `.zip` does not contain a pinned language server version, so when
+installed it will download the **latest release** from GitHub on first activation.
+To pin a specific version:
 
 ```sh
-rm -rf bin/
-./gradlew runIde
+./gradlew buildPlugin -PlanguageServerVersion=0.2.0-rc6
 ```
 
 To use a locally-built language server instead of downloading one, either:
@@ -30,10 +31,11 @@ The plugin uses the same priority order as the VS Code extension:
 
 1. Custom path from **Settings → Tools → Function HCL**
 2. `FUNCTION_HCL_LS_PATH` environment variable
-3. Bundled binary shipped with the plugin (at `{pluginPath}/bin/function-hcl-ls`)
+3. Automatically downloaded binary (cached in the IDE's plugins directory)
 
-During local development, `prepareSandbox` copies `bin/function-hcl-ls` into
-the IntelliJ sandbox so it appears as the bundled binary.
+For release builds, the language server version is pinned to match the plugin
+version (baked in at build time via `-PlanguageServerVersion=X.Y.Z`).
+For local dev, the latest release is downloaded.
 
 ## Restarting the language server
 
@@ -51,14 +53,12 @@ the next `.hcl` file is opened.
 This creates a plugin ZIP under `build/distributions/` that can be installed
 via **Settings → Plugins → ⚙ → Install Plugin from Disk**.
 
-The ZIP contains the language server binary for your current platform only.
-
 ## Publishing to the JetBrains Marketplace
 
 The plugin is published automatically by the release workflow (`.github/workflows/release.yaml`)
-when a `v*` tag is pushed. The workflow builds platform-specific plugin ZIPs for
-`darwin-arm64`, `darwin-amd64`, `linux-arm64`, `linux-amd64`, and `windows-amd64`, each bundling
-the corresponding language server binary. These are attached to the GitHub release.
+when a `v*` tag is pushed. The workflow builds a lightweight plugin ZIP (no bundled binary)
+with the language server version pinned to the tag. Users' IDEs download the
+language server on first activation.
 
 ### First-time setup
 
@@ -73,18 +73,17 @@ the corresponding language server binary. These are attached to the GitHub relea
 |----------------------------|------------------------------------------------------------------------------------------------------------------|
 | `./gradlew runIde`         | Builds the plugin and launches a sandboxed IntelliJ instance with it loaded                                      |
 | `./gradlew buildPlugin`    | Produces a distributable plugin ZIP in `build/distributions/`                                                    |
-| `./gradlew downloadLanguageServer` | Downloads the language server binary for your platform into `bin/`. Runs automatically before `runIde`   |
-| `./gradlew prepareSandbox` | Assembles the plugin in the sandbox directory, including the language server binary from `bin/`                   |
 | `./gradlew compileKotlin`  | Compiles Kotlin sources without building the full plugin                                                         |
 | `./gradlew test`           | Runs the test suite                                                                                              |
-| `./gradlew clean`          | Removes the `build/` and `bin/` directories, including the downloaded language server binary                      |
+| `./gradlew clean`          | Removes the `build/` directory                                                                                   |
 
 ## File reference
 
 | File | Purpose |
 |------|---------|
-| `src/.../FunctionHclLanguageServerFactory.kt` | LSP4IJ factory — resolves the binary path and creates the stdio connection to the language server |
-| `src/.../binary/BinaryPathResolver.kt` | Priority-based binary path resolution (settings → env var → bundled) |
+| `src/.../FunctionHclLanguageServerFactory.kt` | LSP4IJ factory — resolves the binary path, triggers download, creates the stdio connection |
+| `src/.../binary/BinaryPathResolver.kt` | Priority-based binary path resolution (settings → env var → cached download) |
+| `src/.../binary/BinaryDownloader.kt` | Downloads the language server binary from GitHub releases with progress reporting |
 | `src/.../settings/FunctionHclConfigurable.kt` | Settings UI panel under **Settings → Tools → Function HCL** |
 | `src/.../settings/FunctionHclSettings.kt` | Persistent settings service |
 | `src/.../settings/FunctionHclSettingsState.kt` | Settings state data class |
@@ -95,5 +94,5 @@ the corresponding language server binary. These are attached to the GitHub relea
 | `src/.../FunctionHclBundle.kt` | Message bundle for i18n strings |
 | `src/main/resources/META-INF/plugin.xml` | Plugin descriptor — extensions, services, dependencies |
 | `src/main/resources/messages/FunctionHclBundle.properties` | User-facing strings (settings labels, notifications, errors) |
-| `build.gradle.kts` | Build configuration — dependencies, IntelliJ Platform config, download task, sandbox wiring |
+| `build.gradle.kts` | Build configuration — dependencies, IntelliJ Platform config, version resource generation |
 | `gradle.properties` | Plugin version, platform version, build settings |

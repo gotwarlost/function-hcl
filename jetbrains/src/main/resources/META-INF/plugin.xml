@@ -19,9 +19,9 @@
 
     Configuration:
     <ul>
-        <li>The language server binary is bundled with the plugin</li>
+        <li>The language server binary is downloaded automatically on first use</li>
         <li>You can configure a custom binary path in Settings → Tools → Function HCL</li>
-        <li>Environment variable FUNCTION_HCL_LS_PATH can also be used to override the bundled binary</li>
+        <li>Environment variable FUNCTION_HCL_LS_PATH can also be used to specify a custom path</li>
     </ul>
 
     Requirements:
@@ -83,7 +83,7 @@
                 factoryClass="crossplanecontrib.functionhcl.FunctionHclLanguageServerFactory">
             <description><![CDATA[
             Language server for function-hcl files.
-            The binary is bundled with the plugin.
+            The binary is downloaded automatically on first use.
             You can configure a custom path in Settings → Tools → Function HCL.
             ]]></description>
         </server>
