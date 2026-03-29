@@ -7,7 +7,7 @@ package crossplanecontrib.functionhcl.settings
 data class FunctionHclSettingsState(
     /**
      * Custom path to the language server binary.
-     * If empty, the plugin will use the environment variable or the bundled binary.
+     * If empty, the plugin will use the environment variable or download automatically.
      */
     var languageServerPath: String = ""
 )
