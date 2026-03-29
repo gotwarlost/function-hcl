@@ -10,13 +10,9 @@ import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.options.ShowSettingsUtil
-import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.redhat.devtools.lsp4ij.LanguageServerFactory
-import com.redhat.devtools.lsp4ij.LanguageServerManager
 import com.redhat.devtools.lsp4ij.client.LanguageClientImpl
 import com.redhat.devtools.lsp4ij.client.features.LSPClientFeatures
 import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider
@@ -28,27 +24,64 @@ class FunctionHclLanguageServerFactory : LanguageServerFactory {
     private val log = logger<FunctionHclLanguageServerFactory>()
 
     companion object {
-        @Volatile
-        private var downloadTriggered = false
-
         fun resetNotificationState() {
-            downloadTriggered = false
+            // No-op, kept for settings UI compatibility
         }
     }
 
     override fun createConnectionProvider(project: Project): StreamConnectionProvider {
-        val binaryPath = BinaryPathResolver.resolve()
-        if (binaryPath != null) {
-            return FunctionHclStreamConnectionProvider(binaryPath)
+        // Try existing binary first (settings, env var, or cached download)
+        val existingPath = BinaryPathResolver.resolve()
+        if (existingPath != null) {
+            return FunctionHclStreamConnectionProvider(existingPath)
         }
 
-        // Binary not found — trigger background download if not already in progress
-        if (!downloadTriggered) {
-            downloadTriggered = true
-            triggerBackgroundDownload(project)
-        }
+        // Binary not found — download synchronously.
+        // LSP4IJ calls createConnectionProvider on a background thread, so blocking is safe.
+        val version = getPinnedVersion()
+        log.info("Language server not found, downloading (version: ${version.ifBlank { "latest" }})...")
 
-        throw ProcessCanceledException()
+        try {
+            var downloadedPath: java.nio.file.Path? = null
+            ProgressManager.getInstance().runProcessWithProgressSynchronously(
+                {
+                    val indicator = ProgressManager.getInstance().progressIndicator
+                    downloadedPath = BinaryDownloader.download(version, indicator)
+                },
+                FunctionHclBundle.message("download.progress.title"),
+                true,
+                project
+            )
+
+            val path = downloadedPath ?: throw IllegalStateException("Download completed but path is null")
+
+            Notification(
+                "Function HCL Language Server",
+                FunctionHclBundle.message("notification.download.success.title"),
+                FunctionHclBundle.message("notification.download.success"),
+                NotificationType.INFORMATION
+            ).notify(project)
+
+            return FunctionHclStreamConnectionProvider(path.toString())
+
+        } catch (e: Exception) {
+            log.warn("Failed to download language server", e)
+
+            val notification = Notification(
+                "Function HCL Language Server",
+                FunctionHclBundle.message("notification.download.failed.title"),
+                FunctionHclBundle.message("notification.download.failed", e.message ?: "Unknown error"),
+                NotificationType.ERROR
+            )
+            notification.addAction(
+                NotificationAction.createSimple(FunctionHclBundle.message("notification.binary.notFound.configure")) {
+                    ShowSettingsUtil.getInstance().showSettingsDialog(project, FunctionHclConfigurable::class.java)
+                }
+            )
+            notification.notify(project)
+
+            throw e
+        }
     }
 
     override fun createLanguageClient(project: Project): LanguageClientImpl {
@@ -70,53 +103,6 @@ class FunctionHclLanguageServerFactory : LanguageServerFactory {
                 )
             }
         }
-    }
-
-    private fun triggerBackgroundDownload(project: Project) {
-        val version = getPinnedVersion()
-        log.info("Language server not found, triggering download (version: ${version.ifBlank { "latest" }})")
-
-        ProgressManager.getInstance().run(
-            object : Task.Backgroundable(
-                project,
-                FunctionHclBundle.message("download.progress.title"),
-                true
-            ) {
-                override fun run(indicator: ProgressIndicator) {
-                    try {
-                        BinaryDownloader.download(version, indicator)
-
-                        // Restart the language server now that the binary is available
-                        downloadTriggered = false
-                        LanguageServerManager.getInstance(project).start("functionHclLanguageServer")
-
-                        Notification(
-                            "Function HCL Language Server",
-                            FunctionHclBundle.message("notification.download.success.title"),
-                            FunctionHclBundle.message("notification.download.success"),
-                            NotificationType.INFORMATION
-                        ).notify(project)
-
-                    } catch (e: Exception) {
-                        log.warn("Failed to download language server", e)
-                        downloadTriggered = false
-
-                        val notification = Notification(
-                            "Function HCL Language Server",
-                            FunctionHclBundle.message("notification.download.failed.title"),
-                            FunctionHclBundle.message("notification.download.failed", e.message ?: "Unknown error"),
-                            NotificationType.ERROR
-                        )
-                        notification.addAction(
-                            NotificationAction.createSimple(FunctionHclBundle.message("notification.binary.notFound.configure")) {
-                                ShowSettingsUtil.getInstance().showSettingsDialog(project, FunctionHclConfigurable::class.java)
-                            }
-                        )
-                        notification.notify(project)
-                    }
-                }
-            }
-        )
     }
 
     /**

@@ -87,15 +87,15 @@ download the language server on first activation.
 
 ## npm scripts
 
-| Script                    | Command                                                                                                                                               |
-|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `npm run compile`         | Bundles the extension into `dist/extension.js` using esbuild                                                                                          |
-| `npm run watch`           | Runs esbuild in watch mode, rebuilding `dist/extension.js` on file changes. Used by the debug launch configuration                                    |
-| `npm run package`         | Produces a `.vsix` package for local installation                                                                                                     |
-| `npm run test`            | Type-checks with `tsc` and runs the test suite via `vscode-test`                                                                                      |
-| `npm run clean`           | Removes all generated directories: `dist/`, `out/`, and `node_modules/`                                                                               |
-| `npm run setup`           | First-time setup: installs dependencies and builds the extension                                                                                       |
-| `vscode:prepublish`       | Runs automatically during `vsce package` — builds the extension in production mode. Not intended to be run directly                                   |
+| Script              | Command                                                                                                             |
+|---------------------|---------------------------------------------------------------------------------------------------------------------|
+| `npm run compile`   | Bundles the extension into `dist/extension.js` using esbuild                                                        |
+| `npm run watch`     | Runs esbuild in watch mode, rebuilding `dist/extension.js` on file changes. Used by the debug launch configuration  |
+| `npm run package`   | Produces a `.vsix` package for local installation                                                                   |
+| `npm run test`      | Type-checks with `tsc` and runs the test suite via `vscode-test`                                                    |
+| `npm run clean`     | Removes all generated directories: `dist/`, `out/`, and `node_modules/`                                             |
+| `npm run setup`     | First-time setup: installs dependencies and builds the extension                                                    |
+| `vscode:prepublish` | Runs automatically during `vsce package` — builds the extension in production mode. Not intended to be run directly |
 
 ## File reference
 
