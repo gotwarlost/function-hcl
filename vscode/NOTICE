@@ -1,0 +1,10 @@
+This extension includes files derived from the Terraform VS Code extension
+(https://github.com/hashicorp/vscode-terraform), Copyright (c) HashiCorp, Inc.,
+used under the Mozilla Public License 2.0 (MPL-2.0).
+
+The following files are derived from or based on the upstream project:
+
+  syntaxes/hcl.tmGrammar.json
+  language-configuration.json
+
+The full text of the MPL-2.0 is provided in LICENSE-MPL-2.0.txt.

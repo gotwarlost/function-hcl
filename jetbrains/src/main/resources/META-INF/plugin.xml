@@ -1,0 +1,99 @@
+<idea-plugin>
+    <id>crossplanecontrib.functionhcl</id>
+    <vendor url="https://github.com/crossplane-contrib/function-hcl">The function-hcl authors</vendor>
+
+    <description><![CDATA[
+    Provides language support for function-hcl files using the function-hcl language server.
+
+    Features:
+    <ul>
+        <li>HCL syntax highlighting (via Terraform plugin)</li>
+        <li>Code completion (via language server)</li>
+        <li>Hover information</li>
+        <li>Go to definition</li>
+        <li>Find references</li>
+        <li>Document symbols</li>
+        <li>Diagnostics</li>
+        <li>Code formatting</li>
+    </ul>
+
+    Configuration:
+    <ul>
+        <li>The language server binary is downloaded automatically on first use</li>
+        <li>You can configure a custom binary path in Settings → Tools → Function HCL</li>
+        <li>Environment variable FUNCTION_HCL_LS_PATH can also be used to specify a custom path</li>
+    </ul>
+
+    Requirements:
+    <ul>
+        <li>Terraform plugin (for HCL syntax highlighting) - optional but recommended</li>
+    </ul>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.redhat.devtools.lsp4ij</depends>
+
+    <!-- IntelliJ Platform Extensions -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Language and FileType -->
+        <fileType
+                name="FunctionHCL"
+                implementationClass="crossplanecontrib.functionhcl.HclFileType"
+                fieldName="INSTANCE"
+                language="FunctionHCL"
+                extensions="hcl"/>
+
+        <!-- PSI support (needed for LSP4IJ semantic token-based navigation) -->
+        <lang.parserDefinition
+                language="FunctionHCL"
+                implementationClass="crossplanecontrib.functionhcl.HclParserDefinition"/>
+        <lang.fileViewProviderFactory
+                language="FunctionHCL"
+                implementationClass="com.redhat.devtools.lsp4ij.features.semanticTokens.viewProvider.LSPSemanticTokensStructurelessFileViewProviderFactory"/>
+        <lang.foldingBuilder
+                language="FunctionHCL"
+                implementationClass="com.redhat.devtools.lsp4ij.features.foldingRange.LSPFoldingRangeBuilder"
+                order="first"/>
+
+        <!-- Code Style -->
+        <langCodeStyleSettingsProvider
+                implementation="crossplanecontrib.functionhcl.HclCodeStyleSettingsProvider"/>
+
+        <!-- Settings -->
+        <applicationConfigurable
+                parentId="tools"
+                instance="crossplanecontrib.functionhcl.settings.FunctionHclConfigurable"
+                id="crossplanecontrib.functionhcl.settings"
+                displayName="Function HCL"/>
+
+        <!-- Application Services -->
+        <applicationService
+                serviceImplementation="crossplanecontrib.functionhcl.settings.FunctionHclSettings"/>
+
+        <!-- Notification Group -->
+        <notificationGroup id="Function HCL Language Server" displayType="BALLOON"/>
+    </extensions>
+
+    <!-- LSP4IJ Extensions -->
+    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
+        <!-- Language Server Definition -->
+        <server
+                id="functionHclLanguageServer"
+                name="Function HCL Language Server"
+                factoryClass="crossplanecontrib.functionhcl.FunctionHclLanguageServerFactory">
+            <description><![CDATA[
+            Language server for function-hcl files.
+            The binary is downloaded automatically on first use.
+            You can configure a custom path in Settings → Tools → Function HCL.
+            ]]></description>
+        </server>
+
+        <!-- Map HCL files to our language server -->
+        <fileNamePatternMapping
+                patterns="*.hcl"
+                serverId="functionHclLanguageServer"
+                languageId="hcl"
+                language="FunctionHCL" />
+    </extensions>
+
+</idea-plugin>

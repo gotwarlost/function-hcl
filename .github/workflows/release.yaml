@@ -12,7 +12,7 @@ env:
   GO_VERSION: '1.25.4'
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -90,6 +90,112 @@ jobs:
           cd dist
           shasum -a 256 *.tar.gz > checksums.txt
 
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  vscode-package:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: vscode
+        run: npm ci --ignore-scripts
+
+      - name: Pin language server version
+        run: echo "${GITHUB_REF_NAME#v}" > vscode/language-server-version.txt
+
+      - name: Set extension version from tag
+        working-directory: vscode
+        run: npm version ${GITHUB_REF_NAME#v} --no-git-tag-version
+
+      - name: Package extension
+        working-directory: vscode
+        run: npx @vscode/vsce package
+
+      - name: Upload vsix artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: vscode/*.vsix
+          retention-days: 1
+
+  jetbrains-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build plugin
+        working-directory: jetbrains
+        run: ./gradlew buildPlugin -PpluginVersion=${GITHUB_REF_NAME#v} -PlanguageServerVersion=${GITHUB_REF_NAME#v}
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jetbrains-plugin
+          path: jetbrains/build/distributions/*.zip
+          retention-days: 1
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - vscode-package
+      - jetbrains-package
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Download vsix artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+          path: vsix/
+
+      - name: Download JetBrains plugin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jetbrains-plugin
+          path: jetbrains-plugins/
+
+      - name: Publish to VS Code Marketplace
+        run: |
+          for vsix in vsix/*.vsix; do
+            echo "Publishing ${vsix}..."
+            npx @vscode/vsce publish --packagePath "$vsix"
+          done
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -97,3 +203,5 @@ jobs:
           files: |
             dist/*.tar.gz
             dist/checksums.txt
+            vsix/*.vsix
+            jetbrains-plugins/*.zip
