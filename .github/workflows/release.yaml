@@ -30,60 +30,47 @@ jobs:
           echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
-      - name: Build fn-hcl-tools binaries
-        working-directory: function-hcl
+      - name: Build binaries
         run: |
-          ldflags="-s -w -X main.Version=${{ steps.vars.outputs.version }} -X main.Commit=${{ steps.vars.outputs.commit }} -X main.BuildDate=${{ steps.vars.outputs.date }}"
-          platforms=(
-            "linux/amd64"
-            "linux/arm64"
-            "darwin/amd64"
-            "darwin/arm64"
-            "windows/amd64"
-          )
-          for platform in "${platforms[@]}"; do
-            os="${platform%/*}"
-            arch="${platform#*/}"
-            binary="fn-hcl-tools"
-            if [ "$os" = "windows" ]; then
-              binary="${binary}.exe"
-            fi
-            echo "Building ${os}/${arch}..."
-            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -ldflags="$ldflags" -o "../dist/${binary}" ./cmd/fn-hcl-tools
-            chmod +x "../dist/${binary}"
-            cd ../dist
-            shasum -a 256 "${binary}" > checksums.txt
-            tar czf "fn-hcl-tools-${os}-${arch}.tar.gz" "${binary}" checksums.txt
-            rm "${binary}" checksums.txt
-            cd ../function-hcl
-          done
+          mkdir -p dist
 
-      - name: Build function-hcl-ls binaries
-        working-directory: function-hcl-ls
-        run: |
-          platforms=(
-            "linux/amd64"
-            "linux/arm64"
-            "darwin/amd64"
-            "darwin/arm64"
-            "windows/amd64"
-          )
-          for platform in "${platforms[@]}"; do
-            os="${platform%/*}"
-            arch="${platform#*/}"
-            binary="function-hcl-ls"
-            if [ "$os" = "windows" ]; then
-              binary="${binary}.exe"
-            fi
-            echo "Building ${os}/${arch}..."
-            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -o "../dist/${binary}" .
-            chmod +x "../dist/${binary}"
-            cd ../dist
-            shasum -a 256 "${binary}" > checksums.txt
-            tar czf "function-hcl-ls-${os}-${arch}.tar.gz" "${binary}" checksums.txt
-            rm "${binary}" checksums.txt
-            cd ../function-hcl-ls
-          done
+          build_fn_hcl_tools() {
+            ldflags="-s -w -X main.Version=${{ steps.vars.outputs.version }} -X main.Commit=${{ steps.vars.outputs.commit }} -X main.BuildDate=${{ steps.vars.outputs.date }}"
+            platforms=("linux/amd64" "linux/arm64" "darwin/amd64" "darwin/arm64" "windows/amd64")
+            for platform in "${platforms[@]}"; do
+              os="${platform%/*}"
+              arch="${platform#*/}"
+              binary="fn-hcl-tools"
+              [ "$os" = "windows" ] && binary="${binary}.exe"
+              echo "Building fn-hcl-tools ${os}/${arch}..."
+              GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -ldflags="$ldflags" -C function-hcl -o "../dist/${binary}" ./cmd/fn-hcl-tools
+              shasum -a 256 "dist/${binary}" > "dist/${binary}.sha256"
+              tar czf "dist/fn-hcl-tools-${os}-${arch}.tar.gz" -C dist "${binary}" "${binary}.sha256"
+              rm "dist/${binary}" "dist/${binary}.sha256"
+            done
+          }
+
+          build_function_hcl_ls() {
+            platforms=("linux/amd64" "linux/arm64" "darwin/amd64" "darwin/arm64" "windows/amd64")
+            for platform in "${platforms[@]}"; do
+              os="${platform%/*}"
+              arch="${platform#*/}"
+              binary="function-hcl-ls"
+              [ "$os" = "windows" ] && binary="${binary}.exe"
+              echo "Building function-hcl-ls ${os}/${arch}..."
+              GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -C function-hcl-ls -o "../dist/${binary}" .
+              shasum -a 256 "dist/${binary}" > "dist/${binary}.sha256"
+              tar czf "dist/function-hcl-ls-${os}-${arch}.tar.gz" -C dist "${binary}" "${binary}.sha256"
+              rm "dist/${binary}" "dist/${binary}.sha256"
+            done
+          }
+
+          build_fn_hcl_tools &
+          PID1=$!
+          build_function_hcl_ls &
+          PID2=$!
+          wait $PID1 || exit 1
+          wait $PID2 || exit 1
 
       - name: Create archive checksums
         run: |
@@ -122,7 +109,10 @@ jobs:
 
       - name: Package extension
         working-directory: vscode
-        run: npx @vscode/vsce package
+        run: |
+          npx @vscode/vsce package
+          version=${GITHUB_REF_NAME#v}
+          mv function-hcl-${version}.vsix function-hcl-vscode-${version}.vsix
 
       - name: Upload vsix artifact
         uses: actions/upload-artifact@v4
@@ -133,6 +123,7 @@ jobs:
 
   jetbrains-package:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -148,7 +139,10 @@ jobs:
 
       - name: Build plugin
         working-directory: jetbrains
-        run: ./gradlew buildPlugin -PpluginVersion=${GITHUB_REF_NAME#v} -PlanguageServerVersion=${GITHUB_REF_NAME#v}
+        run: |
+          ./gradlew buildPlugin -PpluginVersion=${GITHUB_REF_NAME#v} -PlanguageServerVersion=${GITHUB_REF_NAME#v}
+          version=${GITHUB_REF_NAME#v}
+          mv build/distributions/function-hcl-${version}.zip build/distributions/function-hcl-jetbrains-${version}.zip
 
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v4
@@ -234,7 +228,7 @@ jobs:
 
       - name: Publish plugin to JetBrains Marketplace
         working-directory: jetbrains
-        run: ./gradlew publishPlugin -PpluginVersion=${GITHUB_REF_NAME#v} -PlanguageServerVersion=${GITHUB_REF_NAME#v}
+        run: ./gradlew publishPlugin --no-configuration-cache -PpluginVersion=${GITHUB_REF_NAME#v} -PlanguageServerVersion=${GITHUB_REF_NAME#v}
         env:
           PUBLISH_TOKEN: ${{ secrets.JETBRAINS_PUBLISH_TOKEN }}
           CERTIFICATE_CHAIN: ${{ secrets.JETBRAINS_CERTIFICATE_CHAIN }}
