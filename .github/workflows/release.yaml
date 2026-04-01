@@ -12,6 +12,28 @@ env:
   GO_VERSION: '1.25.4'
 
 jobs:
+  compute-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_version: ${{ steps.versions.outputs.tag_version }}
+      artifact_version: ${{ steps.versions.outputs.artifact_version }}
+    steps:
+      - name: Compute versions
+        id: versions
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          echo "tag_version=${tag}" >> "$GITHUB_OUTPUT"
+          if [[ "$tag" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-rc([0-9]+)$ ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            patch="${BASH_REMATCH[3]}"
+            num="${BASH_REMATCH[4]}"
+            computed_patch=$((1000 * minor + 100 * patch + num))
+            echo "artifact_version=${major}.0.${computed_patch}" >> "$GITHUB_OUTPUT"
+          else
+            echo "artifact_version=${tag}" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -99,7 +121,7 @@ jobs:
 
   vscode-package:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, compute-versions]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -114,17 +136,17 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Pin language server version
-        run: echo "${GITHUB_REF_NAME#v}" > vscode/language-server-version.txt
+        run: echo "${{ needs.compute-versions.outputs.tag_version }}" > vscode/language-server-version.txt
 
       - name: Set extension version from tag
         working-directory: vscode
-        run: npm version ${GITHUB_REF_NAME#v} --no-git-tag-version
+        run: npm version ${{ needs.compute-versions.outputs.artifact_version }} --no-git-tag-version
 
       - name: Package extension
         working-directory: vscode
         run: |
           npx @vscode/vsce package
-          version=${GITHUB_REF_NAME#v}
+          version=${{ needs.compute-versions.outputs.artifact_version }}
           mv function-hcl-${version}.vsix function-hcl-vscode-${version}.vsix
 
       - name: Upload vsix artifact
@@ -136,7 +158,7 @@ jobs:
 
   jetbrains-package:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, compute-versions]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -153,8 +175,8 @@ jobs:
       - name: Build plugin
         working-directory: jetbrains
         run: |
-          ./gradlew buildPlugin -PpluginVersion=${GITHUB_REF_NAME#v} -PlanguageServerVersion=${GITHUB_REF_NAME#v}
-          version=${GITHUB_REF_NAME#v}
+          ./gradlew buildPlugin -PpluginVersion=${{ needs.compute-versions.outputs.artifact_version }} -PlanguageServerVersion=${{ needs.compute-versions.outputs.tag_version }}
+          version=${{ needs.compute-versions.outputs.artifact_version }}
           mv build/distributions/function-hcl-${version}.zip build/distributions/function-hcl-jetbrains-${version}.zip
 
       - name: Upload plugin artifact
@@ -225,7 +247,7 @@ jobs:
 
   jetbrains-publish:
     runs-on: ubuntu-latest
-    needs: release
+    needs: [release, compute-versions]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -241,7 +263,7 @@ jobs:
 
       - name: Publish plugin to JetBrains Marketplace
         working-directory: jetbrains
-        run: ./gradlew publishPlugin --no-configuration-cache -PpluginVersion=${GITHUB_REF_NAME#v} -PlanguageServerVersion=${GITHUB_REF_NAME#v}
+        run: ./gradlew publishPlugin --no-configuration-cache -PpluginVersion=${{ needs.compute-versions.outputs.artifact_version }} -PlanguageServerVersion=${{ needs.compute-versions.outputs.tag_version }}
         env:
           PUBLISH_TOKEN: ${{ secrets.JETBRAINS_PUBLISH_TOKEN }}
           CERTIFICATE_CHAIN: ${{ secrets.JETBRAINS_CERTIFICATE_CHAIN }}
