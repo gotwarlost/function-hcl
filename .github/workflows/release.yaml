@@ -95,7 +95,7 @@ jobs:
         with:
           name: dist
           path: dist/
-          retention-days: 1
+          retention-days: 7
 
   vscode-package:
     runs-on: ubuntu-latest
@@ -129,7 +129,7 @@ jobs:
         with:
           name: vsix
           path: vscode/*.vsix
-          retention-days: 1
+          retention-days: 7
 
   jetbrains-package:
     runs-on: ubuntu-latest
@@ -155,7 +155,7 @@ jobs:
         with:
           name: jetbrains-plugin
           path: jetbrains/build/distributions/*.zip
-          retention-days: 1
+          retention-days: 7
 
   release:
     runs-on: ubuntu-latest
@@ -164,11 +164,6 @@ jobs:
       - vscode-package
       - jetbrains-package
     steps:
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
       - name: Download dist artifacts
         uses: actions/download-artifact@v4
         with:
@@ -187,15 +182,6 @@ jobs:
           name: jetbrains-plugin
           path: jetbrains-plugins/
 
-      - name: Publish to VS Code Marketplace
-        run: |
-          for vsix in vsix/*.vsix; do
-            echo "Publishing ${vsix}..."
-            npx @vscode/vsce publish --packagePath "$vsix"
-          done
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -205,3 +191,52 @@ jobs:
             dist/checksums.txt
             vsix/*.vsix
             jetbrains-plugins/*.zip
+
+  vscode-publish:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download vsix artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+          path: vsix/
+
+      - name: Publish to VS Code Marketplace
+        run: |
+          for vsix in vsix/*.vsix; do
+            echo "Publishing ${vsix}..."
+            npx @vscode/vsce publish --packagePath "$vsix"
+          done
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+  jetbrains-publish:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish plugin to JetBrains Marketplace
+        working-directory: jetbrains
+        run: ./gradlew publishPlugin -PpluginVersion=${GITHUB_REF_NAME#v} -PlanguageServerVersion=${GITHUB_REF_NAME#v}
+        env:
+          PUBLISH_TOKEN: ${{ secrets.JETBRAINS_PUBLISH_TOKEN }}
+          CERTIFICATE_CHAIN: ${{ secrets.JETBRAINS_CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.JETBRAINS_PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.JETBRAINS_PRIVATE_KEY_PASSWORD }}
