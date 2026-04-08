@@ -1,6 +1,6 @@
 module github.com/crossplane-contrib/function-hcl/function-hcl
 
-go 1.25.5
+go 1.25.0
 
 require (
 	github.com/alecthomas/kong v1.14.0
