@@ -154,7 +154,7 @@ func (d *Extractor) processInputs(inputs ...io.Reader) (images []string, finalEr
 }
 
 func (d *Extractor) processImage(img string) (finalErr error) {
-	ref, err := name.ParseReference(img)
+	ref, err := name.ParseReference(img, name.WithDefaultTag("latest"))
 	if err != nil {
 		return fmt.Errorf("%s: %w", errBadReference, err)
 	}

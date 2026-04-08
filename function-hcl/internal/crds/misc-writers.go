@@ -13,7 +13,7 @@ func (nop) StartImage(_ Image) error               { return nil }
 func (nop) Write(_ ObjectMetadata, _ []byte) error { return nil }
 func (nop) EndImage() error                        { return nil }
 
-// ProgressWriter is a writer than writes progress log messages when a new image is started and ended.
+// ProgressWriter is a writer that writes progress log messages when a new image is started and ended.
 type ProgressWriter struct {
 	nop
 	logger *log.Logger
