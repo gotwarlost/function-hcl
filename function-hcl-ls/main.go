@@ -39,7 +39,6 @@ func main() {
 	cmd.Version = VersionString()
 	cmd.AddServeCommand(root)
 	cmd.AddVersionCommand(root)
-	cmd.AddDownloadCRDsCommand(root)
 	cmd.AddDumpASTCommand(root)
 
 	if err := root.Execute(); err != nil {

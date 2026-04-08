@@ -120,11 +120,9 @@ func (s *Store) getSourceInfo(dir string) (ret types.CRDSource, _ error) {
 		return ret, fmt.Errorf("load source store at %s: no sources file or default directory", filePath)
 	}
 	return types.CRDSource{
-		Runtime: types.CRDSourceRuntime{
-			Scope: types.ScopeBoth,
-			Paths: []string{
-				filepath.Join(types.DefaultSourcesDir, "*.yaml"),
-			},
+		Scope: types.ScopeBoth,
+		Paths: []string{
+			filepath.Join(types.DefaultSourcesDir, "*.yaml"),
 		},
 	}, nil
 }
@@ -135,7 +133,7 @@ func (s *Store) loadSourceStoreAt(dir string) error {
 		return err
 	}
 	foundFiles := map[string]bool{}
-	for _, p := range src.Runtime.Paths {
+	for _, p := range src.Paths {
 		var pattern string
 		if filepath.IsAbs(p) {
 			pattern = p
@@ -168,13 +166,13 @@ func (s *Store) loadSourceStoreAt(dir string) error {
 	if ss == nil { // never before seen
 		ss = &sourceInfo{
 			sourcePath:    dir,
-			source:        &src.Runtime,
+			source:        &src,
 			expandedFiles: foundFiles,
 			schema:        emptySchema,
 		}
 	} else {
 		// but leave the last known schema for this one alone
-		ss.source = &src.Runtime
+		ss.source = &src
 		ss.expandedFiles = foundFiles
 	}
 	s.sources.put(ss)

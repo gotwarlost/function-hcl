@@ -27,12 +27,6 @@ type CRDs struct {
 	schemas atomic.Pointer[resource.Schemas]
 }
 
-// Download processes the offline source definition and downloads a list
-// of images on to the filesystem.
-func Download(sourcesFile string, deleteCache bool) error {
-	return downloadCRDs(sourcesFile, deleteCache)
-}
-
 // New creates an instance of the CRD discovery feature.
 func New(c Config) *CRDs {
 	ret := &CRDs{
