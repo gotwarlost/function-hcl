@@ -10,3 +10,4 @@ This section collects practical wisdom for writing function-hcl compositions eff
 
 - [Best Practices](./best-practices/) -- conventions and patterns that lead to maintainable compositions
 - [Gotchas](./gotchas/) -- common surprises and how to avoid them
+- [Debugging](./debugging/) -- how to get debug output to troubleshoot your compositions

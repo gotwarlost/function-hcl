@@ -1,4 +1,4 @@
-// Package v1beta1 contains the input type for the cue function runner.
+// Package v1beta1 contains the input type for the hcl function runner.
 // +kubebuilder:object:generate=true
 // +groupName=hcl.fn.crossplane.io
 // +versionName=v1beta1
