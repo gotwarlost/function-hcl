@@ -19,7 +19,7 @@ import (
 
 const debugAnnotation = "hcl.fn.crossplane.io/debug"
 
-// Options are options for the cue runner.
+// Options are options for the hcl runner.
 type Options struct {
 	Logger logging.Logger
 	Debug  bool
