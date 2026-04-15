@@ -16,22 +16,8 @@ const (
 	ScopeBoth       Scope = resource.ScopeBoth
 )
 
-// CRDSourceRuntime is used by the language server at runtime to
-// load schemas from filesystem paths.
-type CRDSourceRuntime struct {
-	Scope Scope    `json:"scope,omitempty"`
-	Paths []string `json:"paths"`
-}
-
-// CRDSourceOffline is the section used by tooling to download
-// CRDs from remote packages to the local filesystem.
-type CRDSourceOffline struct {
-	CacheDir string   `json:"cache-dir"`
-	Images   []string `json:"images"`
-}
-
 // CRDSource provides a source for loading CRDs.
 type CRDSource struct {
-	Runtime CRDSourceRuntime `json:"runtime"`
-	Offline CRDSourceOffline `json:"offline"`
+	Scope Scope    `json:"scope,omitempty"`
+	Paths []string `json:"paths"`
 }

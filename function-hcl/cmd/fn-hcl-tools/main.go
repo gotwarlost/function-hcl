@@ -15,6 +15,7 @@ func main() {
 		analyzeCommand(),
 		packageScriptCommand(),
 		versionCommand(),
+		extractCRDsCommand(),
 	)
 	if err := root.Execute(); err != nil {
 		os.Exit(1)

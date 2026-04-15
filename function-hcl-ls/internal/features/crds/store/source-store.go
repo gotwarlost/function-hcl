@@ -10,7 +10,7 @@ import (
 // sourceInfo tracks the set of files and the schema for a single CRD source
 type sourceInfo struct {
 	sourcePath    string
-	source        *types.CRDSourceRuntime
+	source        *types.CRDSource
 	expandedFiles map[string]bool
 	schema        *resource.Schemas
 }
