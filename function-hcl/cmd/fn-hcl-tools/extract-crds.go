@@ -23,7 +23,8 @@ extracts CRD and XRD definitions from the supplied YAML files or stdin and write
 Additionally, image references in Provider and Configuration objects are also processed and additional CRDs are pulled
 from those images.
 
-YAML files can contain multiple documents.
+YAML files can contain multiple documents. The ones that are used are CRDs and XRDs (as-is), crossplane Provider packages,
+and crossplane configuration packages.
 
 When no arguments are passed to the command, it acts a filter taking inputs over stdin and writing to stdout.
 

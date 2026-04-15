@@ -125,7 +125,7 @@ func (d *Extractor) processInputs(inputs ...io.Reader) (images []string, finalEr
 				if pkg != "" {
 					seenImages[pkg] = true
 				}
-			case meta.Kind == "Configuration" && strings.HasPrefix(meta.APIVersion, "pkg.crossplane.io/"):
+			case meta.Kind == "Configuration" && strings.Contains(meta.APIVersion, "pkg.crossplane.io/"):
 				var p map[string]any
 				err = json.Unmarshal(jsonDoc, &p)
 				if err != nil {
