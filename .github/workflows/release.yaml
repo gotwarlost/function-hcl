@@ -53,7 +53,7 @@ jobs:
           echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - name: Build fn-hcl-tools binaries
-        working-directory: function-hcl
+        working-directory: function
         run: |
           ldflags="-s -w -X main.Version=${{ steps.vars.outputs.version }} -X main.Commit=${{ steps.vars.outputs.commit }} -X main.BuildDate=${{ steps.vars.outputs.date }}"
           platforms=(
@@ -77,11 +77,11 @@ jobs:
             shasum -a 256 "${binary}" > checksums.txt
             tar czf "fn-hcl-tools-${os}-${arch}.tar.gz" "${binary}" checksums.txt
             rm "${binary}" checksums.txt
-            cd ../function-hcl
+            cd ../function
           done
 
       - name: Build function-hcl-ls binaries
-        working-directory: function-hcl-ls
+        working-directory: language-server
         run: |
           platforms=(
             "linux/amd64"
@@ -104,7 +104,7 @@ jobs:
             shasum -a 256 "${binary}" > checksums.txt
             tar czf "function-hcl-ls-${os}-${arch}.tar.gz" "${binary}" checksums.txt
             rm "${binary}" checksums.txt
-            cd ../function-hcl-ls
+            cd ../language-server
           done
 
       - name: Create archive checksums
