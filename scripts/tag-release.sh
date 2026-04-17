@@ -23,8 +23,8 @@ if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9](-rc[0-9]+)+$ ]]; then
   exit 1
 fi
 
-module_tag="function-hcl/${tag}"
-ls_module_tag="function-hcl-ls/${tag}"
+module_tag="function/${tag}"
+ls_module_tag="language-server/${tag}"
 
 # Ensure clean working tree
 if [ -n "$(git status --porcelain)" ]; then

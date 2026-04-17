@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: function-hcl
+        working-directory: function
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,13 +61,13 @@ jobs:
         uses: golangci/golangci-lint-action@v7
         with:
           version: ${{ env.GOLANGCI_VERSION }}
-          working-directory: function-hcl
+          working-directory: function
 
   unit-test:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: function-hcl
+        working-directory: function
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: function-hcl-ls
+        working-directory: language-server
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -102,13 +102,13 @@ jobs:
         uses: golangci/golangci-lint-action@v7
         with:
           version: ${{ env.GOLANGCI_VERSION }}
-          working-directory: function-hcl-ls
+          working-directory: language-server
 
   unit-test-ls:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: function-hcl-ls
+        working-directory: language-server
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -170,7 +170,7 @@ jobs:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: function-hcl
+        working-directory: function
     strategy:
       fail-fast: true
       matrix:
@@ -203,7 +203,7 @@ jobs:
         id: image
         uses: docker/build-push-action@v6
         with:
-          context: function-hcl
+          context: function
           platforms: linux/${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -227,7 +227,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: package-${{ matrix.arch }}
-          path: "function-hcl/*.xpkg"
+          path: "function/*.xpkg"
           if-no-files-found: error
           retention-days: 1
 
@@ -259,7 +259,7 @@ jobs:
         run: "curl -sL https://raw.githubusercontent.com/crossplane/crossplane/master/install.sh | sh"
 
       - name: Set Multi-Platform Package Version
-        run: echo XPKG_VERSION=$(cd function-hcl;make ci-print-version) >> $GITHUB_ENV
+        run: echo XPKG_VERSION=$(cd function;make ci-print-version) >> $GITHUB_ENV
 
       - name: Login to Upbound
         uses: docker/login-action@v3

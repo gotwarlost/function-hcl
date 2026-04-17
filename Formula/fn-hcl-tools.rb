@@ -9,7 +9,7 @@ class FnHclTools < Formula
   depends_on "go" => :build
 
   def install
-    cd "function-hcl" do
+    cd "function" do
       ldflags = %W[
         -X main.Version=0.2.0-rc5
         -X main.Commit=83a5ab6
