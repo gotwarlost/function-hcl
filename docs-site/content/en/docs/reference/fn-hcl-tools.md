@@ -12,7 +12,7 @@ HCL compositions.
 ## Installation
 
 ```bash
-go install github.com/crossplane-contrib/function-hcl/function-hcl/cmd/fn-hcl-tools@{{< version >}}
+go install github.com/crossplane-contrib/function-hcl/function/cmd/fn-hcl-tools@{{< version >}}
 ```
 
 ## Commands

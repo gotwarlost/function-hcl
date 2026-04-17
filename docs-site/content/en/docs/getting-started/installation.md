@@ -46,7 +46,7 @@ You should see `HEALTHY: True` and `INSTALLED: True` in the output.
 Install it with `go install`:
 
 ```bash
-go install github.com/crossplane-contrib/function-hcl/function-hcl/cmd/fn-hcl-tools@{{< version >}}
+go install github.com/crossplane-contrib/function-hcl/function/cmd/fn-hcl-tools@{{< version >}}
 ```
 
 Verify it works:
