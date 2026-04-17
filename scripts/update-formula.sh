@@ -105,7 +105,7 @@ class $class < Formula
   depends_on "go" => :build
 
   def install
-    cd "function-hcl" do
+    cd "function" do
       ldflags = %W[
         -X main.Version=${VERSION}
         -X main.Commit=${COMMIT}
