@@ -24,8 +24,8 @@ github.com/creachadair/jrpc2 v1.3.2 h1:27pDXBLe19ck2WQvW+ywnFdzZwZzdTbcQ8Yct1LYi
 github.com/creachadair/jrpc2 v1.3.2/go.mod h1:npYsgDnV5iDpSCVcD3iUGig5WVYY3vn0bZNYWGbgFWw=
 github.com/creachadair/mds v0.25.1 h1:YSjVNf3aFitfoC7pg99HGBMudC8omA1d9WFrcScldzg=
 github.com/creachadair/mds v0.25.1/go.mod h1:+s4CFteFRj4eq2KcGHW8Wei3u9NyzSPzNV32EvjyK/Q=
-github.com/crossplane-contrib/function-hcl/function v0.2.0-rc10.0.20260427171252-c64357e6fb0b h1:51MRLOI29d5F8VTuVEefAx86l7ViEog7eIMepGYQlvU=
-github.com/crossplane-contrib/function-hcl/function v0.2.0-rc10.0.20260427171252-c64357e6fb0b/go.mod h1:+Hgq9MDqqFWS1VrHl8vNKS1YR0CYwI9spNRs44+dmc4=
+github.com/crossplane-contrib/function-hcl/function v0.2.0-rc10.0.20260511175421-09b509484424 h1:bal1SRu78mAwdPUI6BneCM878h2uq/+kWyqP9Dks/HE=
+github.com/crossplane-contrib/function-hcl/function v0.2.0-rc10.0.20260511175421-09b509484424/go.mod h1:+Hgq9MDqqFWS1VrHl8vNKS1YR0CYwI9spNRs44+dmc4=
 github.com/crossplane/crossplane-runtime v1.20.0 h1:I54uipRIecqZyms+vz1J/l62yjVQ7HV5w+Nh3RMrUtc=
 github.com/crossplane/crossplane-runtime v1.20.0/go.mod h1:lfV1VJenDc9PNVLxDC80YjPoTm+JdSZ13xlS2h37Dvg=
 github.com/crossplane/crossplane-runtime/v2 v2.1.0 h1:JBMhL9T+/PfyjLAQEdZWlKLvA3jJVtza8zLLwd9Gs4k=

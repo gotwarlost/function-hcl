@@ -6,7 +6,7 @@ require (
 	github.com/apparentlymart/go-textseg v1.0.0
 	github.com/bmatcuk/doublestar/v4 v4.9.1
 	github.com/creachadair/jrpc2 v1.3.2
-	github.com/crossplane-contrib/function-hcl/function v0.2.0-rc10.0.20260427171252-c64357e6fb0b
+	github.com/crossplane-contrib/function-hcl/function v0.2.0-rc10.0.20260511175421-09b509484424
 	github.com/crossplane/crossplane-runtime/v2 v2.1.0
 	github.com/crossplane/crossplane/v2 v2.1.3
 	github.com/ghodss/yaml v1.0.0
