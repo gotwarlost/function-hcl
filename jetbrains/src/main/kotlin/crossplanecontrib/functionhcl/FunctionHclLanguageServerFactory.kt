@@ -6,7 +6,7 @@ import crossplanecontrib.functionhcl.settings.FunctionHclConfigurable
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
-import com.intellij.ide.plugins.PluginManagerCore
+import com.intellij.ide.plugins.PluginManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.options.ShowSettingsUtil
@@ -90,11 +90,12 @@ class FunctionHclLanguageServerFactory : LanguageServerFactory {
 
     override fun createClientFeatures(): LSPClientFeatures {
         return object : LSPClientFeatures() {
+            @Suppress("DEPRECATION")
             override fun initializeParams(initializeParams: InitializeParams) {
-                val pluginVersion = PluginManagerCore.getPlugin(
+                val pluginVersion = PluginManager.getPlugin(
                     PluginId.getId("crossplanecontrib.functionhcl")
                 )?.version ?: "unknown"
-                val lsp4ijVersion = PluginManagerCore.getPlugin(
+                val lsp4ijVersion = PluginManager.getPlugin(
                     PluginId.getId("com.redhat.devtools.lsp4ij")
                 )?.version ?: "unknown"
                 initializeParams.clientInfo = ClientInfo(
