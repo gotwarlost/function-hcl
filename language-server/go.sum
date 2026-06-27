@@ -119,12 +119,12 @@ github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 h1:BHT72Gu3keYf3ZEu2J
 github.com/google/pprof v0.0.0-20250403155104-27863c87afa6/go.mod h1:boTsfXsheKC2y+lKOCMpSfarhxDeIzfZG1jqGcPl3cA=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/gotwarlost/hcl/v2 v2.0.0-20260210011329-0927384ef641 h1:+EvCvuVKbVO3HwxCbcujmOAvQSUY+1I4RQ5NHqLToX4=
-github.com/gotwarlost/hcl/v2 v2.0.0-20260210011329-0927384ef641/go.mod h1:WS1ymNdBhhwYKDVlGnUb9fmqB2hw1djJva6S8Bj/WfI=
 github.com/hashicorp/go-uuid v1.0.3 h1:2gKiV6YVmrJ1i2CKKa9obLvRieoRGviZFL26PcT/Co8=
 github.com/hashicorp/go-uuid v1.0.3/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
 github.com/hashicorp/go-version v1.7.0 h1:5tqGy27NaOTB8yJKUZELlFAS/LTKJkrmONwQKeRZfjY=
 github.com/hashicorp/go-version v1.7.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
+github.com/hashicorp/hcl/v2 v2.24.1-0.20260327001625-d4195a120f30 h1:IQMtUW+S2J6QFXpd+hMrMJmGMElL1/2VrixOkjCmmkk=
+github.com/hashicorp/hcl/v2 v2.24.1-0.20260327001625-d4195a120f30/go.mod h1:WS1ymNdBhhwYKDVlGnUb9fmqB2hw1djJva6S8Bj/WfI=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
