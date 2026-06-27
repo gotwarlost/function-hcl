@@ -14,7 +14,7 @@ require (
 	github.com/google/go-containerregistry v0.20.7
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/go-version v1.7.0
-	github.com/hashicorp/hcl/v2 v2.24.0
+	github.com/hashicorp/hcl/v2 v2.24.1-0.20260327001625-d4195a120f30
 	github.com/pkg/errors v0.9.1
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
 	github.com/spf13/cobra v1.10.2
@@ -25,8 +25,6 @@ require (
 	k8s.io/apiextensions-apiserver v0.34.2
 	k8s.io/apimachinery v0.35.0
 )
-
-replace github.com/hashicorp/hcl/v2 => github.com/gotwarlost/hcl/v2 v2.0.0-20260210011329-0927384ef641
 
 require (
 	dario.cat/mergo v1.0.2 // indirect

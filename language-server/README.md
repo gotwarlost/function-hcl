@@ -32,10 +32,3 @@ point. A lot of refactoring has been done on both these copied codebases to make
 work for function-hcl. Both upstream projects are licensed under the Mozilla Public License 2.0 (MPL-2.0).
 See [NOTICE](NOTICE) for specific attribution details and [LICENSE-MPL-2.0.txt](LICENSE-MPL-2.0.txt)
 for the full license text.
-
-In addition, the `go.mod` replaces the [HCL dependency](https://github.com/hashicorp/hcl) 
-with a [fork](https://github.com/gotwarlost/hcl) because of a [critical fix](https://github.com/hashicorp/hcl/pull/785) 
-for a [known issue](https://github.com/hashicorp/hcl/issues/597) that is needed.
-
-You cannot build this repo using `go install github.com/...` because of this. For source builds, you will need to clone 
-the repo and build it locally.
