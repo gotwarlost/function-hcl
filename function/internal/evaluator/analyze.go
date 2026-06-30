@@ -181,20 +181,12 @@ func (a *analyzer) analyzeContent(ctx *hcl.EvalContext, parent *hcl.Block, conte
 
 	var ret hcl.Diagnostics
 
-	checkFunctionRefs := func(x hcl.Expression) {
-		n, ok := x.(hclsyntax.Node)
-		if ok {
-			ret = ret.Extend(a.p.CheckUserFunctionRefs(n))
-		}
-	}
-
 	// first locals
 	for _, expr := range localExpressions {
 		vars := expr.Variables()
 		for _, v := range vars {
 			ret = ret.Extend(a.checkReferences(ctx, tables, v))
 		}
-		checkFunctionRefs(expr)
 	}
 
 	// then attributes
@@ -208,7 +200,6 @@ func (a *analyzer) analyzeContent(ctx *hcl.EvalContext, parent *hcl.Block, conte
 		for _, v := range vars {
 			ret = ret.Extend(a.checkReferences(ctx, tables, v))
 		}
-		checkFunctionRefs(attr.Expr)
 	}
 
 	// if it is a resources block add the iterator context at this point
@@ -251,6 +242,32 @@ func (a *analyzer) analyze(files ...File) hcl.Diagnostics {
 		return diags
 	}
 	return a.analyzeBodies(bodies...)
+}
+
+func (a *analyzer) checkFunctionRefs(content *hcl.BodyContent) hcl.Diagnostics {
+	var ret hcl.Diagnostics
+	doCheckFunctionRefs := func(x hcl.Expression) {
+		n, ok := x.(hclsyntax.Node)
+		if ok {
+			ret = ret.Extend(a.p.CheckUserFunctionRefs(n))
+		}
+	}
+	for _, attr := range content.Attributes {
+		doCheckFunctionRefs(attr.Expr)
+	}
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case blockLocals:
+			attrs, _ := block.Body.JustAttributes()
+			for _, attr := range attrs {
+				doCheckFunctionRefs(attr.Expr)
+			}
+		default:
+			childContent, _ := block.Body.Content(schemasByBlockType[block.Type])
+			ret = ret.Extend(a.checkFunctionRefs(childContent))
+		}
+	}
+	return ret
 }
 
 func (a *analyzer) analyzeBodies(bodies ...hcl.Body) hcl.Diagnostics {
@@ -296,7 +313,9 @@ func (a *analyzer) analyzeBodies(bodies ...hcl.Body) hcl.Diagnostics {
 		return []*hcl.Diagnostic{{Severity: hcl.DiagError, Summary: "internal error: setup dummy vars", Detail: err.Error()}}
 	}
 
-	return a.analyzeContent(ctx, &hcl.Block{}, content)
+	ret := a.analyzeContent(ctx, &hcl.Block{}, content)
+	ret = ret.Extend(a.checkFunctionRefs(content))
+	return ret
 }
 
 func (a *analyzer) checkStructure(body hcl.Body, s *hcl.BodySchema) hcl.Diagnostics {
