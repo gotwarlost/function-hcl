@@ -277,6 +277,15 @@ resources foo {
 `,
 			errMsg: `test.hcl:3,40-49: no such attribute "name"; self.name`,
 		},
+		{
+			name: "user function to user function call check",
+			hcl: `
+function foo {
+	body = invoke("my-other-func", {})
+}
+`,
+			errMsg: `test.hcl:3,16-31: invoke called on unknown function: "my-other-func";`,
+		},
 	}
 
 	for _, test := range tests {
