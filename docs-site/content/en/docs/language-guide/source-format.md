@@ -76,7 +76,7 @@ You should always use the `fn-hcl-tools package` command to produce the txtar sc
 HCL source files -- even for a single file. Do not hand-craft txtar bundles.
 
 ```bash
-fn-hcl-tools package ./my-composition/*.hcl
+fn-hcl-tools package ./my-composition/
 ```
 
 Before producing the txtar output, `fn-hcl-tools package` **analyzes** every HCL file and will

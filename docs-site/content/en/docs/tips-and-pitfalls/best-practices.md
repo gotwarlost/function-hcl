@@ -6,7 +6,7 @@ description: >
   Conventions and patterns for writing clean, maintainable function-hcl compositions.
 ---
 
-## Always use fn-hcl-tools package
+## Always use fn-hcl-tools to package composition scripts
 
 Run `fn-hcl-tools package` to produce your txtar script rather than hand-crafting it. This
 validates your HCL before it reaches the cluster, catching typos in variable names, bad block
@@ -62,6 +62,11 @@ group {
   resource my-subnet { ... }
 }
 ```
+
+{{% alert title="Tip" color="info" %}}
+It's a good idea to have a single file (say, `init.hcl`) that contains locals you want to use everywhere.
+Wrap the contents of other files in a `group` so that all locals defined in that file are scoped to the file.
+{{% /alert %}}
 
 ## Put composite status inside resource blocks
 

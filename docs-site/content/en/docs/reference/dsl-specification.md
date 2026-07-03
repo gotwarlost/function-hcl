@@ -7,7 +7,7 @@ description: >
 ---
 
 {{% alert title="Source of truth" color="info" %}}
-This page is derived from [`spec.md`](https://github.com/crossplane-contrib/function-hcl/blob/main/spec.md)
+This page is derived from [`spec.md`](https://github.com/crossplane-contrib/function-hcl/blob/main/function/spec.md)
 in the repository. If you find a discrepancy, the repository version is authoritative.
 {{% /alert %}}
 
@@ -20,16 +20,16 @@ via the `input` field of the Composition pipeline step. All files are treated as
 
 Created automatically from the `RunFunctionRequest`. Accessed as `req.<field>`.
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `req.composite` | object | Observed composite resource (XR) |
-| `req.composite_connection` | map(string, bytes) | Observed connection details of the composite |
-| `req.resource` | map(string, object) | Observed resource bodies, keyed by crossplane name |
-| `req.connection` | map(string, map(string, bytes)) | Observed connection details, keyed by resource name |
-| `req.resources` | map(string, list(object)) | Observed resource collections, keyed by base name |
-| `req.connections` | map(string, list(map(string, bytes))) | Connection details of collections |
-| `req.context` | map(string, any) | Pipeline context |
-| `req.extra_resources` | map(string, list(object)) | Extra resources from `requirement` blocks |
+| Variable                   | Type                                  | Description                                         |
+|----------------------------|---------------------------------------|-----------------------------------------------------|
+| `req.composite`            | object                                | Observed composite resource (XR)                    |
+| `req.composite_connection` | map(string, bytes)                    | Observed connection details of the composite        |
+| `req.resource`             | map(string, object)                   | Observed resource bodies, keyed by crossplane name  |
+| `req.connection`           | map(string, map(string, bytes))       | Observed connection details, keyed by resource name |
+| `req.resources`            | map(string, list(object))             | Observed resource collections, keyed by base name   |
+| `req.connections`          | map(string, list(map(string, bytes))) | Connection details of collections                   |
+| `req.context`              | map(string, any)                      | Pipeline context                                    |
+| `req.extra_resources`      | map(string, list(object))             | Extra resources from `requirement` blocks           |
 
 ## Top-Level Blocks
 

@@ -43,11 +43,36 @@ You should see `HEALTHY: True` and `INSTALLED: True` in the output.
 ## Install fn-hcl-tools
 
 `fn-hcl-tools` is the companion CLI for packaging, formatting, and analyzing your HCL files.
-Install it with `go install`:
+
+### Prebuilt release
+
+Install it by downloading the [appropriate file for your OS for the latest release](https://github.com/crossplane-contrib/function-hcl/releases)
+
+### Homebrew
+
+For MacOS, you can also use homebrew to install it.
+
+```bash
+# since the formula comes from the same monorepo, you need to run the `tap` subcommand as follows
+brew tap crossplane-contrib/function-hcl https://github.com/crossplane-contrib/function-hcl
+brew trust crossplane-contrib/function-hcl
+brew install fn-hcl-tools
+```
+
+To upgrade the version:
+
+```bash
+brew update
+brew upgrade fn-hcl-tools
+```
+
+### Install from source
 
 ```bash
 go install github.com/crossplane-contrib/function-hcl/function/cmd/fn-hcl-tools@{{< version >}}
 ```
+
+Note that the version printed by `fn-hcl-tools version` will be incorrect using this method.
 
 Verify it works:
 

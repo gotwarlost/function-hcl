@@ -23,7 +23,7 @@ Packages a directory of HCL files into a single txtar bundle, suitable for embed
 `input` field.
 
 ```bash
-fn-hcl-tools package *.hcl
+fn-hcl-tools package .
 ```
 
 The tool runs basic static analysis on the HCL before packing, catching syntax errors early.
@@ -42,7 +42,7 @@ my-composition/
 Run:
 
 ```bash
-fn-hcl-tools package my-composition/*.hcl
+fn-hcl-tools package my-composition/
 ```
 
 Output (suitable for pasting into a Composition YAML `input` field):
@@ -78,7 +78,7 @@ if the supplied files are not correctly formatted.
 Analyzes HCL syntax files and reports diagnostics.
 
 ```bash
-fn-hcl-tools analyze *.hcl
+fn-hcl-tools analyze .
 ```
 
 ### `version`
@@ -102,5 +102,5 @@ A typical development workflow:
 
 ```bash
 # Package and copy to clipboard (macOS)
-fn-hcl-tools package ./my-composition/*.hcl | pbcopy
+fn-hcl-tools package ./my-composition/ | pbcopy
 ```

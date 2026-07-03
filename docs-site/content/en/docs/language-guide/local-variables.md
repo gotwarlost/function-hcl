@@ -25,7 +25,7 @@ All `locals` blocks in a given scope are processed together and variable orderin
 Dependencies are resolved automatically. This is the same behavior as Terraform.
 
 ```hcl
-# These two blocks are treated identically:
+# These two blocks are treated exactly the same as the single block in the previous section
 locals {
   computedName = "${baseName}-bucket"
 }
