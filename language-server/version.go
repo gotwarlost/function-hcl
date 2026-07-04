@@ -1,52 +1,48 @@
-package cmd
+package main
 
 import (
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"runtime/debug"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
-type versionOutput struct {
-	Version string `json:"version"`
-	buildInfo
-}
+var Version = ""
 
 type buildInfo struct {
+	Version   string `json:"version,omitempty"`
 	GoVersion string `json:"go,omitempty"`
 	GoOS      string `json:"os,omitempty"`
 	GoArch    string `json:"arch,omitempty"`
-	Compiler  string `json:"compiler,omitempty"`
+}
+
+func getBuildInfo() buildInfo {
+	output := buildInfo{
+		Version:   "dev",
+		GoVersion: "unknown",
+		GoOS:      runtime.GOOS,
+		GoArch:    runtime.GOARCH,
+	}
+
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		if Version == "" {
+			if info.Main.Version != "" && info.Main.Version != "(devel)" {
+				output.Version = info.Main.Version
+			}
+		} else {
+			output.Version = Version
+		}
+		output.GoVersion = info.GoVersion
+	}
+	return output
 }
 
 func showVersion(jsonOutput bool) error {
-	info, ok := debug.ReadBuildInfo()
-	output := versionOutput{
-		Version: Version,
-		buildInfo: buildInfo{
-			GoVersion: "unknown",
-			GoOS:      "unknown",
-			GoArch:    "unknown",
-			Compiler:  "unknown",
-		},
-	}
-	if ok {
-		output.GoVersion = info.GoVersion
-		for _, setting := range info.Settings {
-			// Filter for VCS-related info
-			switch setting.Key {
-			case "GOOS":
-				output.GoOS = setting.Value
-			case "GOARCH":
-				output.GoArch = setting.Value
-			case "compiler":
-				output.Compiler = setting.Value
-			}
-		}
-	}
-
+	output := getBuildInfo()
 	if jsonOutput {
 		out, err := json.MarshalIndent(output, "", "  ")
 		if err != nil {
@@ -56,8 +52,8 @@ func showVersion(jsonOutput bool) error {
 		return nil
 	}
 
-	fmt.Printf("%s\nplatform: %s/%s\ngo: %s\ncompiler: %s\n",
-		Version, output.GoOS, output.GoArch, output.GoVersion, output.Compiler)
+	fmt.Printf("%s\nplatform: %s/%s\ngo: %s\n",
+		output.Version, output.GoOS, output.GoArch, output.GoVersion)
 	return nil
 }
 

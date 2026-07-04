@@ -4,10 +4,10 @@
 
 This is a monorepo with two Go modules:
 
-| Directory | Go module | Description |
-|-----------|-----------|-------------|
-| `function/` | `github.com/crossplane-contrib/function-hcl/function` | Crossplane composition function |
-| `language-server/` | `github.com/crossplane-contrib/function-hcl/language-server` | LSP language server |
+| Directory          | Go module                                                    | Description                     |
+|--------------------|--------------------------------------------------------------|---------------------------------|
+| `function/`        | `github.com/crossplane-contrib/function-hcl/function`        | Crossplane composition function |
+| `language-server/` | `github.com/crossplane-contrib/function-hcl/language-server` | LSP language server             |
 
 Other top-level directories (`vscode/`, `jetbrains/`, `docs-site/`, `Formula/`) are not Go modules and are released as part of the same workflow.
 
@@ -102,15 +102,15 @@ git push origin main v0.3.0-rc1 function/v0.3.0-rc1 language-server/v0.3.0-rc1 -
 
 ## Required repository secrets
 
-| Secret | Used by |
-|--------|---------|
-| `XPKG_ACCESS_ID` | Push Crossplane package to xpkg.upbound.io |
-| `XPKG_TOKEN` | Push Crossplane package to xpkg.upbound.io |
-| `VSCE_PAT` | Publish VS Code extension |
-| `JETBRAINS_PUBLISH_TOKEN` | Publish JetBrains plugin |
-| `JETBRAINS_CERTIFICATE_CHAIN` | Sign JetBrains plugin |
-| `JETBRAINS_PRIVATE_KEY` | Sign JetBrains plugin |
-| `JETBRAINS_PRIVATE_KEY_PASSWORD` | Sign JetBrains plugin |
+| Secret                           | Used by                                    |
+|----------------------------------|--------------------------------------------|
+| `XPKG_ACCESS_ID`                 | Push Crossplane package to xpkg.upbound.io |
+| `XPKG_TOKEN`                     | Push Crossplane package to xpkg.upbound.io |
+| `VSCE_PAT`                       | Publish VS Code extension                  |
+| `JETBRAINS_PUBLISH_TOKEN`        | Publish JetBrains plugin                   |
+| `JETBRAINS_CERTIFICATE_CHAIN`    | Sign JetBrains plugin                      |
+| `JETBRAINS_PRIVATE_KEY`          | Sign JetBrains plugin                      |
+| `JETBRAINS_PRIVATE_KEY_PASSWORD` | Sign JetBrains plugin                      |
 
 ## Go module tagging
 

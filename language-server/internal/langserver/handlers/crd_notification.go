@@ -8,7 +8,7 @@ import (
 	lsp "github.com/crossplane-contrib/function-hcl/language-server/internal/langserver/protocol"
 )
 
-const crdSetupURL = "https://github.com/crossplane-contrib/function-hcl/language-server/blob/main/README.md"
+const crdSetupURL = "https://crossplane-contrib.github.io/function-hcl/docs/getting-started/crd-setup/"
 
 func (svc *service) startCRDNotificationHandler(ctx context.Context) {
 	events := svc.eventBus.SubscribeToNoCRDSourcesEvents("handlers.crd_notification")

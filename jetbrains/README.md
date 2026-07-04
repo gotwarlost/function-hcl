@@ -27,7 +27,3 @@ Features:
 
   Download the [latest release](https://github.com/crossplane-contrib/function-hcl/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
-
-## Development
-
-See [HACKING.md](HACKING.md) for build instructions and project layout.

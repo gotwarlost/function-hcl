@@ -36,13 +36,6 @@ resource my-bucket {
   body = { /* ... */ }
 }
 
-# Block with two labels
-resource my-bucket {
-  # 'composite' is the block type, 'status' is a label
-  composite status {
-    body = { /* ... */ }
-  }
-}
 ```
 
 Unlike attributes, some block types **can** appear multiple times in the same scope. For example,
@@ -85,6 +78,7 @@ body = {
 {{% alert title="Note" color="info" %}}
 HCL also allows `:` as a delimiter inside object literals (e.g. `kind: "Bucket"`). Both `=` and
 `:` are valid, but this documentation uses `=` consistently for clarity.
+The formatter also normalizes colons and replaces them with equal signs.
 {{% /alert %}}
 
 An attribute can only be set **once** in a given scope. Setting the same attribute name twice
@@ -201,12 +195,10 @@ Some commonly used ones:
 
 ```hcl
 locals {
-  merged  = merge(defaults, overrides)
-  safe    = try(obj.field, "fallback")
-  ok      = can(obj.field)
-  items   = join(",", list)
-  encoded = base64encode(secret)
-  count   = length(names)
+  merged  = merge(defaults, overrides)  # merge overrides
+  safe    = try(obj.field, "fallback")  # handle optional fields
+  ok      = can(obj.field)              # check if an optional field is present
+  encoded = base64encode(secret)        # encode a secret value for Crossplane use
 }
 ```
 

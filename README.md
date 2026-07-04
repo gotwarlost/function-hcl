@@ -3,6 +3,16 @@
 A crossplane function that uses an opinionated DSL built on [HCL](https://github.com/hashicorp/hcl) 
 to model desired resources. It has more than a passing familiarity with Terraform syntax.
 
+This is a monorepo that contains
+the [function implementation](function/),
+[language server](language-server/),
+[VS code extension](vscode/),
+[Jetbrains extension](jetbrains/),
+[documentation content](docs-site/),
+and [homebrew formula](Formula/).
+
+Detailed documentation [can be found here](https://crossplane-contrib.github.io/function-hcl/).
+
 ![CI](https://github.com/crossplane-contrib/function-hcl/actions/workflows/ci.yaml/badge.svg?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/crossplane-contrib/function-hcl)](https://goreportcard.com/report/github.com/crossplane-contrib/function-hcl)
 [![function-hcl coverage](https://github.com/crossplane-contrib/function-hcl/wiki/coverage.svg)](https://raw.githack.com/wiki/crossplane-contrib/function-hcl/coverage.html)
@@ -90,7 +100,7 @@ In addition, it emits an event for every such discarded resource telling you exa
 and maintains a status condition explicitly for this purpose. 
 This allows you to fix any typos that prevent resources from being rendered as opposed to unknown dependency state.
 
-Start with the [examples](example/README.md), then read the [spec](spec.md).
+Start with the [examples](example/README.md), then [read the docs](https://crossplane-contrib.github.io/function-hcl/).
 
 There is also tooling in [fn-hcl-tools](cmd/fn-hcl-tools) that can package multiple HCL files into txtar format
 after static analysis. It also provides a formatter for canonical formatting of HCL files.

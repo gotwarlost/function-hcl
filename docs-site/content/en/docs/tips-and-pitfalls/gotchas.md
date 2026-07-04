@@ -109,12 +109,6 @@ locals {
 }
 ```
 
-## resource vs resources -- singular matters
-
-`resource` (singular) creates one resource. `resources` (plural) creates a collection with
-`for_each`. Using the wrong one is a schema error. The observed state variables follow the
-same pattern: `req.resource` (singular) vs `req.resources` (plural).
-
 ## User functions cannot access req, self, or each
 
 Functions are pure -- they only have access to their declared arguments and their own locals.
