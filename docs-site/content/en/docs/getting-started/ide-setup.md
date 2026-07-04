@@ -19,6 +19,20 @@ The language server provides:
 - Document symbols
 - Semantic token highlighting
 
-## Installation instructions
+## Installation
 
-Coming soon. Watch this space...
+### Visual Studio Code
+
+Install the [Crossplane Function HCL](https://marketplace.visualstudio.com/items?itemName=function-hcl-authors.function-hcl) extension shown below.
+
+{{< figure src="../vscode-extension.png"  >}}
+
+### Jetbrains products
+
+Install the [function-hcl plugin](https://plugins.jetbrains.com/plugin/30965-function-hcl) as shown below.
+
+{{< figure src="../jetbrains-plugin.png"  >}}
+
+### Post-install
+
+Follow the instructions [on this page](../crd-setup) to register types with the language server.

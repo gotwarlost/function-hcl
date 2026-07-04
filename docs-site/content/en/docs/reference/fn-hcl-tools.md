@@ -11,9 +11,8 @@ HCL compositions.
 
 ## Installation
 
-```bash
-go install github.com/crossplane-contrib/function-hcl/function/cmd/fn-hcl-tools@{{< version >}}
-```
+see [Installation](../../getting-started/installation#install-fn-hcl-tools).
+
 
 ## Commands
 
